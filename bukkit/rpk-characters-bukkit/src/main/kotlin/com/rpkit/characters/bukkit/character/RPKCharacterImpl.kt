@@ -36,6 +36,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Character implementation.
@@ -258,6 +259,9 @@ class RPKCharacterImpl(
                 }
                 minecraftProfile.sendMessage(*messageComponents.toTypedArray())
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to show character card", exception)
+            throw exception
         }
     }
 

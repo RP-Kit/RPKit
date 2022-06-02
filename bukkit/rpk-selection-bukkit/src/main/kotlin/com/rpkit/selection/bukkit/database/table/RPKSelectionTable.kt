@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.selection.bukkit.database.jooq.Tables.RPKIT_SELECTION_
 import com.rpkit.selection.bukkit.selection.RPKSelection
 import com.rpkit.selection.bukkit.selection.RPKSelectionImpl
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKSelectionTable(private val database: Database, private val plugin: RPKSelectionBukkit) : Table {
@@ -65,6 +67,9 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
             )
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert selection", exception)
+            throw exception
         }
     }
 
@@ -83,10 +88,13 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update selection", exception)
+            throw exception
         }
     }
 
-    operator fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKSelection?> {
+    operator fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<out RPKSelection?> {
         val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         if (cache?.containsKey(minecraftProfileId.value) == true) {
             return CompletableFuture.completedFuture(cache[minecraftProfileId.value])
@@ -125,6 +133,9 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 )
                 cache?.set(minecraftProfileId.value, selection)
                 return@supplyAsync selection
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get selection", exception)
+                throw exception
             }
         }
     }
@@ -137,6 +148,9 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete selection", exception)
+            throw exception
         }
     }
 

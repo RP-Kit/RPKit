@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +19,7 @@ package com.rpkit.players.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.database.create
 import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_MINECRAFT_PROFILE_LINK_REQUEST
 import com.rpkit.players.bukkit.profile.RPKProfileId
@@ -26,9 +28,11 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequest
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileLinkRequestImpl
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class RPKMinecraftProfileLinkRequestTable(
-        private val database: Database
+        private val database: Database,
+        private val plugin: RPKPlayersBukkit
 ) : Table {
 
     fun insert(entity: RPKMinecraftProfileLinkRequest): CompletableFuture<Void> {
@@ -46,10 +50,13 @@ class RPKMinecraftProfileLinkRequestTable(
                     minecraftProfileId.value
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert Minecraft profile link request", exception)
+            throw exception
         }
     }
 
-    fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKMinecraftProfileLinkRequest>> {
+    fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<out List<RPKMinecraftProfileLinkRequest>> {
         val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(emptyList())
         return CompletableFuture.supplyAsync {
             val results = database.create
@@ -70,6 +77,9 @@ class RPKMinecraftProfileLinkRequestTable(
                     minecraftProfile
                 )
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get Minecraft profile link requests", exception)
+            throw exception
         }
     }
 
@@ -82,6 +92,9 @@ class RPKMinecraftProfileLinkRequestTable(
                 .where(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.PROFILE_ID.eq(profileId.value))
                 .and(RPKIT_MINECRAFT_PROFILE_LINK_REQUEST.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete Minecraft profile link request", exception)
+            throw exception
         }
     }
 }

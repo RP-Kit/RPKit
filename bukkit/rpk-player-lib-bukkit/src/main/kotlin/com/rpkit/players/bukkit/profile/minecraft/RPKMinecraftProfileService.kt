@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +26,7 @@ import java.util.concurrent.CompletableFuture
 
 interface RPKMinecraftProfileService : Service {
 
-    fun getMinecraftProfile(id: RPKMinecraftProfileId): CompletableFuture<RPKMinecraftProfile?>
+    fun getMinecraftProfile(id: RPKMinecraftProfileId): CompletableFuture<out RPKMinecraftProfile?>
     fun getMinecraftProfile(name: RPKMinecraftUsername): CompletableFuture<RPKMinecraftProfile?>
     fun getMinecraftProfile(player: OfflinePlayer): CompletableFuture<RPKMinecraftProfile?>
     fun getMinecraftProfile(minecraftUUID: UUID): CompletableFuture<RPKMinecraftProfile?>
@@ -36,7 +37,7 @@ interface RPKMinecraftProfileService : Service {
     fun createAndLoadMinecraftProfile(minecraftUUID: UUID, profile: RPKThinProfile? = null): CompletableFuture<RPKMinecraftProfile>
     fun updateMinecraftProfile(profile: RPKMinecraftProfile): CompletableFuture<Void>
     fun removeMinecraftProfile(profile: RPKMinecraftProfile): CompletableFuture<Void>
-    fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKMinecraftProfileLinkRequest>>
+    fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): CompletableFuture<out List<RPKMinecraftProfileLinkRequest>>
     fun removeMinecraftProfileLinkRequest(minecraftProfileLinkRequest: RPKMinecraftProfileLinkRequest): CompletableFuture<Void>
     fun createMinecraftProfileLinkRequest(profile: RPKProfile, minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKMinecraftProfileLinkRequest>
     fun getPreloadedMinecraftProfile(id: RPKMinecraftProfileId): RPKMinecraftProfile?

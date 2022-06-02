@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +24,13 @@ import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_LOG_MESSAGES_ENABL
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessagesEnabled
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
-class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEssentialsBukkit) : Table {
+class RPKLogMessagesEnabledTable(
+    private val database: Database,
+    private val plugin: RPKEssentialsBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_log_messages_enabled.minecraft_profile_id.enabled")) {
         database.cacheManager.createCache(
@@ -51,6 +56,9 @@ class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEsse
                 )
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert log messages enabled", exception)
+            throw exception
         }
     }
 
@@ -70,6 +78,9 @@ class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEsse
             val logMessagesEnabled = RPKLogMessagesEnabled(minecraftProfile)
             cache?.set(minecraftProfileId.value, logMessagesEnabled)
             return@supplyAsync logMessagesEnabled
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get log messages enabled", exception)
+            throw exception
         }
     }
 
@@ -81,6 +92,9 @@ class RPKLogMessagesEnabledTable(private val database: Database, plugin: RPKEsse
                 .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete log messages enabled", exception)
+            throw exception
         }
     }
 

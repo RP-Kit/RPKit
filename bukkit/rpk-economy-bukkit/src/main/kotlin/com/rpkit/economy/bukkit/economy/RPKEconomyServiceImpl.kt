@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.rpkit.economy.bukkit.exception.NegativeBalanceException
 import com.rpkit.economy.bukkit.wallet.RPKWallet
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 /**
  * Economy service implementation.
@@ -82,6 +83,9 @@ class RPKEconomyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKEconomyS
                     }
                 }
             }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set balance", exception)
+            throw exception
         }
     }
 
@@ -89,6 +93,9 @@ class RPKEconomyServiceImpl(override val plugin: RPKEconomyBukkit) : RPKEconomyS
         return CompletableFuture.runAsync {
             setBalance(from, currency, getBalance(from, currency).join() - amount).join()
             setBalance(to, currency, getBalance(to, currency).join() + amount).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to transfer", exception)
+            throw exception
         }
     }
 

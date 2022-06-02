@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.locks.bukkit.database.table.RPKKeyringTable
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 
 class RPKKeyringServiceImpl(override val plugin: RPKLocksBukkit) : RPKKeyringService {
@@ -47,6 +48,9 @@ class RPKKeyringServiceImpl(override val plugin: RPKLocksBukkit) : RPKKeyringSer
                 keyringTable.update(keyring).join()
             }
             character.id?.value?.let { keyrings[it] = items }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set keyring", exception)
+            throw exception
         }
     }
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileImpl
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKMinecraftProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
@@ -75,6 +77,9 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
             entity.id = RPKMinecraftProfileId(id)
             cache?.set(id, entity)
             minecraftUUIDCache?.set(entity.minecraftUUID, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert Minecraft profile", exception)
+            throw exception
         }
     }
 
@@ -97,10 +102,13 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 .execute()
             cache?.set(id.value, entity)
             minecraftUUIDCache?.set(entity.minecraftUUID, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update Minecraft profile", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKMinecraftProfileId): CompletableFuture<RPKMinecraftProfile?> {
+    operator fun get(id: RPKMinecraftProfileId): CompletableFuture<out RPKMinecraftProfile?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -134,6 +142,9 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 cache?.set(id.value, minecraftProfile)
                 minecraftUUIDCache?.set(minecraftProfile.minecraftUUID, minecraftProfile)
                 return@supplyAsync minecraftProfile
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get Minecraft profile", exception)
+                throw exception
             }
         }
     }
@@ -148,7 +159,10 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 .fetch()
             val futures = results.map { result -> get(RPKMinecraftProfileId(result[RPKIT_MINECRAFT_PROFILE.ID])) }
             CompletableFuture.allOf(*futures.toTypedArray()).join()
-            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKMinecraftProfile?>::join)
+            return@supplyAsync futures.mapNotNull(CompletableFuture<out RPKMinecraftProfile?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get Minecraft profiles", exception)
+            throw exception
         }
     }
 
@@ -163,6 +177,9 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 .where(RPKIT_MINECRAFT_PROFILE.MINECRAFT_UUID.eq(minecraftUUID.toString()))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync get(RPKMinecraftProfileId(result.get(RPKIT_MINECRAFT_PROFILE.ID))).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get Minecraft profile", exception)
+            throw exception
         }
     }
 
@@ -175,6 +192,9 @@ class RPKMinecraftProfileTable(private val database: Database, private val plugi
                 .execute()
             cache?.remove(id.value)
             minecraftUUIDCache?.remove(entity.minecraftUUID)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete Minecraft profile", exception)
+            throw exception
         }
     }
 }

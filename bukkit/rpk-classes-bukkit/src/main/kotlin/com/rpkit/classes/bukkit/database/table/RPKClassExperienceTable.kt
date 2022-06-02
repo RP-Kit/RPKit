@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +25,7 @@ import com.rpkit.classes.bukkit.database.jooq.Tables.RPKIT_CLASS_EXPERIENCE
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKClassExperienceTable(private val database: Database, private val plugin: RPKClassesBukkit) : Table {
@@ -61,6 +63,9 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                 )
                 .execute()
             cache?.set(CharacterClassCacheKey(characterId.value, className.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert class experience", exception)
+            throw exception
         }
     }
 
@@ -75,6 +80,9 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                 .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(entity.`class`.name.value))
                 .execute()
             cache?.set(CharacterClassCacheKey(characterId.value, className.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update class experience", exception)
+            throw exception
         }
     }
 
@@ -103,6 +111,9 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
             )
             cache?.set(cacheKey, classExperience)
             return@supplyAsync classExperience
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get class experience", exception)
+            throw exception
         }
     }
 
@@ -116,6 +127,9 @@ class RPKClassExperienceTable(private val database: Database, private val plugin
                 .and(RPKIT_CLASS_EXPERIENCE.CLASS_NAME.eq(className.value))
                 .execute()
             cache?.remove(CharacterClassCacheKey(characterId.value, className.value))
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete class experience", exception)
+            throw exception
         }
     }
 

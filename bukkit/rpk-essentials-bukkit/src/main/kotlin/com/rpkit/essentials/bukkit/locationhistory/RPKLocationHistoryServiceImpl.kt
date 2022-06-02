@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryServic
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import org.bukkit.Location
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKLocationHistoryServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKLocationHistoryService {
@@ -45,6 +46,9 @@ class RPKLocationHistoryServiceImpl(override val plugin: RPKEssentialsBukkit) : 
                 previousLocation = RPKPreviousLocation(minecraftProfile = minecraftProfile, location = location.toRPKLocation())
                 previousLocationTable.insert(previousLocation).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set previous location", exception)
+            throw exception
         }
     }
 

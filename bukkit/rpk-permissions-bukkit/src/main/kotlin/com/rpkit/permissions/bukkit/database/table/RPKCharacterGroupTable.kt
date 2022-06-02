@@ -28,6 +28,7 @@ import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKCharacterGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
@@ -66,6 +67,9 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
                 )
                 .execute()
             cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert character group", exception)
+            throw exception
         }
     }
 
@@ -80,6 +84,9 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
                 .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(entity.group.name.value))
                 .execute()
             cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character group", exception)
+            throw exception
         }
     }
 
@@ -104,6 +111,9 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
             )
             cache?.set(cacheKey, characterGroup)
             return@supplyAsync characterGroup
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character group", exception)
+            throw exception
         }
     }
 
@@ -129,6 +139,9 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
                         result[RPKIT_CHARACTER_GROUP.PRIORITY]
                     )
                 }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character groups", exception)
+            throw exception
         }
     }
 
@@ -142,6 +155,9 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
                 .and(RPKIT_CHARACTER_GROUP.GROUP_NAME.eq(groupName.value))
                 .execute()
             cache?.set(CharacterGroupCacheKey(characterId.value, groupName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character group", exception)
+            throw exception
         }
     }
 

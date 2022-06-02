@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKNewCharacterCooldownService(override val plugin: RPKCharactersBukkit) : Service {
@@ -43,6 +44,9 @@ class RPKNewCharacterCooldownService(override val plugin: RPKCharactersBukkit) :
                 newCharacterCooldown.cooldownExpiryTime = LocalDateTime.now().plus(cooldown)
                 newCharacterCooldownTable.update(newCharacterCooldown).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set new character cooldown", exception)
+            throw exception
         }
     }
 

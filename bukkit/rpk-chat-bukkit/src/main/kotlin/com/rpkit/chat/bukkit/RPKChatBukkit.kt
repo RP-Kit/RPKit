@@ -165,7 +165,7 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         database.addTable(RPKChatChannelMuteTable(database, this))
         database.addTable(RPKChatChannelSpeakerTable(database, this))
         database.addTable(RPKChatGroupTable(database, this))
-        database.addTable(RPKChatGroupInviteTable(database))
+        database.addTable(RPKChatGroupInviteTable(database, this))
         database.addTable(RPKChatGroupMemberTable(database, this))
         database.addTable(RPKLastUsedChatGroupTable(database, this))
         database.addTable(RPKSnooperTable(database, this))

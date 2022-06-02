@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +31,7 @@ import com.rpkit.skills.bukkit.skills.RPKSkillBinding
 import com.rpkit.skills.bukkit.skills.RPKSkillName
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class RPKSkillBindingTable(private val database: Database, private val plugin: RPKSkillsBukkit): Table {
 
@@ -60,6 +62,9 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                     entity.skill.name.value
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert skill binding", exception)
+            throw exception
         }
     }
 
@@ -72,6 +77,9 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 .set(RPKIT_SKILL_BINDING.SKILL_NAME, entity.skill.name.value)
                 .where(RPKIT_SKILL_BINDING.ID.eq(entity.id))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update skill binding", exception)
+            throw exception
         }
     }
 
@@ -112,6 +120,9 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 cache?.remove(id)
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get skill binding", exception)
+            throw exception
         }
     }
 
@@ -146,6 +157,9 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                     null
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get skill binding", exception)
+            throw exception
         }
     }
 
@@ -157,6 +171,9 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
                 .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_SKILL_BINDING.ITEM.eq(entity.item.toByteArray()))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete skill binding", exception)
+            throw exception
         }
     }
 }

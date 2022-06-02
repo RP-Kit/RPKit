@@ -37,9 +37,10 @@ import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.chat.hover.content.Text
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.logging.Level
 
 class NotificationListCommand(private val plugin: RPKNotificationsBukkit) : RPKCommandExecutor {
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
         if (!sender.hasPermission("rpkit.notifications.command.notification.list")) {
             sender.sendMessage(plugin.messages.noPermissionNotificationList)
             return completedFuture(NoPermissionFailure("rpkit.notifications.command.notification.list"))
@@ -69,6 +70,9 @@ class NotificationListCommand(private val plugin: RPKNotificationsBukkit) : RPKC
                     sender.sendMessage(listItem)
                 }
             return@thenApply CommandSuccess
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to list notifications", exception)
+            throw exception
         }
     }
 }

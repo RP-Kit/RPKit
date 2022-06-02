@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +31,7 @@ import com.rpkit.players.bukkit.profile.irc.RPKIRCProfile
 import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Account link IRC command.
@@ -78,19 +80,22 @@ class ProfileLinkIRCCommand(private val plugin: RPKPlayersBukkit) : RPKCommandEx
             sender.sendMessage(plugin.messages.noIrcProfileService)
             return CompletableFuture.completedFuture(MissingServiceFailure(RPKIRCProfileService::class.java))
         }
-        return ircProfileService.getIRCProfile(nick).thenApply { ircProfile ->
+        return ircProfileService.getIRCProfile(nick).thenApplyAsync { ircProfile ->
             if (ircProfile != null && ircProfile.profile is RPKProfile) {
                 sender.sendMessage(plugin.messages.profileLinkIrcInvalidAlreadyLinked)
-                return@thenApply IRCProfileAlreadyLinkedFailure(ircProfile)
+                return@thenApplyAsync IRCProfileAlreadyLinkedFailure(ircProfile)
             }
             if (ircProfile == null) {
-                ircProfileService.createIRCProfile(profile, nick)
+                ircProfileService.createIRCProfile(profile, nick).join()
             } else {
                 ircProfile.profile = profile
-                ircProfileService.updateIRCProfile(ircProfile)
+                ircProfileService.updateIRCProfile(ircProfile).join()
             }
             sender.sendMessage(plugin.messages.profileLinkIrcValid)
-            return@thenApply CommandSuccess
+            return@thenApplyAsync CommandSuccess
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to link IRC profile", exception)
+            throw exception
         }
     }
 }

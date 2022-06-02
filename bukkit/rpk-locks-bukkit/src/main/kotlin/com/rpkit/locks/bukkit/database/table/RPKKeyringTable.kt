@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_KEYRING
 import com.rpkit.locks.bukkit.keyring.RPKKeyring
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKKeyringTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -55,6 +57,9 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
                 )
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert keyring", exception)
+            throw exception
         }
     }
 
@@ -67,6 +72,9 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update keyring", exception)
+            throw exception
         }
     }
 
@@ -90,6 +98,9 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
                 )
                 cache?.set(characterId.value, keyring)
                 return@supplyAsync keyring
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get keyring", exception)
+                throw exception
             }
         }
     }
@@ -102,6 +113,9 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete keyring", exception)
+            throw exception
         }
     }
 }

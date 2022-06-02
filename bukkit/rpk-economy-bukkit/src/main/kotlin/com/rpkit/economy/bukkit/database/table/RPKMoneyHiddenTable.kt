@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,13 +24,14 @@ import com.rpkit.economy.bukkit.character.RPKMoneyHidden
 import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_MONEY_HIDDEN
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the money hidden table.
  */
 class RPKMoneyHiddenTable(
         private val database: Database,
-        plugin: RPKEconomyBukkit
+        private val plugin: RPKEconomyBukkit
 ) : Table {
 
     private val characterCache = if (plugin.config.getBoolean("caching.rpkit_money_hidden.character_id.enabled")) {
@@ -56,6 +58,9 @@ class RPKMoneyHiddenTable(
                 )
                 .execute()
             characterCache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert money hidden", exception)
+            throw exception
         }
     }
 
@@ -80,6 +85,9 @@ class RPKMoneyHiddenTable(
             val moneyHidden = RPKMoneyHidden(character)
             characterCache?.set(characterId.value, moneyHidden)
             return@supplyAsync moneyHidden
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get money hidden", exception)
+            throw exception
         }
     }
 
@@ -91,6 +99,9 @@ class RPKMoneyHiddenTable(
                 .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .execute()
             characterCache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete money hidden", exception)
+            throw exception
         }
     }
 

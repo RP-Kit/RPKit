@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +31,7 @@ import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeName
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKCharacterStatPoints
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class RPKCharacterStatPointsTable(private val database: Database, private val plugin: RPKStatBuildsBukkit) : Table {
 
@@ -65,6 +67,9 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                     entity.points
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert character stat points", exception)
+            throw exception
         }
     }
 
@@ -79,6 +84,9 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                 .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(statAttributeName.value))
                 .execute()
             cache?.set(CharacterStatAttributeCacheKey(characterId.value, statAttributeName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character stat points", exception)
+            throw exception
         }
     }
 
@@ -100,6 +108,9 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
             )
             cache?.set(cacheKey, characterStatPoints)
             return@supplyAsync characterStatPoints
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character stat points", exception)
+            throw exception
         }
     }
 
@@ -111,6 +122,9 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                 .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
                 .fetch()
                 .map { it.toDomain() }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character stat points", exception)
+            throw exception
         }
     }
 
@@ -123,6 +137,9 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
                 .and(RPKIT_CHARACTER_STAT_POINTS.STAT_ATTRIBUTE.eq(entity.statAttribute.name.value))
                 .execute()
             cache?.remove(CharacterStatAttributeCacheKey(characterId.value, entity.statAttribute.name.value))
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character stat points", exception)
+            throw exception
         }
     }
 

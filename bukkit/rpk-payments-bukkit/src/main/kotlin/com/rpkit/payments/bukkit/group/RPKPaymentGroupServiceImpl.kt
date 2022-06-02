@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +25,7 @@ import com.rpkit.payments.bukkit.event.group.RPKBukkitPaymentGroupUpdateEvent
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Payment group service implementation.
@@ -33,7 +35,7 @@ class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPa
     override val paymentGroups: CompletableFuture<List<RPKPaymentGroup>>
         get() = plugin.database.getTable(RPKPaymentGroupTable::class.java).getAll()
 
-    override fun getPaymentGroup(id: RPKPaymentGroupId): CompletableFuture<RPKPaymentGroup?> {
+    override fun getPaymentGroup(id: RPKPaymentGroupId): CompletableFuture<out RPKPaymentGroup?> {
         return plugin.database.getTable(RPKPaymentGroupTable::class.java)[id]
     }
 
@@ -47,6 +49,9 @@ class RPKPaymentGroupServiceImpl(override val plugin: RPKPaymentsBukkit) : RPKPa
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKPaymentGroupTable::class.java).insert(event.paymentGroup).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add payment group", exception)
+            throw exception
         }
     }
 

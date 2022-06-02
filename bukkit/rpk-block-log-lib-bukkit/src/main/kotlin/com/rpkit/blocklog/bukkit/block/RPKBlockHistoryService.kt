@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,15 +26,15 @@ import java.util.concurrent.CompletableFuture
 
 interface RPKBlockHistoryService : Service {
 
-    fun getBlockHistory(id: RPKBlockHistoryId): CompletableFuture<RPKBlockHistory?>
+    fun getBlockHistory(id: RPKBlockHistoryId): CompletableFuture<out RPKBlockHistory?>
     fun addBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void>
     fun updateBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void>
     fun removeBlockHistory(blockHistory: RPKBlockHistory): CompletableFuture<Void>
-    fun getBlockChange(id: RPKBlockChangeId): CompletableFuture<RPKBlockChange?>
+    fun getBlockChange(id: RPKBlockChangeId): CompletableFuture<out RPKBlockChange?>
     fun addBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void>
     fun updateBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void>
     fun removeBlockChange(blockChange: RPKBlockChange): CompletableFuture<Void>
-    fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): CompletableFuture<RPKBlockInventoryChange?>
+    fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): CompletableFuture<out RPKBlockInventoryChange?>
     fun addBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
     fun updateBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
     fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKLogMessageService(override val plugin: RPKEssentialsBukkit) : Service {
@@ -42,6 +43,9 @@ class RPKLogMessageService(override val plugin: RPKEssentialsBukkit) : Service {
                     logMessagesEnabledTable.insert(RPKLogMessagesEnabled(minecraftProfile)).join()
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set log messages enabled", exception)
+            throw exception
         }
     }
 

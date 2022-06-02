@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture
 
 class RPKSelectionServiceImpl(override val plugin: RPKSelectionBukkit) : RPKSelectionService {
 
-    override fun getSelection(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKSelection?> {
+    override fun getSelection(minecraftProfile: RPKMinecraftProfile): CompletableFuture<out RPKSelection?> {
         return plugin.database.getTable(RPKSelectionTable::class.java)[minecraftProfile]
     }
 

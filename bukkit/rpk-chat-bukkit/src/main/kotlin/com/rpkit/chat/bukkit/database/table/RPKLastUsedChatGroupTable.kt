@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +27,7 @@ import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the last used chat group table
@@ -59,6 +61,9 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                 )
                 .execute()
             minecraftProfileCache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert last used chat group", exception)
+            throw exception
         }
     }
 
@@ -72,6 +77,9 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                 .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             minecraftProfileCache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update last used chat group", exception)
+            throw exception
         }
     }
 
@@ -106,6 +114,9 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                     .execute()
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get last used chat group", exception)
+            throw exception
         }
     }
 
@@ -117,6 +128,9 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                 .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             minecraftProfileCache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete last used chat group", exception)
+            throw exception
         }
     }
 

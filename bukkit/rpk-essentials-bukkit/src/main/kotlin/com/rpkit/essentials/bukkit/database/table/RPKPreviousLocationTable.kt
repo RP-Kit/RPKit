@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +25,7 @@ import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_PREVIOUS_LOCATION
 import com.rpkit.essentials.bukkit.locationhistory.RPKPreviousLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKPreviousLocationTable(private val database: Database, private val plugin: RPKEssentialsBukkit) : Table {
@@ -64,6 +66,9 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                 )
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert previous location", exception)
+            throw exception
         }
     }
 
@@ -82,6 +87,9 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                 .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update previous location", exception)
+            throw exception
         }
     }
 
@@ -117,6 +125,9 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
             )
             cache?.set(minecraftProfileId.value, previousLocation)
             return@supplyAsync previousLocation
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get previous location", exception)
+            throw exception
         }
     }
 
@@ -128,6 +139,9 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
                 .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete previous location", exception)
+            throw exception
         }
     }
 

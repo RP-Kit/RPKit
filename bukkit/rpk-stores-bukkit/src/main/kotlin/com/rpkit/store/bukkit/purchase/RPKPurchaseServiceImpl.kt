@@ -30,6 +30,7 @@ import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchaseService {
@@ -55,6 +56,9 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
                 is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java)
                     .insert(eventPurchase).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add purchase", exception)
+            throw exception
         }
     }
 
@@ -115,6 +119,9 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
                 is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java)
                     .update(eventPurchase).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update purchase", exception)
+            throw exception
         }
     }
 
@@ -131,6 +138,9 @@ class RPKPurchaseServiceImpl(override val plugin: RPKStoresBukkit) : RPKPurchase
                 is RPKTimedPurchase -> plugin.database.getTable(RPKTimedPurchaseTable::class.java)
                     .delete(eventPurchase).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove purchase", exception)
+            throw exception
         }
     }
 

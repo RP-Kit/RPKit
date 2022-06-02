@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,17 +21,20 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.create
 import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP_INVITE
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents payment group invite table.
  */
 class RPKPaymentGroupInviteTable(
-        private val database: Database
+        private val database: Database,
+        private val plugin: RPKPaymentsBukkit
 ) : Table {
 
     fun insert(entity: RPKPaymentGroupInvite): CompletableFuture<Void> {
@@ -48,6 +52,9 @@ class RPKPaymentGroupInviteTable(
                     characterId.value
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert payment group invite", exception)
+            throw exception
         }
     }
 
@@ -67,6 +74,9 @@ class RPKPaymentGroupInviteTable(
                             ?: return@mapNotNull null
                     return@mapNotNull RPKPaymentGroupInvite(paymentGroup, character)
                 }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get payment group invites", exception)
+            throw exception
         }
     }
 
@@ -79,6 +89,9 @@ class RPKPaymentGroupInviteTable(
                 .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .and(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID.eq(characterId.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete payment group invite", exception)
+            throw exception
         }
     }
 

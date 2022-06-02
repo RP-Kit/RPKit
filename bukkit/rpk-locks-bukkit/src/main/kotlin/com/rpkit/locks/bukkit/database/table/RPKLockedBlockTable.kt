@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_LOCKED_BLOCK
 import com.rpkit.locks.bukkit.database.jooq.tables.records.RpkitLockedBlockRecord
 import com.rpkit.locks.bukkit.lock.RPKLockedBlock
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKLockedBlockTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -66,6 +67,9 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
                 )
                 .execute()
             cache?.set(cacheKey, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert locked block", exception)
+            throw exception
         }
     }
 
@@ -91,6 +95,9 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
             val lockedBlock = RPKLockedBlock(block)
             cache?.set(cacheKey, lockedBlock)
             return@supplyAsync lockedBlock
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get locked block", exception)
+            throw exception
         }
     }
 
@@ -100,6 +107,9 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
                 .selectFrom(RPKIT_LOCKED_BLOCK)
                 .fetch()
                 .mapNotNull { it.toDomain() }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get locked blocks", exception)
+            throw exception
         }
     }
 
@@ -121,6 +131,9 @@ class RPKLockedBlockTable(private val database: Database, private val plugin: RP
                 .and(RPKIT_LOCKED_BLOCK.Z.eq(block.z))
                 .execute()
             cache?.remove(cacheKey)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete locked block", exception)
+            throw exception
         }
     }
 

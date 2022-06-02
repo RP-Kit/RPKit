@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelUnmuteEvent
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Provides chat channel mute related services.
@@ -48,6 +49,9 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
                     )
                 ).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add chat channel mute", exception)
+            throw exception
         }
     }
 
@@ -66,6 +70,9 @@ class RPKChatChannelMuteService(override val plugin: RPKChatBukkit) : Service {
             if (chatChannelMute != null) {
                 chatChannelMuteTable.delete(chatChannelMute).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove chat channel mute", exception)
+            throw exception
         }
     }
 

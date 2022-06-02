@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +30,7 @@ class RPKProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKProfileS
     private val profilesById = ConcurrentHashMap<Int, RPKProfile>()
     private val profilesByTag = ConcurrentHashMap<String, RPKProfile>()
 
-    override fun getProfile(id: RPKProfileId): CompletableFuture<RPKProfile?> {
+    override fun getProfile(id: RPKProfileId): CompletableFuture<out RPKProfile?> {
         return plugin.database.getTable(RPKProfileTable::class.java)[id]
     }
 
@@ -45,7 +46,7 @@ class RPKProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKProfileS
         return profilesByTag[name + discriminator]
     }
 
-    override fun loadProfile(id: RPKProfileId): CompletableFuture<RPKProfile?> {
+    override fun loadProfile(id: RPKProfileId): CompletableFuture<out RPKProfile?> {
         val preloadedProfile = getPreloadedProfile(id)
         if (preloadedProfile != null) return CompletableFuture.completedFuture(preloadedProfile)
         plugin.logger.info("Loading profile ${id.value}...")

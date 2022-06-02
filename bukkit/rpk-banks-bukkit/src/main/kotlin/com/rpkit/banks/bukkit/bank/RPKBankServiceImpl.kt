@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.economy.bukkit.exception.NegativeBalanceException
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Bank service implementation.
@@ -32,7 +33,7 @@ class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
 
     override fun getBalance(character: RPKCharacter, currency: RPKCurrency): CompletableFuture<Int> {
         return plugin.database.getTable(RPKBankTable::class.java)[character, currency]
-            .thenApply { bank -> bank?.balance ?: 0}
+            .thenApply { bank -> bank?.balance ?: 0 }
     }
 
     override fun setBalance(character: RPKCharacter, currency: RPKCurrency, amount: Int): CompletableFuture<Void> {
@@ -53,6 +54,9 @@ class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
                     ).join()
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set bank balance", exception)
+            throw exception
         }
     }
 
@@ -65,6 +69,9 @@ class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
                 val bankBalance = getBalance(character, currency).join()
                 setBalance(character, currency, bankBalance + amount).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to deposit to bank", exception)
+            throw exception
         }
     }
 
@@ -77,6 +84,9 @@ class RPKBankServiceImpl(override val plugin: RPKBanksBukkit) : RPKBankService {
                 economyService.setBalance(character, currency, walletBalance + amount).join()
                 setBalance(character, currency, bankBalance - amount)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to withdraw from bank", exception)
+            throw exception
         }
     }
 

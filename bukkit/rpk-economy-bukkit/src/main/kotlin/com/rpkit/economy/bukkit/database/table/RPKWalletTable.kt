@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,13 +28,14 @@ import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_WALLET
 import com.rpkit.economy.bukkit.wallet.RPKWallet
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the wallet table.
  */
 class RPKWalletTable(
         private val database: Database,
-        plugin: RPKEconomyBukkit
+        private val plugin: RPKEconomyBukkit
 ) : Table {
 
     private data class CharacterCurrencyCacheKey(
@@ -70,6 +72,9 @@ class RPKWalletTable(
                 )
                 .execute()
             cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert wallet", exception)
+            throw exception
         }
     }
 
@@ -84,6 +89,9 @@ class RPKWalletTable(
                 .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
             cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update wallet", exception)
+            throw exception
         }
     }
 
@@ -108,6 +116,9 @@ class RPKWalletTable(
             )
             cache?.set(cacheKey, wallet)
             return@supplyAsync wallet
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get wallet", exception)
+            throw exception
         }
     }
 
@@ -138,6 +149,9 @@ class RPKWalletTable(
                     cache?.set(CharacterCurrencyCacheKey(characterId, currencyName.value), wallet)
                     return@mapNotNull wallet
                 }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get top balances", exception)
+            throw exception
         }
     }
 
@@ -151,6 +165,9 @@ class RPKWalletTable(
                 .and(RPKIT_WALLET.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
             cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyName.value))
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete wallet", exception)
+            throw exception
         }
     }
 

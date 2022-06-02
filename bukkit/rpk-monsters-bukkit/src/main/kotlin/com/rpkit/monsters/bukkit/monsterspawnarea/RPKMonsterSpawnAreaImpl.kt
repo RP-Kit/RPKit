@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaMonsterTable
 import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaTable
 import org.bukkit.entity.EntityType
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKMonsterSpawnAreaImpl(
@@ -72,6 +73,9 @@ class RPKMonsterSpawnAreaImpl(
                     maxLevels[entityType] = maxLevel
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add monster to monster spawn area", exception)
+            throw exception
         }
     }
 

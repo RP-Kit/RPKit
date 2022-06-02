@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.rpkit.languages.bukkit.RPKLanguagesBukkit
 import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import com.rpkit.languages.bukkit.language.RPKLanguage
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 import kotlin.math.max
 import kotlin.math.min
 
@@ -47,6 +48,9 @@ class RPKCharacterLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) :
                     )
                 ).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set character language understanding", exception)
+            throw exception
         }
     }
 }

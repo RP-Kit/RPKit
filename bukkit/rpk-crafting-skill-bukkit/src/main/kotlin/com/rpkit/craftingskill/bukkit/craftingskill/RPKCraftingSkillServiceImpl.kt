@@ -28,6 +28,7 @@ import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
 import org.bukkit.Material
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 
 class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) : RPKCraftingSkillService {
@@ -110,6 +111,9 @@ class RPKCraftingSkillServiceImpl(override val plugin: RPKCraftingSkillBukkit) :
                 val characterId = craftingExperience.character.id ?: return@runAsync
                 this.craftingExperience[CraftingActionKey(characterId.value, craftingExperience.action, craftingExperience.material)] = craftingExperience.experience
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set crafting experience", exception)
+            throw exception
         }
     }
 

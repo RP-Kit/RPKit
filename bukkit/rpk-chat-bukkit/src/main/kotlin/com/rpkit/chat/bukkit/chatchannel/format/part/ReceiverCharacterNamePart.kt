@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,20 @@
 package com.rpkit.chat.bukkit.chatchannel.format.part
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.core.service.Services
+import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture.supplyAsync
+import java.util.logging.Level
 
 @SerializableAs("ReceiverCharacterNamePart")
 class ReceiverCharacterNamePart(
+    private val plugin: RPKChatBukkit,
     font: String? = null,
     color: String? = null,
     isBold: Boolean? = null,
@@ -38,6 +42,7 @@ class ReceiverCharacterNamePart(
     hover: HoverAction? = null,
     click: ClickAction? = null
 ) : GenericTextPart(
+    plugin,
     font,
     color,
     isBold,
@@ -55,6 +60,9 @@ class ReceiverCharacterNamePart(
         val character =
             characterService.getActiveCharacter(context.receiverMinecraftProfile).join() ?: return@supplyAsync ""
         return@supplyAsync character.name
+    }.exceptionally { exception ->
+        plugin.logger.log(Level.SEVERE, "Failed to get receiver character name", exception)
+        throw exception
     }
 
     override fun serialize() = mutableMapOf(
@@ -73,6 +81,7 @@ class ReceiverCharacterNamePart(
     companion object {
         @JvmStatic
         fun deserialize(serialized: Map<String, Any>) = ReceiverCharacterNamePart(
+            Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
             serialized["font"] as? String,
             serialized["color"] as? String,
             serialized["bold"] as? Boolean,

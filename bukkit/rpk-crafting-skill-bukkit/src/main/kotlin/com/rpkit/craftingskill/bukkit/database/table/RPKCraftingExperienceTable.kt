@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.craftingskill.bukkit.database.create
 import com.rpkit.craftingskill.bukkit.database.jooq.Tables.RPKIT_CRAFTING_EXPERIENCE
 import org.bukkit.Material
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKCraftingExperienceTable(private val database: Database, private val plugin: RPKCraftingSkillBukkit) : Table {
@@ -46,6 +48,9 @@ class RPKCraftingExperienceTable(private val database: Database, private val plu
                     entity.experience
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert crafting experience", exception)
+            throw exception
         }
     }
 
@@ -58,6 +63,9 @@ class RPKCraftingExperienceTable(private val database: Database, private val plu
                 .set(RPKIT_CRAFTING_EXPERIENCE.EXPERIENCE, entity.experience)
                 .where(RPKIT_CRAFTING_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update crafting experience", exception)
+            throw exception
         }
     }
 
@@ -78,6 +86,9 @@ class RPKCraftingExperienceTable(private val database: Database, private val plu
                 material,
                 experience
             )
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get crafting experience", exception)
+            throw exception
         }
     }
 
@@ -88,6 +99,9 @@ class RPKCraftingExperienceTable(private val database: Database, private val plu
                 .deleteFrom(RPKIT_CRAFTING_EXPERIENCE)
                 .where(RPKIT_CRAFTING_EXPERIENCE.CHARACTER_ID.eq(characterId.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete crafting experience", exception)
+            throw exception
         }
     }
 
@@ -117,6 +131,9 @@ class RPKCraftingExperienceTable(private val database: Database, private val plu
                         experience
                     )
                 }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get crafting experience", exception)
+            throw exception
         }
     }
 

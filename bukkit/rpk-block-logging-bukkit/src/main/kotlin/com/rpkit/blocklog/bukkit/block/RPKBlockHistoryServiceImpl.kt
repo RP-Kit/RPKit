@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +28,12 @@ import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : RPKBlockHistoryService {
 
-    override fun getBlockHistory(id: RPKBlockHistoryId): CompletableFuture<RPKBlockHistory?> {
+    override fun getBlockHistory(id: RPKBlockHistoryId): CompletableFuture<out RPKBlockHistory?> {
         return plugin.database.getTable(RPKBlockHistoryTable::class.java)[id]
     }
 
@@ -47,7 +49,7 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         return plugin.database.getTable(RPKBlockHistoryTable::class.java).delete(blockHistory)
     }
 
-    override fun getBlockChange(id: RPKBlockChangeId): CompletableFuture<RPKBlockChange?> {
+    override fun getBlockChange(id: RPKBlockChangeId): CompletableFuture<out RPKBlockChange?> {
         return plugin.database.getTable(RPKBlockChangeTable::class.java)[id]
     }
 
@@ -63,7 +65,7 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         return plugin.database.getTable(RPKBlockChangeTable::class.java).delete(blockChange)
     }
 
-    override fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): CompletableFuture<RPKBlockInventoryChange?> {
+    override fun getBlockInventoryChange(id: RPKBlockInventoryChangeId): CompletableFuture<out RPKBlockInventoryChange?> {
         return plugin.database.getTable(RPKBlockInventoryChangeTable::class.java)[id]
     }
 
@@ -93,6 +95,9 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
                 addBlockHistory(blockHistory).join()
             }
             return@supplyAsync blockHistory
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get block history", exception)
+            throw exception
         }
     }
 
@@ -107,6 +112,9 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
                 .takeWhile { time <= it.time }
                 .forEach { type = it.from }
             return@supplyAsync type
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get block type at time", exception)
+            throw exception
         }
     }
 
@@ -121,6 +129,9 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
                 .takeWhile { time <= it.time }
                 .forEach { inventoryContents = it.from }
             return@supplyAsync inventoryContents
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get block inventory at time", exception)
+            throw exception
         }
     }
 

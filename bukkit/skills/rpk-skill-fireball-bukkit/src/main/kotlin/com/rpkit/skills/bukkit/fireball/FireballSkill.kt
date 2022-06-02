@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +22,7 @@ import com.rpkit.skills.bukkit.skills.*
 import org.bukkit.Bukkit
 import org.bukkit.entity.Fireball
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
 
@@ -54,6 +56,9 @@ class FireballSkill(private val plugin: RPKFireballSkillBukkit) : RPKSkill {
                 ?.all { (skillType, requiredPoints) ->
                     skillPointService.getSkillPoints(character, skillType).join() >= requiredPoints
                 } ?: false
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to check fireball requirements", exception)
+            throw exception
         }
     }
 }

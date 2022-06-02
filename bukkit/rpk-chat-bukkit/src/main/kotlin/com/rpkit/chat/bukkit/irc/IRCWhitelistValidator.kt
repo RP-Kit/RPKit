@@ -16,6 +16,7 @@
 
 package com.rpkit.chat.bukkit.irc
 
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.chatchannel.undirected.IRCComponent
 import com.rpkit.core.service.Services
@@ -30,8 +31,9 @@ import org.pircbotx.Channel
 import org.pircbotx.PircBotX
 import org.pircbotx.User
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
-class IRCWhitelistValidator {
+class IRCWhitelistValidator(private val plugin: RPKChatBukkit) {
 
     fun enforceWhitelist(user: User, nick: RPKIRCNick, bot: PircBotX, channel: Channel) {
         val verified = user.isVerified
@@ -107,6 +109,9 @@ class IRCWhitelistValidator {
                     "${nick.value} attempted to join, but does not have permission to view the channel."
                 )
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to check IRC profile", exception)
+            throw exception
         }
     }
 

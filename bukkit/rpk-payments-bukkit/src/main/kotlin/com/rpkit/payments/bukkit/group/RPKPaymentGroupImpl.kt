@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +29,7 @@ import com.rpkit.payments.bukkit.group.owner.RPKPaymentGroupOwner
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Payment group implementation.
@@ -62,6 +64,9 @@ class RPKPaymentGroupImpl(
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKPaymentGroupOwnerTable::class.java)
                 .insert(RPKPaymentGroupOwner(paymentGroup = event.paymentGroup, character = event.character)).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add payment group owner", exception)
+            throw exception
         }
     }
 
@@ -77,6 +82,9 @@ class RPKPaymentGroupImpl(
             if (owner != null) {
                 ownerTable.delete(owner).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove payment group owner", exception)
+            throw exception
         }
     }
 
@@ -87,6 +95,9 @@ class RPKPaymentGroupImpl(
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKPaymentGroupMemberTable::class.java)
                 .insert(RPKPaymentGroupMember(paymentGroup = event.paymentGroup, character = event.character)).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add payment group member", exception)
+            throw exception
         }
     }
 
@@ -101,6 +112,9 @@ class RPKPaymentGroupImpl(
             if (member != null) {
                 memberTable.delete(member).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove payment group member", exception)
+            throw exception
         }
     }
 
@@ -111,6 +125,9 @@ class RPKPaymentGroupImpl(
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKPaymentGroupInviteTable::class.java)
                 .insert(RPKPaymentGroupInvite(paymentGroup = event.paymentGroup, character = event.character)).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add payment group invite", exception)
+            throw exception
         }
     }
 
@@ -124,6 +141,9 @@ class RPKPaymentGroupImpl(
             if (invite != null) {
                 plugin.database.getTable(RPKPaymentGroupInviteTable::class.java).delete(invite).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove payment group invite", exception)
+            throw exception
         }
     }
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +26,8 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -38,8 +39,8 @@ class LogComponent(private val plugin: RPKChatBukkit) : UndirectedPipelineCompon
 
     override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
         val logDirectory = File(plugin.dataFolder, "logs")
-        val logDateFormat = SimpleDateFormat("yyyy-MM-dd")
-        val datedLogDirectory = File(logDirectory, logDateFormat.format(Date()))
+        val logDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val datedLogDirectory = File(logDirectory, logDateFormat.format(LocalDateTime.now()))
         if (!datedLogDirectory.exists()) {
             if (!datedLogDirectory.mkdirs())
                 throw IOException("Could not create log directory. Does the server have permission to write to the directory?")
@@ -50,8 +51,8 @@ class LogComponent(private val plugin: RPKChatBukkit) : UndirectedPipelineCompon
                 throw IOException("Failed to create log file. Does the server have permission to write to the directory?")
         }
         val writer = BufferedWriter(FileWriter(log, true))
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        writer.append("[").append(dateFormat.format(Date())).append("] ").append(context.message).append("\n")
+        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        writer.append("[").append(dateFormat.format(LocalDateTime.now())).append("] ").append(context.message).append("\n")
         writer.close()
         return CompletableFuture.completedFuture(context)
     }

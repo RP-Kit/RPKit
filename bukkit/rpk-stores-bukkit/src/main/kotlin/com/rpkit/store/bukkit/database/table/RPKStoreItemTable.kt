@@ -25,11 +25,12 @@ import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import com.rpkit.store.bukkit.storeitem.RPKStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKStoreItemTable(
         private val database: Database,
-        plugin: RPKStoresBukkit
+        private val plugin: RPKStoresBukkit
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_store_item.id.enabled")) {
@@ -64,6 +65,9 @@ class RPKStoreItemTable(
             entity.id = RPKStoreItemId(id)
             cache?.set(id, entity)
             return@supplyAsync RPKStoreItemId(id)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert store item", exception)
+            throw exception
         }
     }
 
@@ -79,6 +83,9 @@ class RPKStoreItemTable(
                 .where(RPKIT_STORE_ITEM.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update store item", exception)
+            throw exception
         }
     }
 
@@ -107,6 +114,9 @@ class RPKStoreItemTable(
                 cache?.remove(id.value)
             }
             return@supplyAsync null
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get store item", exception)
+            throw exception
         }
     }
 
@@ -119,6 +129,9 @@ class RPKStoreItemTable(
                 .and(RPKIT_STORE_ITEM.IDENTIFIER.eq(identifier))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync get(RPKStoreItemId(result[RPKIT_STORE_ITEM.ID])).join()
+        }.exceptionally { exception ->
+            this.plugin.logger.log(Level.SEVERE, "Failed to get store item", exception)
+            throw exception
         }
     }
 
@@ -131,6 +144,9 @@ class RPKStoreItemTable(
             val storeItemFutures = result.map { row -> get(RPKStoreItemId(row[RPKIT_STORE_ITEM.ID])) }
             CompletableFuture.allOf(*storeItemFutures.toTypedArray()).join()
             return@supplyAsync storeItemFutures.mapNotNull(CompletableFuture<RPKStoreItem?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get all store items", exception)
+            throw exception
         }
     }
 
@@ -142,6 +158,9 @@ class RPKStoreItemTable(
                 .where(RPKIT_STORE_ITEM.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete store item", exception)
+            throw exception
         }
     }
 }

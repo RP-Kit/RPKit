@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.travel.bukkit.warp.RPKWarpImpl
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import com.rpkit.warp.bukkit.warp.RPKWarpName
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKWarpTable(private val database: Database, private val plugin: RPKTravelBukkit) : Table {
@@ -64,6 +66,9 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 )
                 .execute()
             cache?.set(entity.name.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert warp", exception)
+            throw exception
         }
     }
 
@@ -80,10 +85,13 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 .where(RPKIT_WARP.NAME.eq(entity.name.value))
                 .execute()
             cache?.set(entity.name.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update warp", exception)
+            throw exception
         }
     }
 
-    operator fun get(name: String): CompletableFuture<RPKWarp?> {
+    operator fun get(name: String): CompletableFuture<out RPKWarp?> {
         if (cache?.containsKey(name) == true) {
             return CompletableFuture.completedFuture(cache[name])
         } else {
@@ -114,11 +122,14 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 )
                 cache?.set(name, warp)
                 return@supplyAsync warp
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get warp", exception)
+                throw exception
             }
         }
     }
 
-    fun getAll(): CompletableFuture<List<RPKWarp>> {
+    fun getAll(): CompletableFuture<out List<RPKWarp>> {
         return CompletableFuture.supplyAsync {
             val results = database.create
                 .select(
@@ -145,6 +156,9 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                     )
                 )
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get all warps", exception)
+            throw exception
         }
     }
 
@@ -155,6 +169,9 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 .where(RPKIT_WARP.NAME.eq(entity.name.value))
                 .execute()
             cache?.remove(entity.name.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete warp", exception)
+            throw exception
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.rpkit.chat.bukkit.chatchannel.format.part
 
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
@@ -24,8 +25,10 @@ import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.TextComponent.fromLegacyText
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.supplyAsync
+import java.util.logging.Level
 
 abstract class GenericTextPart(
+    private val plugin: RPKChatBukkit,
     val font: String? = null,
     val color: String? = null,
     val isBold: Boolean? = null,
@@ -55,5 +58,8 @@ abstract class GenericTextPart(
                 if (click != null) component.clickEvent = click.toClickEvent(context).join()
             }
         }
+    }.exceptionally { exception ->
+        plugin.logger.log(Level.SEVERE, "Failed to convert text part to chat components", exception)
+        throw exception
     }
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,19 +17,25 @@
 package com.rpkit.chat.bukkit.chatchannel.undirected
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import net.md_5.bungee.api.ChatColor
+import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.supplyAsync
+import java.util.logging.Level
 
 @SerializableAs("UndirectedFormatComponent")
-class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineComponent, ConfigurationSerializable {
+class UndirectedFormatComponent(
+    private val plugin: RPKChatBukkit,
+    var formatString: String
+) : UndirectedPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: UndirectedMessageContext): CompletableFuture<UndirectedMessageContext> {
         return supplyAsync {
@@ -75,6 +82,9 @@ class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineCo
             }
             context.message = formattedMessage
             return@supplyAsync context
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to format message", exception)
+            throw exception
         }
     }
 
@@ -88,7 +98,8 @@ class UndirectedFormatComponent(var formatString: String) : UndirectedPipelineCo
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): UndirectedFormatComponent {
             return UndirectedFormatComponent(
-                    serialized["format"] as String
+                Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
+                serialized["format"] as String
             )
         }
     }

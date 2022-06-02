@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +29,7 @@ import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKTicketTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -80,6 +82,9 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
             val id = database.create.lastID().toInt()
             entity.id = RPKTicketId(id)
             cache?.set(id, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert ticket", exception)
+            throw exception
         }
     }
 
@@ -104,10 +109,13 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .where(RPKIT_TICKET.ID.eq(ticketId.value))
                 .execute()
             cache?.set(ticketId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update ticket", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKTicketId): CompletableFuture<RPKTicket?> {
+    operator fun get(id: RPKTicketId): CompletableFuture<out RPKTicket?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         }
@@ -174,6 +182,9 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 cache?.remove(id.value)
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get ticket", exception)
+            throw exception
         }
     }
 
@@ -185,6 +196,9 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .where(RPKIT_TICKET.ID.eq(ticketId.value))
                 .execute()
             cache?.remove(ticketId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete ticket", exception)
+            throw exception
         }
     }
 
@@ -197,7 +211,10 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .fetch()
             val ticketFutures = results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }
             CompletableFuture.allOf(*ticketFutures.toTypedArray()).join()
-            return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<RPKTicket?>::join)
+            return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<out RPKTicket?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get open tickets", exception)
+            throw exception
         }
     }
 
@@ -210,7 +227,10 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .fetch()
             val ticketFutures = results.map { get(RPKTicketId(it[RPKIT_TICKET.ID])) }
             CompletableFuture.allOf(*ticketFutures.toTypedArray()).join()
-            return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<RPKTicket?>::join)
+            return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<out RPKTicket?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get closed tickets", exception)
+            throw exception
         }
     }
 

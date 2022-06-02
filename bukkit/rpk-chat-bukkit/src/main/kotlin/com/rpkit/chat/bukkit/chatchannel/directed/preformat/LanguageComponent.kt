@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +17,21 @@
 package com.rpkit.chat.bukkit.chatchannel.directed.preformat
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageService
 import com.rpkit.languages.bukkit.language.RPKLanguageName
 import com.rpkit.languages.bukkit.language.RPKLanguageService
+import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 @SerializableAs("LanguageComponent")
-class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
+class LanguageComponent(private val plugin: RPKChatBukkit) : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: DirectedPreFormatMessageContext): CompletableFuture<DirectedPreFormatMessageContext> {
         val characterService = Services[RPKCharacterService::class.java] ?: return CompletableFuture.completedFuture(context)
@@ -57,6 +61,9 @@ class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSeria
                     ).join()
                 }
                 return@thenCombineAsync context
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to apply language", exception)
+                throw exception
             }
     }
 
@@ -67,7 +74,9 @@ class LanguageComponent : DirectedPreFormatPipelineComponent, ConfigurationSeria
     companion object {
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): LanguageComponent {
-            return LanguageComponent()
+            return LanguageComponent(
+                Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit
+            )
         }
     }
 

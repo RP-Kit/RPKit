@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_TRACKING_DISABLED
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingDisabled
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKTrackingDisabledTable(private val database: Database, private val plugin: RPKEssentialsBukkit) : Table {
@@ -51,6 +53,9 @@ class RPKTrackingDisabledTable(private val database: Database, private val plugi
                 )
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert tracking disabled", exception)
+            throw exception
         }
     }
 
@@ -70,6 +75,9 @@ class RPKTrackingDisabledTable(private val database: Database, private val plugi
             val trackingEnabled = RPKTrackingDisabled(character)
             cache?.set(characterId.value, trackingEnabled)
             return@supplyAsync trackingEnabled
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get tracking disabled", exception)
+            throw exception
         }
     }
 
@@ -81,6 +89,9 @@ class RPKTrackingDisabledTable(private val database: Database, private val plugi
                 .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete tracking disabled", exception)
+            throw exception
         }
     }
 }

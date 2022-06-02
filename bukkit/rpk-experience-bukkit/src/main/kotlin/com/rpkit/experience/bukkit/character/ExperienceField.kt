@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class ExperienceField(private val plugin: RPKExperienceBukkit) : CharacterCardField {
@@ -40,6 +41,9 @@ class ExperienceField(private val plugin: RPKExperienceBukkit) : CharacterCardFi
                 experienceService.getExperienceNeededForLevel(characterLevel + 1) -
                         experienceService.getExperienceNeededForLevel(characterLevel)
             return@supplyAsync "$currentExperience/$nextLevelExperience"
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get experience character card field value", exception)
+            throw exception
         }
     }
 
