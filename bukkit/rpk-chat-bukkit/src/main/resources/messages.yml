@@ -83,7 +83,7 @@ no-permission-chat-group-members: '&cYou do not have permission to list chat gro
 no-permission-chat-group-message: '&cYou do not have permission to message chat groups.'
 no-permission-message: '&cYou do not have permission to send private messages.'
 no-permission-reply: '&cYou do not have permission to reply to messages.'
-command-snoop: '&2[command] ${sender}-player: ${command}'
+command-snoop: '&2[command] ${sender_player}: ${command}'
 account-link-discord-successful: '&aDiscord profile ${discord_tag} successfully linked.'
 no-minecraft-profile-service: '&cThere is no Minecraft profile service available.'
 no-chat-channel-service: '&cThere is no chat channel service available.'
