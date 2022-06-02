@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItemImpl
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKConsumableStoreItemTable(private val database: Database, private val plugin: RPKStoresBukkit) : Table {
@@ -57,6 +58,9 @@ class RPKConsumableStoreItemTable(private val database: Database, private val pl
                 .execute()
             entity.id = id
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert consumable store item", exception)
+            throw exception
         }
     }
 
@@ -70,10 +74,13 @@ class RPKConsumableStoreItemTable(private val database: Database, private val pl
                 .where(RPKIT_CONSUMABLE_STORE_ITEM.STORE_ITEM_ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update consumable store item", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKStoreItemId): CompletableFuture<RPKConsumableStoreItem?> {
+    operator fun get(id: RPKStoreItemId): CompletableFuture<out RPKConsumableStoreItem?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -103,6 +110,9 @@ class RPKConsumableStoreItemTable(private val database: Database, private val pl
                 )
                 cache?.set(id.value, storeItem)
                 return@supplyAsync storeItem
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get consumable store item", exception)
+                throw exception
             }
         }
     }
@@ -116,6 +126,9 @@ class RPKConsumableStoreItemTable(private val database: Database, private val pl
                 .where(RPKIT_CONSUMABLE_STORE_ITEM.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete consumable store item", exception)
+            throw exception
         }
     }
 }

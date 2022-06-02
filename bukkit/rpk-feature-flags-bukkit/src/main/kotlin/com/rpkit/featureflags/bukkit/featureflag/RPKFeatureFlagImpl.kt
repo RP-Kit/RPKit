@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +20,7 @@ import com.rpkit.featureflags.bukkit.RPKFeatureFlagsBukkit
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKFeatureFlagImpl(
@@ -47,6 +49,9 @@ class RPKFeatureFlagImpl(
                     profileFeatureFlagTable.update(playerFeatureFlag).join()
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set feature flag enabled state", exception)
+            throw exception
         }
     }
 

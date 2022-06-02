@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +21,7 @@ import java.util.concurrent.CompletableFuture
 
 interface RPKProfileService : Service {
 
-    fun getProfile(id: RPKProfileId): CompletableFuture<RPKProfile?>
+    fun getProfile(id: RPKProfileId): CompletableFuture<out RPKProfile?>
     fun getProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator): CompletableFuture<RPKProfile?>
     fun addProfile(profile: RPKProfile): CompletableFuture<Void>
     fun updateProfile(profile: RPKProfile): CompletableFuture<Void>
@@ -31,7 +32,7 @@ interface RPKProfileService : Service {
     fun generateDiscriminatorFor(name: RPKProfileName): CompletableFuture<RPKProfileDiscriminator>
     fun getPreloadedProfile(id: RPKProfileId): RPKProfile?
     fun getPreloadedProfile(name: RPKProfileName, discriminator: RPKProfileDiscriminator): RPKProfile?
-    fun loadProfile(id: RPKProfileId): CompletableFuture<RPKProfile?>
+    fun loadProfile(id: RPKProfileId): CompletableFuture<out RPKProfile?>
     fun unloadProfile(profile: RPKProfile)
 
 }

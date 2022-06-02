@@ -26,6 +26,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Message command.
@@ -71,6 +72,9 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                             return@getMembers
                         }
                         chatGroup.sendMessage(senderMinecraftProfile, args.drop(1).joinToString(" "))
+                    }.exceptionally { exception ->
+                        plugin.logger.log(Level.SEVERE, "Failed to execute message command", exception)
+                        throw exception
                     }
                 } else {
                     if (plugin.server.getPlayer(args[0]) == null) {
@@ -115,11 +119,23 @@ class MessageCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                                         }
                                     }.thenAccept { pmGroup ->
                                         pmGroup.sendMessage(senderMinecraftProfile, args.drop(1).joinToString(" "))
+                                    }.exceptionally { exception ->
+                                        plugin.logger.log(Level.SEVERE, "Failed to execute message command", exception)
+                                        throw exception
                                     }
+                                }.exceptionally { exception ->
+                                    plugin.logger.log(Level.SEVERE, "Failed to execute message command", exception)
+                                    throw exception
                                 }
+                        }.exceptionally { exception ->
+                            plugin.logger.log(Level.SEVERE, "Failed to execute message command", exception)
+                            throw exception
                         }
                 }
             })
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to execute message command", exception)
+            throw exception
         }
         return true
     }

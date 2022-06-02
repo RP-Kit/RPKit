@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +29,7 @@ import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import java.util.logging.Level
 
 
 class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKProfessionService {
@@ -101,6 +103,9 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
                     }
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add profession", exception)
+            throw exception
         }
     }
 
@@ -124,6 +129,9 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
                     }
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove profession", exception)
+            throw exception
         }
     }
 
@@ -131,6 +139,9 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
         return CompletableFuture.supplyAsync {
             val professionExperience = getProfessionExperience(character, profession).join()
             return@supplyAsync getLevelFromExperience(profession, professionExperience)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get profession level", exception)
+            throw exception
         }
     }
 
@@ -227,6 +238,9 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
                     this.characterProfessionExperience[characterId.value] = preloadedCharacterProfessionExperience
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set profession experience", exception)
+            throw exception
         }
     }
 
@@ -240,6 +254,9 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
                 LocalDateTime.now(),
                 characterProfessionChangeCooldown.cooldownEndTime
             )
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get profession change cooldown", exception)
+            throw exception
         }
     }
 
@@ -258,6 +275,9 @@ class RPKProfessionServiceImpl(override val plugin: RPKProfessionsBukkit) : RPKP
                 characterProfessionChangeCooldown.cooldownEndTime = LocalDateTime.now().plus(cooldown)
                 characterProfessionChangeCooldownTable.update(characterProfessionChangeCooldown).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set profession change cooldown", exception)
+            throw exception
         }
     }
 }

@@ -87,7 +87,7 @@ class RPKNotificationsBukkit : JavaPlugin(), RPKPlugin {
             ),
             classLoader
         )
-        database.addTable(RPKNotificationTable(database))
+        database.addTable(RPKNotificationTable(database, this))
 
         Services[RPKNotificationService::class.java] = RPKNotificationServiceImpl(this, database)
 

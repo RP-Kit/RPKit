@@ -28,7 +28,6 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -36,7 +35,6 @@ import java.util.concurrent.CompletableFuture
  * Kicks a character from a payment group.
  */
 class PaymentKickCommand(private val plugin: RPKPaymentsBukkit) : CommandExecutor {
-    val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz")
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.payments.command.payment.kick")) {
             sender.sendMessage(plugin.messages.noPermissionPaymentKick)

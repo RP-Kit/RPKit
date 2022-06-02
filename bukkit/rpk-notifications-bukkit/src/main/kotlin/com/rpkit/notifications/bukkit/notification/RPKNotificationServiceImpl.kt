@@ -24,11 +24,11 @@ import java.time.Instant
 import java.util.concurrent.CompletableFuture
 
 class RPKNotificationServiceImpl(override val plugin: RPKPlugin, private val database: Database) : RPKNotificationService {
-    override fun getNotifications(recipient: RPKProfile): CompletableFuture<List<RPKNotification>> {
+    override fun getNotifications(recipient: RPKProfile): CompletableFuture<out List<RPKNotification>> {
         return database.getTable(RPKNotificationTable::class.java).get(recipient)
     }
 
-    override fun getNotification(notificationId: RPKNotificationId): CompletableFuture<RPKNotification?> {
+    override fun getNotification(notificationId: RPKNotificationId): CompletableFuture<out RPKNotification?> {
         return database.getTable(RPKNotificationTable::class.java).get(notificationId)
     }
 

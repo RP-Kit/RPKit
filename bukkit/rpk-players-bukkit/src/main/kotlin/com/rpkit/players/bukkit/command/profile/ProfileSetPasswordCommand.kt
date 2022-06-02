@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,9 @@ class ProfileSetPasswordCommand(private val plugin: RPKPlayersBukkit) : RPKComma
             return CompletableFuture.completedFuture(MissingServiceFailure(RPKProfileService::class.java))
         }
         profile.setPassword(password.toCharArray())
-        profileService.updateProfile(profile)
-        sender.sendMessage(plugin.messages.profileSetPasswordValid)
-        return CompletableFuture.completedFuture(CommandSuccess)
+        return profileService.updateProfile(profile).thenApply {
+            sender.sendMessage(plugin.messages.profileSetPasswordValid)
+            CommandSuccess
+        }
     }
 }

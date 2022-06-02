@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +27,7 @@ import com.rpkit.featureflags.bukkit.featureflag.RPKProfileFeatureFlag
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKProfileFeatureFlagTable(private val database: Database, private val plugin: RPKFeatureFlagsBukkit) : Table {
@@ -55,6 +57,9 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                     entity.isEnabled
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert feature flag", exception)
+            throw exception
         }
     }
 
@@ -68,6 +73,9 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 .set(RPKIT_PROFILE_FEATURE_FLAG.ENABLED, entity.isEnabled)
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update feature flag", exception)
+            throw exception
         }
     }
 
@@ -96,6 +104,9 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
             )
             cache?.set(featureFlag.name.value, profileFeatureFlag)
             return@supplyAsync profileFeatureFlag
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get feature flag", exception)
+            throw exception
         }
     }
 
@@ -108,6 +119,9 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 .and(RPKIT_PROFILE_FEATURE_FLAG.FEATURE_FLAG_NAME.eq(entity.featureFlag.name.value))
                 .execute()
             cache?.remove(entity.featureFlag.name.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete feature flag", exception)
+            throw exception
         }
     }
 

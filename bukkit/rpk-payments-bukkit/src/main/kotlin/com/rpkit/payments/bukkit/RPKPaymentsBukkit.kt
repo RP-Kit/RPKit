@@ -93,9 +93,9 @@ class RPKPaymentsBukkit : JavaPlugin(), RPKPlugin {
                 classLoader
         )
         database.addTable(RPKPaymentGroupTable(database, this))
-        database.addTable(RPKPaymentGroupInviteTable(database))
-        database.addTable(RPKPaymentGroupMemberTable(database))
-        database.addTable(RPKPaymentGroupOwnerTable(database))
+        database.addTable(RPKPaymentGroupInviteTable(database, this))
+        database.addTable(RPKPaymentGroupMemberTable(database, this))
+        database.addTable(RPKPaymentGroupOwnerTable(database, this))
 
         Services[RPKPaymentGroupService::class.java] = RPKPaymentGroupServiceImpl(this)
 

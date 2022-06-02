@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +32,7 @@ interface RPKWarningService : Service {
      * @param id The ID
      * @return The warning
      */
-    fun getWarning(id: RPKWarningId): CompletableFuture<RPKWarning?>
+    fun getWarning(id: RPKWarningId): CompletableFuture<out RPKWarning?>
 
     /**
      * Gets warnings issued to a player.

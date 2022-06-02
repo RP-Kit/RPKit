@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttribute
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKStatBuildService {
 
@@ -59,6 +61,9 @@ class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSta
                     statPoints[characterId.value] = preloadedCharacterStatPoints
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set stat points", exception)
+            throw exception
         }
     }
 

@@ -21,8 +21,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
 
 interface RPKNotificationService : Service {
-    fun getNotifications(recipient: RPKProfile): CompletableFuture<List<RPKNotification>>
-    fun getNotification(notificationId: RPKNotificationId): CompletableFuture<RPKNotification?>
+    fun getNotifications(recipient: RPKProfile): CompletableFuture<out List<RPKNotification>>
+    fun getNotification(notificationId: RPKNotificationId): CompletableFuture<out RPKNotification?>
     fun addNotification(notification: RPKNotification): CompletableFuture<Void>
     fun createNotification(
         recipient: RPKProfile,

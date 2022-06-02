@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import com.rpkit.professions.bukkit.profession.RPKProfession
 import com.rpkit.professions.bukkit.profession.RPKProfessionName
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKCharacterProfessionTable(
@@ -48,6 +50,9 @@ class RPKCharacterProfessionTable(
                             entity.profession.name.value
                     )
                     .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert character profession", exception)
+            throw exception
         }
     }
 
@@ -59,6 +64,9 @@ class RPKCharacterProfessionTable(
                 .set(RPKIT_CHARACTER_PROFESSION.PROFESSION, entity.profession.name.value)
                 .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character profession", exception)
+            throw exception
         }
     }
 
@@ -89,6 +97,9 @@ class RPKCharacterProfessionTable(
                     profession
                 )
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character professions", exception)
+            throw exception
         }
     }
 
@@ -105,6 +116,9 @@ class RPKCharacterProfessionTable(
                 .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(profession.name.value))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync RPKCharacterProfession(character, profession)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character profession", exception)
+            throw exception
         }
     }
 
@@ -116,6 +130,9 @@ class RPKCharacterProfessionTable(
                 .where(RPKIT_CHARACTER_PROFESSION.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_PROFESSION.PROFESSION.eq(entity.profession.name.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character profession", exception)
+            throw exception
         }
     }
 }

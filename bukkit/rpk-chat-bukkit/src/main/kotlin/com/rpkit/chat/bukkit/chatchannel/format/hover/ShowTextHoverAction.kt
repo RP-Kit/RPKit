@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,28 @@
 
 package com.rpkit.chat.bukkit.chatchannel.format.hover
 
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
 import net.md_5.bungee.api.chat.hover.content.Text
+import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture.supplyAsync
+import java.util.logging.Level
 
 @SerializableAs("ShowTextHoverAction")
-class ShowTextHoverAction(val text: List<FormatPart>) : HoverAction, ConfigurationSerializable {
+class ShowTextHoverAction(private val plugin: RPKChatBukkit, val text: List<FormatPart>) : HoverAction, ConfigurationSerializable {
     override fun toHoverEvent(context: DirectedPreFormatMessageContext) = supplyAsync {
         HoverEvent(
             SHOW_TEXT,
             Text(text.flatMap { it.toChatComponents(context).join().toList() }.toTypedArray())
         )
+    }.exceptionally { exception ->
+        plugin.logger.log(Level.SEVERE, "Failed to convert show text hover action to hover event", exception)
+        throw exception
     }
 
     override fun serialize() = mutableMapOf(
@@ -41,7 +47,8 @@ class ShowTextHoverAction(val text: List<FormatPart>) : HoverAction, Configurati
     companion object {
         @JvmStatic
         fun deserialize(serialized: Map<String, Any>) = ShowTextHoverAction(
-                serialized["text"] as List<FormatPart>
+            Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
+            serialized["text"] as List<FormatPart>
         )
     }
 }

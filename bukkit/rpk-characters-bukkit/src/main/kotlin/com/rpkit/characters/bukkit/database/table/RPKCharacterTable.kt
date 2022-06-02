@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +36,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the character table.
@@ -141,6 +143,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
             if (minecraftProfileId != null) {
                 minecraftProfileIdCache?.set(minecraftProfileId.value, entity)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert character", exception)
+            throw exception
         }
     }
 
@@ -187,10 +192,13 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
             if (minecraftProfileId != null) {
                 minecraftProfileIdCache?.set(minecraftProfileId.value, entity)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKCharacterId, overrideCache: Boolean = false): CompletableFuture<RPKCharacter?> {
+    operator fun get(id: RPKCharacterId, overrideCache: Boolean = false): CompletableFuture<out RPKCharacter?> {
         if (!overrideCache && cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -288,6 +296,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 )
                 cache?.set(id.value, character)
                 return@supplyAsync character
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get character", exception)
+                throw exception
             }
         }
     }
@@ -303,6 +314,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .where(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync get(RPKCharacterId(result[RPKIT_CHARACTER.ID])).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get active character", exception)
+            throw exception
         }
     }
 
@@ -315,7 +329,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .fetch()
             val futures = results.map { result -> get(RPKCharacterId(result[RPKIT_CHARACTER.ID])) }
             CompletableFuture.allOf(*futures.toTypedArray()).join()
-            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKCharacter?>::join)
+            return@supplyAsync futures.mapNotNull(CompletableFuture<out RPKCharacter?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get characters for profile", exception)
+            throw exception
         }
     }
 
@@ -328,7 +345,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .fetch()
             val futures = results.map { result -> get(RPKCharacterId(result[RPKIT_CHARACTER.ID])) }
             CompletableFuture.allOf(*futures.toTypedArray()).join()
-            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKCharacter?>::join)
+            return@supplyAsync futures.mapNotNull(CompletableFuture<out RPKCharacter?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get characters for name", exception)
+            throw exception
         }
     }
 
@@ -344,6 +364,9 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
             if (minecraftProfileId != null) {
                 minecraftProfileIdCache?.remove(minecraftProfileId.value)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character", exception)
+            throw exception
         }
     }
 

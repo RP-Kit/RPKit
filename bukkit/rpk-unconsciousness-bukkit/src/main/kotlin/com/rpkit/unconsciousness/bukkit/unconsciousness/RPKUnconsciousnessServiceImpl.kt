@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 
 class RPKUnconsciousnessServiceImpl(override val plugin: RPKUnconsciousnessBukkit) : RPKUnconsciousnessService {
@@ -99,6 +100,9 @@ class RPKUnconsciousnessServiceImpl(override val plugin: RPKUnconsciousnessBukki
                     }
                 }
             }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set unconscious", exception)
+            throw exception
         }
     }
 

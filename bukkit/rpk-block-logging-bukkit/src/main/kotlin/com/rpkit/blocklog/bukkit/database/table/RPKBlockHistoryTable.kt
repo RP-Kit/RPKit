@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.location.RPKBlockLocation
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKBlockHistoryTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
@@ -60,6 +62,9 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
             val id = database.create.lastID().toInt()
             entity.id = RPKBlockHistoryId(id)
             cache?.set(id, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert block history", exception)
+            throw exception
         }
     }
 
@@ -75,10 +80,13 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update block history", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKBlockHistoryId): CompletableFuture<RPKBlockHistory?> {
+    operator fun get(id: RPKBlockHistoryId): CompletableFuture<out RPKBlockHistory?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -103,6 +111,9 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 )
                 cache?.set(id.value, blockHistory)
                 return@supplyAsync blockHistory
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get block history", exception)
+                throw exception
             }
         }
     }
@@ -123,6 +134,9 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
             } else {
                 get(RPKBlockHistoryId(id)).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get block history", exception)
+            throw exception
         }
     }
 
@@ -134,6 +148,9 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete block history", exception)
+            throw exception
         }
     }
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +27,7 @@ import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the chat channel speaker table
@@ -58,6 +60,9 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
                 )
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert chat channel speaker", exception)
+            throw exception
         }
     }
 
@@ -84,6 +89,9 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
             )
             cache?.set(minecraftProfileId.value, chatChannelSpeaker)
             return@supplyAsync chatChannelSpeaker
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get chat channel speaker", exception)
+            throw exception
         }
     }
 
@@ -96,6 +104,9 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
                     .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update chat channel speaker", exception)
+            throw exception
         }
     }
 
@@ -107,6 +118,9 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete chat channel speaker", exception)
+            throw exception
         }
     }
 

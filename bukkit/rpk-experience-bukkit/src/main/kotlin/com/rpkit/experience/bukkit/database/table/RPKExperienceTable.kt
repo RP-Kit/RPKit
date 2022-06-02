@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.experience.bukkit.database.create
 import com.rpkit.experience.bukkit.database.jooq.Tables.RPKIT_EXPERIENCE_
 import com.rpkit.experience.bukkit.experience.RPKExperienceValue
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKExperienceTable(private val database: Database, private val plugin: RPKExperienceBukkit) : Table {
@@ -46,6 +48,9 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
                 .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete experience value", exception)
+            throw exception
         }
     }
 
@@ -69,6 +74,9 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
             )
             cache?.set(characterId.value, experienceValue)
             return@supplyAsync experienceValue
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get experience value", exception)
+            throw exception
         }
     }
 
@@ -87,6 +95,9 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
                 )
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert experience value", exception)
+            throw exception
         }
     }
 
@@ -99,6 +110,9 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
                 .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update experience value", exception)
+            throw exception
         }
     }
 

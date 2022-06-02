@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.ShapelessRecipe
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKDrinkServiceImpl(override val plugin: RPKDrinksBukkit) : RPKDrinkService {
@@ -71,6 +73,9 @@ class RPKDrinkServiceImpl(override val plugin: RPKDrinksBukkit) : RPKDrinkServic
                 charDrunkenness = RPKDrunkenness(character = character, drunkenness = drunkenness)
                 drunkennessTable.insert(charDrunkenness).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set drunkenness", exception)
+            throw exception
         }
     }
 

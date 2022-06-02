@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.drinks.bukkit.database.create
 import com.rpkit.drinks.bukkit.database.jooq.Tables.RPKIT_DRUNKENNESS
 import com.rpkit.drinks.bukkit.drink.RPKDrunkenness
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKDrunkennessTable(private val database: Database, private val plugin: RPKDrinksBukkit) : Table {
@@ -53,6 +55,9 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
                 )
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert drunkenness", exception)
+            throw exception
         }
     }
 

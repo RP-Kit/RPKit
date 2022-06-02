@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKPlayerGettingKeyTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -53,6 +55,9 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
                 .values(minecraftProfileId.value)
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert player getting key", exception)
+            throw exception
         }
     }
 
@@ -72,6 +77,9 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
             )
             cache?.set(minecraftProfileId.value, playerGettingKey)
             return@supplyAsync playerGettingKey
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get player getting key", exception)
+            throw exception
         }
     }
 
@@ -81,6 +89,9 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
                 .selectFrom(RPKIT_PLAYER_GETTING_KEY)
                 .fetch()
                 .map { it.toDomain() }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get all players getting keys", exception)
+            throw exception
         }
     }
 
@@ -92,6 +103,9 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
                 .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete player getting key", exception)
+            throw exception
         }
     }
 

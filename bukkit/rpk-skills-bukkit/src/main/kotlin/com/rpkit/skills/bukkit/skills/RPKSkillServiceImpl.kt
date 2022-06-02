@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +25,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 import kotlin.math.max
 
 
@@ -53,6 +55,9 @@ class RPKSkillServiceImpl(override val plugin: RPKSkillsBukkit) : RPKSkillServic
             val skillCooldownTable = plugin.database.getTable(RPKSkillCooldownTable::class.java)
             val skillCooldown = skillCooldownTable[character, skill].join() ?: return@supplyAsync 0
             return@supplyAsync max(0L, SECONDS.between(LocalDateTime.now(), skillCooldown.cooldownTimestamp)).toInt()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get skill cooldown", exception)
+            throw exception
         }
     }
 
@@ -78,6 +83,9 @@ class RPKSkillServiceImpl(override val plugin: RPKSkillsBukkit) : RPKSkillServic
                     characterSkillCooldowns[characterId.value] = skillCooldowns
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set skill cooldown", exception)
+            throw exception
         }
     }
 
@@ -146,6 +154,9 @@ class RPKSkillServiceImpl(override val plugin: RPKSkillsBukkit) : RPKSkillServic
                     }
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set skill binding", exception)
+            throw exception
         }
     }
 

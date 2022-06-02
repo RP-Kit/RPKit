@@ -33,6 +33,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Chat channel service implementation.
@@ -94,6 +95,9 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
             oldChannel?.removeSpeaker(minecraftProfile)?.join()
             val chatChannel = event.chatChannel
             chatChannel?.addSpeaker(minecraftProfile)?.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set minecraft profile channel", exception)
+            throw exception
         }
     }
 

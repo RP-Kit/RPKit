@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +28,12 @@ import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the bank table.
  */
-class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Table {
+class RPKBankTable(private val database: Database, private val plugin: RPKBanksBukkit) : Table {
 
     private data class CharacterCurrencyCacheKey(
         val characterId: Int,
@@ -67,6 +69,9 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                 )
                 .execute()
             cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert bank", exception)
+            throw exception
         }
     }
 
@@ -82,6 +87,9 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                 .and(RPKIT_BANK.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
             cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update bank", exception)
+            throw exception
         }
     }
 
@@ -114,6 +122,9 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
             )
             cache?.set(cacheKey, bank)
             return@supplyAsync bank
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get bank", exception)
+            throw exception
         }
     }
 
@@ -163,6 +174,9 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                 }
             }
             return@supplyAsync banks
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get top bank balances", exception)
+            throw exception
         }
     }
 
@@ -176,6 +190,9 @@ class RPKBankTable(private val database: Database, plugin: RPKBanksBukkit) : Tab
                 .and(RPKIT_BANK.CURRENCY_NAME.eq(currencyName.value))
                 .execute()
             cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyName.value))
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete bank", exception)
+            throw exception
         }
     }
 

@@ -29,6 +29,7 @@ import org.bukkit.permissions.PermissionAttachment
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKPermissionsService {
 
@@ -83,6 +84,9 @@ class RPKPermissionsServiceImpl(override val plugin: RPKPermissionsBukkit) : RPK
                 hasPermission = hasPermission(group, node, hasPermission)
             }
             return@supplyAsync hasPermission
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to check for permission", exception)
+            throw exception
         }
     }
 

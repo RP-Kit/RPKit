@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +31,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the bid table.
@@ -70,6 +72,9 @@ class RPKBidTable(
             val id = database.create.lastID().toInt()
             entity.id = RPKBidId(id)
             cache?.set(id, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert bid", exception)
+            throw exception
         }
     }
 
@@ -86,10 +91,13 @@ class RPKBidTable(
                 .where(RPKIT_BID.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update bid", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKBidId): CompletableFuture<RPKBid?> {
+    operator fun get(id: RPKBidId): CompletableFuture<out RPKBid?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         }
@@ -125,6 +133,9 @@ class RPKBidTable(
                     .execute()
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get bid", exception)
+            throw exception
         }
     }
 
@@ -143,6 +154,9 @@ class RPKBidTable(
             return@supplyAsync results.map { result ->
                 get(RPKBidId(result.get(RPKIT_BID.ID))).join()
             }.filterNotNull()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to retrieve bids for auction", exception)
+            throw exception
         }
     }
 
@@ -154,6 +168,9 @@ class RPKBidTable(
                 .where(RPKIT_BID.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete bid", exception)
+            throw exception
         }
     }
 }

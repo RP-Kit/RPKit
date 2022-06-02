@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,6 @@ import java.util.concurrent.CompletableFuture
 
 interface RPKCommandExecutor {
 
-    fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult>
+    fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult>
 
 }

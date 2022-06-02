@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +28,7 @@ import java.util.concurrent.CompletableFuture
 
 class RPKIRCProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKIRCProfileService {
 
-    override fun getIRCProfile(id: RPKIRCProfileId): CompletableFuture<RPKIRCProfile?> {
+    override fun getIRCProfile(id: RPKIRCProfileId): CompletableFuture<out RPKIRCProfile?> {
         return plugin.database.getTable(RPKIRCProfileTable::class.java)[id]
     }
 

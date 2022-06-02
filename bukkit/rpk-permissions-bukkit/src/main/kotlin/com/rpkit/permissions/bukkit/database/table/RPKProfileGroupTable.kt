@@ -28,6 +28,7 @@ import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKProfileGroup
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKProfileGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
@@ -66,6 +67,9 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                 )
                 .execute()
             cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert profile group", exception)
+            throw exception
         }
     }
 
@@ -80,6 +84,9 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(groupName.value))
                 .execute()
             cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update profile group", exception)
+            throw exception
         }
     }
 
@@ -106,6 +113,9 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
             )
             cache?.set(cacheKey, profileGroup)
             return@supplyAsync profileGroup
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get profile group", exception)
+            throw exception
         }
     }
 
@@ -131,6 +141,9 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                         result[RPKIT_PROFILE_GROUP.PRIORITY]
                     )
                 }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get profile groups", exception)
+            throw exception
         }
     }
 
@@ -144,6 +157,9 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
                 .and(RPKIT_PROFILE_GROUP.GROUP_NAME.eq(entity.group.name.value))
                 .execute()
             cache?.set(ProfileGroupCacheKey(profileId.value, groupName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete profile group", exception)
+            throw exception
         }
     }
 

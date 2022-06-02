@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +31,7 @@ import com.rpkit.payments.bukkit.group.RPKPaymentGroupName
 import java.time.Duration
 import java.time.temporal.ChronoUnit.MILLIS
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents payment group table.
@@ -74,6 +76,9 @@ class RPKPaymentGroupTable(
             val id = database.create.lastID().toInt()
             entity.id = RPKPaymentGroupId(id)
             cache?.set(id, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert payment group", exception)
+            throw exception
         }
     }
 
@@ -91,10 +96,13 @@ class RPKPaymentGroupTable(
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update payment group", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKPaymentGroupId): CompletableFuture<RPKPaymentGroup?> {
+    operator fun get(id: RPKPaymentGroupId): CompletableFuture<out RPKPaymentGroup?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -127,6 +135,9 @@ class RPKPaymentGroupTable(
                 )
                 cache?.set(id.value, paymentGroup)
                 return@supplyAsync paymentGroup
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get payment group", exception)
+                throw exception
             }
         }
     }
@@ -139,6 +150,9 @@ class RPKPaymentGroupTable(
                 .where(RPKIT_PAYMENT_GROUP.NAME.eq(name.value))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID))).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get payment group", exception)
+            throw exception
         }
     }
 
@@ -150,7 +164,10 @@ class RPKPaymentGroupTable(
                 .fetch()
             val paymentGroupFutures = results.map { result -> get(RPKPaymentGroupId(result.get(RPKIT_PAYMENT_GROUP.ID))) }
             CompletableFuture.allOf(*paymentGroupFutures.toTypedArray()).join()
-            return@supplyAsync paymentGroupFutures.mapNotNull(CompletableFuture<RPKPaymentGroup?>::join)
+            return@supplyAsync paymentGroupFutures.mapNotNull(CompletableFuture<out RPKPaymentGroup?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get all payment groups", exception)
+            throw exception
         }
     }
 
@@ -162,6 +179,9 @@ class RPKPaymentGroupTable(
                 .where(RPKIT_PAYMENT_GROUP.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete payment group", exception)
+            throw exception
         }
     }
 

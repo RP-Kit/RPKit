@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,13 +64,13 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
         setMessageAsProfileLinkRequest(message.id, profile)
     }
 
-    override fun getMessageProfileLink(messageId: Long): CompletableFuture<RPKProfile?> {
+    override fun getMessageProfileLink(messageId: Long): CompletableFuture<out RPKProfile?> {
         val profileService = Services[RPKProfileService::class.java] ?: return CompletableFuture.completedFuture(null)
         val profileId = profileLinkMessages[messageId] ?: return CompletableFuture.completedFuture(null)
         return profileService.getProfile(RPKProfileId(profileId))
     }
 
-    override fun getMessageProfileLink(message: DiscordMessage): CompletableFuture<RPKProfile?> {
+    override fun getMessageProfileLink(message: DiscordMessage): CompletableFuture<out RPKProfile?> {
         return getMessageProfileLink(message.id)
     }
 

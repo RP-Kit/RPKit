@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener {
@@ -89,6 +91,9 @@ class PlayerInteractListener(private val plugin: RPKSelectionBukkit) : Listener 
                             }
                             else -> return@getSelection
                         }
+                    }.exceptionally { exception ->
+                        plugin.logger.log(Level.SEVERE, "Failed to update selection point", exception)
+                        throw exception
                     }
                 })
             }

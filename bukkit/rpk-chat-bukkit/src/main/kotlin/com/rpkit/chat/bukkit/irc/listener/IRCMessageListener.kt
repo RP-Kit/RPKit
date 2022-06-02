@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import com.rpkit.players.bukkit.profile.irc.RPKIRCProfileService
 import org.pircbotx.hooks.ListenerAdapter
 import org.pircbotx.hooks.events.MessageEvent
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * IRC message listener.
@@ -61,6 +63,9 @@ class IRCMessageListener(private val plugin: RPKChatBukkit) : ListenerAdapter() 
                 chatChannel.directedPostFormatPipeline,
                 chatChannel.undirectedPipeline.filter { it !is IRCComponent }
             )
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to send message from IRC", exception)
+            throw exception
         }
     }
 

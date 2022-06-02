@@ -117,7 +117,7 @@ class RPKPlayersBukkit : JavaPlugin(), RPKPlugin {
         database.addTable(RPKGitHubProfileTable(database, this))
         database.addTable(RPKIRCProfileTable(database, this))
         database.addTable(RPKMinecraftProfileTable(database, this))
-        database.addTable(RPKMinecraftProfileLinkRequestTable(database))
+        database.addTable(RPKMinecraftProfileLinkRequestTable(database, this))
         database.addTable(RPKProfileTable(database, this))
 
         Services[RPKDiscordProfileService::class.java] = RPKDiscordProfileServiceImpl(this)

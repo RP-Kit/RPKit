@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.chat.bukkit.database.jooq.Tables.RPKIT_CHAT_GROUP
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Represents the chat group table.
@@ -66,6 +68,9 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
             entity.id = RPKChatGroupId(id)
             cache?.set(id, entity)
             nameCache?.set(entity.name.value, id)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert chat group", exception)
+            throw exception
         }
     }
 
@@ -79,10 +84,13 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
                 .execute()
             cache?.set(id.value, entity)
             nameCache?.set(entity.name.value, id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update chat group", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKChatGroupId): CompletableFuture<RPKChatGroup?> {
+    operator fun get(id: RPKChatGroupId): CompletableFuture<out RPKChatGroup?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -100,6 +108,9 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
                 cache?.set(id.value, chatGroup)
                 nameCache?.set(chatGroup.name.value, id.value)
                 return@supplyAsync chatGroup
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get chat group", exception)
+                throw exception
             }
         }
     }
@@ -111,7 +122,7 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
      * @param name The name
      * @return The chat group, or null if there is no chat group with the given name
      */
-    operator fun get(name: RPKChatGroupName): CompletableFuture<RPKChatGroup?> {
+    operator fun get(name: RPKChatGroupName): CompletableFuture<out RPKChatGroup?> {
         if (nameCache?.containsKey(name.value) == true) {
             val chatGroupId = nameCache[name.value]
             if (chatGroupId != null) {
@@ -133,6 +144,9 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
             cache?.set(id, chatGroup)
             nameCache?.set(name.value, id)
             return@supplyAsync chatGroup
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get chat group", exception)
+            throw exception
         }
     }
 
@@ -145,6 +159,9 @@ class RPKChatGroupTable(private val database: Database, private val plugin: RPKC
                 .execute()
             cache?.remove(id.value)
             nameCache?.remove(entity.name.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete chat group", exception)
+            throw exception
         }
     }
 }

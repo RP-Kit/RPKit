@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,11 +33,12 @@ import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKPermanentPurchaseTable(
         private val database: Database,
-        plugin: RPKStoresBukkit
+        private val plugin: RPKStoresBukkit
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_permanent_purchase.id.enabled")) {
@@ -64,6 +66,9 @@ class RPKPermanentPurchaseTable(
                 .execute()
             entity.id = id
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert permanent purchase", exception)
+            throw exception
         }
     }
 
@@ -72,10 +77,13 @@ class RPKPermanentPurchaseTable(
         return CompletableFuture.runAsync {
             database.getTable(RPKPurchaseTable::class.java).update(entity).join()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update permanent purchase", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKPurchaseId): CompletableFuture<RPKPermanentPurchase?> {
+    operator fun get(id: RPKPurchaseId): CompletableFuture<out RPKPermanentPurchase?> {
         return CompletableFuture.supplyAsync {
             val result = database.create
                 .select(
@@ -128,6 +136,9 @@ class RPKPermanentPurchaseTable(
             )
             cache?.set(id.value, permanentPurchase)
             return@supplyAsync permanentPurchase
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get permanent purchase", exception)
+            throw exception
         }
     }
 
@@ -145,7 +156,10 @@ class RPKPermanentPurchaseTable(
                 .fetch()
             val purchaseFutures = result.map { row -> get(RPKPurchaseId(row[RPKIT_PERMANENT_PURCHASE.PURCHASE_ID])) }
             CompletableFuture.allOf(*purchaseFutures.toTypedArray()).join()
-            return@supplyAsync purchaseFutures.mapNotNull(CompletableFuture<RPKPermanentPurchase?>::join)
+            return@supplyAsync purchaseFutures.mapNotNull(CompletableFuture<out RPKPermanentPurchase?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get permanent purchases", exception)
+            throw exception
         }
     }
 
@@ -158,6 +172,9 @@ class RPKPermanentPurchaseTable(
                 .where(RPKIT_PERMANENT_PURCHASE.PURCHASE_ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete permanent purchase", exception)
+            throw exception
         }
     }
 }

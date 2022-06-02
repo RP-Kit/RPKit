@@ -27,6 +27,7 @@ import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemDeleteEvent
 import com.rpkit.store.bukkit.event.storeitem.RPKBukkitStoreItemUpdateEvent
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreItemService {
@@ -56,6 +57,9 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
                 is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java)
                     .insert(eventStoreItem).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add store item", exception)
+            throw exception
         }
     }
 
@@ -124,6 +128,9 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
                 is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java)
                     .update(eventStoreItem).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update store item", exception)
+            throw exception
         }
     }
 
@@ -140,6 +147,9 @@ class RPKStoreItemServiceImpl(override val plugin: RPKStoresBukkit) : RPKStoreIt
                 is RPKTimedStoreItem -> plugin.database.getTable(RPKTimedStoreItemTable::class.java)
                     .delete(eventStoreItem).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove store item", exception)
+            throw exception
         }
     }
 }

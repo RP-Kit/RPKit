@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,19 @@
 package com.rpkit.chat.bukkit.chatchannel.directed.preformat
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.DirectedPreFormatPipelineComponent
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.core.service.Services
 import com.rpkit.drink.bukkit.drink.RPKDrinkService
+import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 @SerializableAs("DrunkenSlurComponent")
-class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
+class DrunkenSlurComponent(private val plugin: RPKChatBukkit, val drunkenness: Int) : DirectedPreFormatPipelineComponent, ConfigurationSerializable {
 
     override fun process(context: DirectedPreFormatMessageContext): CompletableFuture<DirectedPreFormatMessageContext> {
         val minecraftProfile = context.senderMinecraftProfile ?: return CompletableFuture.completedFuture(context)
@@ -38,6 +41,9 @@ class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComp
                 context.message = context.message.replace(Regex("s([^h])"), "sh$1")
             }
             return@supplyAsync context
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to apply drunken slur", exception)
+            throw exception
         }
     }
 
@@ -51,6 +57,7 @@ class DrunkenSlurComponent(val drunkenness: Int) : DirectedPreFormatPipelineComp
         @JvmStatic
         fun deserialize(serialized: MutableMap<String, Any>): DrunkenSlurComponent {
             return DrunkenSlurComponent(
+                Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
                 serialized["drunkenness"] as Int
             )
         }

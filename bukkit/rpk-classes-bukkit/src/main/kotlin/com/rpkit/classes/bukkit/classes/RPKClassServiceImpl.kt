@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.experience.bukkit.experience.RPKExperienceService
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 
 class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassService {
@@ -33,6 +35,7 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
         ?.getKeys(false)
         ?.map { className ->
             RPKClassImpl(
+                plugin,
                 RPKClassName(className),
                 plugin.config.getInt("classes.$className.max-level"),
                 plugin.config.getInt("classes.$className.max-age", Int.MAX_VALUE),
@@ -128,6 +131,9 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
                     loadExperience(character, event.`class`).join()
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set class", exception)
+            throw exception
         }
     }
 
@@ -175,6 +181,9 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
                 val experience = getExperience(character, `class`).join()
                 return@supplyAsync getLevelForExperience(experience, `class`.maxLevel)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get level", exception)
+            throw exception
         }
     }
 
@@ -187,6 +196,9 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
             } else {
                 setExperience(character, `class`, experienceService.getExperienceNeededForLevel(level)).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set level", exception)
+            throw exception
         }
     }
 
@@ -205,6 +217,9 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
                 val classExperience = classExperienceTable[character, `class`].join()
                 classExperience?.experience ?: 0
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get class experience", exception)
+            throw exception
         }
     }
 
@@ -242,6 +257,9 @@ class RPKClassServiceImpl(override val plugin: RPKClassesBukkit) : RPKClassServi
                     classExperienceTable.update(classExperience).join()
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set class experience", exception)
+            throw exception
         }
     }
 

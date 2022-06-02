@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.database.table.RPKChatChannelSpeakerTable
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Provides chat channel speaker related operations.
@@ -61,6 +62,9 @@ class RPKChatChannelSpeakerService(override val plugin: RPKChatBukkit) : Service
                     table.update(chatChannelSpeaker).join()
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set minecraft profile channel", exception)
+            throw exception
         }
     }
 
@@ -75,6 +79,9 @@ class RPKChatChannelSpeakerService(override val plugin: RPKChatBukkit) : Service
             if (chatChannelSpeaker != null) {
                 table.delete(chatChannelSpeaker).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove minecraft profile channel", exception)
+            throw exception
         }
     }
 

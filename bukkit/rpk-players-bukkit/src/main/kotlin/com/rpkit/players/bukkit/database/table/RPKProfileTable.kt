@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.players.bukkit.database.jooq.Tables.RPKIT_PROFILE
 import com.rpkit.players.bukkit.profile.*
 import org.jooq.impl.DSL.max
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKProfileTable(private val database: Database, private val plugin: RPKPlayersBukkit) : Table {
@@ -58,6 +60,9 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
             val id = database.create.lastID().toInt()
             entity.id = RPKProfileId(id)
             cache?.set(id, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert profile", exception)
+            throw exception
         }
     }
 
@@ -73,10 +78,13 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .where(RPKIT_PROFILE.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update profile", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKProfileId): CompletableFuture<RPKProfile?> {
+    operator fun get(id: RPKProfileId): CompletableFuture<out RPKProfile?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -100,6 +108,9 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 )
                 cache?.set(id.value, profile)
                 return@supplyAsync profile
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get profile", exception)
+                throw exception
             }
         }
     }
@@ -113,6 +124,9 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .and(RPKIT_PROFILE.DISCRIMINATOR.eq(discriminator.value))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync get(RPKProfileId(result.get(RPKIT_PROFILE.ID))).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get profile", exception)
+            throw exception
         }
     }
 
@@ -124,6 +138,9 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .where(RPKIT_PROFILE.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete profile", exception)
+            throw exception
         }
     }
 
@@ -135,6 +152,9 @@ class RPKProfileTable(private val database: Database, private val plugin: RPKPla
                 .where(RPKIT_PROFILE.NAME.eq(name.value))
                 .fetchOne()
             return@supplyAsync RPKProfileDiscriminator(result?.get(0, Int::class.javaObjectType)?.plus(1) ?: 1)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to generate discriminator for profile", exception)
+            throw exception
         }
     }
 

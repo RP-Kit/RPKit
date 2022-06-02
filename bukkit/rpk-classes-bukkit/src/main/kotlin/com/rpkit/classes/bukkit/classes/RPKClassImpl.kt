@@ -17,6 +17,7 @@
 package com.rpkit.classes.bukkit.classes
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.classes.bukkit.RPKClassesBukkit
 import com.rpkit.core.expression.RPKExpressionService
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillType
@@ -24,9 +25,11 @@ import com.rpkit.skills.bukkit.skills.RPKSkillTypeName
 import com.rpkit.skills.bukkit.skills.RPKSkillTypeService
 import com.rpkit.stats.bukkit.stat.RPKStatVariable
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKClassImpl(
+    private val plugin: RPKClassesBukkit,
     override val name: RPKClassName,
     override val maxLevel: Int,
     override val maxAge: Int,
@@ -70,6 +73,9 @@ class RPKClassImpl(
                 }
             }
             return@supplyAsync true
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to check class prerequisites", exception)
+            throw exception
         }
     }
 

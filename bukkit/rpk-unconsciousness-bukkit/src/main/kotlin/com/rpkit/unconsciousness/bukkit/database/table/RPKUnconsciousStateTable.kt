@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.unconsciousness.bukkit.database.create
 import com.rpkit.unconsciousness.bukkit.database.jooq.Tables.RPKIT_UNCONSCIOUS_STATE
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousState
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKUnconsciousStateTable(private val database: Database, private val plugin: RPKUnconsciousnessBukkit) : Table {
@@ -53,6 +55,9 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                 )
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert unconscious state", exception)
+            throw exception
         }
     }
 
@@ -65,6 +70,9 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                 .set(RPKIT_UNCONSCIOUS_STATE.DEATH_TIME, entity.deathTime)
                 .execute()
             cache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update unconscious state", exception)
+            throw exception
         }
     }
 
@@ -89,6 +97,9 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                 )
                 cache?.set(characterId.value, unconsciousState)
                 return@supplyAsync unconsciousState
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get unconscious state", exception)
+                throw exception
             }
         }
     }
@@ -101,6 +112,9 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
                 .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete unconscious state", exception)
+            throw exception
         }
     }
 

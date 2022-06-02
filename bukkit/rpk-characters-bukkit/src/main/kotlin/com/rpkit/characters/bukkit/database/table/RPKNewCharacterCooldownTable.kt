@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKNewCharacterCooldownTable(private val database: Database, private val plugin: RPKCharactersBukkit) : Table {
@@ -53,6 +55,9 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
                 )
                 .execute()
             profileCache?.set(profileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert new character cooldown", exception)
+            throw exception
         }
     }
 
@@ -65,6 +70,9 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
                 .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
             profileCache?.set(profileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update new character cooldown", exception)
+            throw exception
         }
     }
 
@@ -88,6 +96,9 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
             )
             profileCache?.set(profileId.value, newCharacterCooldown)
             return@supplyAsync newCharacterCooldown
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get new character cooldown", exception)
+            throw exception
         }
     }
 
@@ -99,6 +110,9 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
                 .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
             profileCache?.remove(profileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete new character cooldown", exception)
+            throw exception
         }
     }
 

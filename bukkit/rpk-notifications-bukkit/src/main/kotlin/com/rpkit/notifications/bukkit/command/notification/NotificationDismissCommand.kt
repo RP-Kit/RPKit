@@ -29,6 +29,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.logging.Level
 
 class NotificationDismissCommand(private val plugin: RPKNotificationsBukkit) : RPKCommandExecutor {
 
@@ -79,6 +80,9 @@ class NotificationDismissCommand(private val plugin: RPKNotificationsBukkit) : R
                 sender.sendMessage(plugin.messages.notificationDismissValid)
                 return@thenApply CommandSuccess
             }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to dismiss notification", exception)
+            throw exception
         }
     }
 }
