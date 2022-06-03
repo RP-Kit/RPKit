@@ -10,6 +10,7 @@ depend:
 - rpk-permissions-lib-bukkit
 softdepend:
 - PlaceholderAPI
+- ProtocolLib
 api-version: '1.18'
 commands:
   character:

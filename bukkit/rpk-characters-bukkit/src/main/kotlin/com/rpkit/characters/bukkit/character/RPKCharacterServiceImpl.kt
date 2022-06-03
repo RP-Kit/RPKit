@@ -22,6 +22,7 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterCreateEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
+import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
@@ -167,6 +168,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
                         }
+                        reloadPlayer(bukkitPlayer, newCharacter, plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
                     }
                     newCharacter.minecraftProfile = minecraftProfile
                     updateCharacter(newCharacter)

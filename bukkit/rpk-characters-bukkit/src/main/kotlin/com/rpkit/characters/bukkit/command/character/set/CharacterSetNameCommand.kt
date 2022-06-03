@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -89,6 +90,10 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
         nameBuilder.append(args[args.size - 1])
         character.name = nameBuilder.toString()
         characterService.updateCharacter(character).thenAccept { updatedCharacter ->
+            if (plugin.config.getBoolean("characters.set-player-nameplate")
+                && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
+                reloadPlayer(sender, character, plugin.server.onlinePlayers.filter { it.uniqueId != sender.uniqueId })
+            }
             sender.sendMessage(plugin.messages["character-set-name-valid"])
             updatedCharacter?.showCharacterCard(minecraftProfile)
         }
@@ -111,6 +116,10 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : Command
             if (input == null) return NameSetPrompt()
             character.name = input
             characterService.updateCharacter(character)
+            if (plugin.config.getBoolean("characters.set-player-nameplate")
+                && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
+                reloadPlayer(conversable, character, plugin.server.onlinePlayers.filter { it.uniqueId != conversable.uniqueId })
+            }
             return NameSetPrompt()
         }
 

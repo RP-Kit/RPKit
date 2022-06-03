@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +19,7 @@ package com.rpkit.characters.bukkit.web
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.web.character.CharacterHandler
 import com.rpkit.characters.bukkit.web.race.RaceHandler
-import org.http4k.core.Method.DELETE
-import org.http4k.core.Method.GET
-import org.http4k.core.Method.PATCH
-import org.http4k.core.Method.POST
-import org.http4k.core.Method.PUT
+import org.http4k.core.Method.*
 import org.http4k.core.then
 import org.http4k.filter.CorsPolicy
 import org.http4k.filter.ServerFilters
@@ -33,7 +30,7 @@ import org.http4k.server.asServer
 
 class CharactersWebAPI(plugin: RPKCharactersBukkit) {
 
-    private val characterHandler = CharacterHandler()
+    private val characterHandler = CharacterHandler(plugin)
     private val raceHandler = RaceHandler()
     private val app = ServerFilters.CatchAll()
         .then(ServerFilters.Cors(CorsPolicy.UnsafeGlobalPermissive))
