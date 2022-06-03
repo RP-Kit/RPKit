@@ -8,6 +8,7 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
+- rpk-permissions-lib-bukkit
 softdepend:
 - PlaceholderAPI
 api-version: '1.18'

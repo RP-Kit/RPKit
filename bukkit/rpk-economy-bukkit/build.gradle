@@ -40,6 +40,7 @@ dependencies {
     implementation project(":bukkit:rpk-player-lib-bukkit")
     implementation project(":bukkit:rpk-character-lib-bukkit")
     implementation project(":bukkit:rpk-economy-lib-bukkit")
+    implementation project(":bukkit:rpk-permissions-lib-bukkit")
 }
 
 processResources {

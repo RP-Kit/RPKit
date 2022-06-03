@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +17,8 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.permissions.bukkit.group.hasPermission
+import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -30,6 +33,16 @@ class RaceField : HideableCharacterCardField {
                 "[HIDDEN]"
             } else {
                 character.race?.name?.value ?: "unset"
+            }
+        }
+    }
+
+    override fun get(character: RPKCharacter, viewer: RPKProfile): CompletableFuture<String> {
+        return isHidden(character).thenApplyAsync { hidden ->
+            if (viewer.hasPermission("rpkit.characters.command.character.card.bypasshidden").join() || !hidden) {
+                return@thenApplyAsync character.race?.name?.value ?: "unset"
+            } else {
+                return@thenApplyAsync "[HIDDEN]"
             }
         }
     }

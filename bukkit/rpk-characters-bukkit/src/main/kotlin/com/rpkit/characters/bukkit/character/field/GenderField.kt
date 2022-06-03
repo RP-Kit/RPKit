@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.permissions.bukkit.group.hasPermission
+import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -31,6 +33,16 @@ class GenderField : HideableCharacterCardField {
                 "[HIDDEN]"
             } else {
                 character.gender ?: "unset"
+            }
+        }
+    }
+
+    override fun get(character: RPKCharacter, viewer: RPKProfile): CompletableFuture<String> {
+        return isHidden(character).thenApplyAsync { hidden ->
+            if (viewer.hasPermission("rpkit.characters.command.character.card.bypasshidden").join() || !hidden) {
+                return@thenApplyAsync character.gender ?: "unset"
+            } else {
+                return@thenApplyAsync "[HIDDEN]"
             }
         }
     }

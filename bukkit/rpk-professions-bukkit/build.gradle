@@ -41,6 +41,7 @@ dependencies {
     implementation project(":bukkit:rpk-character-lib-bukkit")
     implementation project(":bukkit:rpk-item-quality-lib-bukkit")
     implementation project(":bukkit:rpk-professions-lib-bukkit")
+    implementation project(":bukkit:rpk-permissions-lib-bukkit")
 }
 
 processResources {
