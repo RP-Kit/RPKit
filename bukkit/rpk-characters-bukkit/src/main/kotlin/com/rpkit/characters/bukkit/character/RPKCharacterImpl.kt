@@ -137,7 +137,12 @@ class RPKCharacterImpl(
                                 ) == "\${${field.name}}"
                             }
                             .forEach { field ->
-                                val textComponent = TextComponent(field.get(this).join())
+                                val textComponent = TextComponent(
+                                    if (profile is RPKProfile)
+                                        field.get(this, profile).join()
+                                    else
+                                        field.get(this).join()
+                                )
                                 if (chatColor != null) {
                                     textComponent.color = chatColor.asBungee()
                                 }

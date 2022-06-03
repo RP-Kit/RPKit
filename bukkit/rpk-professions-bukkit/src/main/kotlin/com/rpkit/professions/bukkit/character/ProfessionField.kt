@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package com.rpkit.professions.bukkit.character
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
 import com.rpkit.core.service.Services
+import com.rpkit.permissions.bukkit.group.hasPermission
+import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.professions.bukkit.RPKProfessionsBukkit
 import com.rpkit.professions.bukkit.database.table.RPKProfessionHiddenTable
 import com.rpkit.professions.bukkit.profession.RPKProfessionService
@@ -39,6 +41,20 @@ class ProfessionField(val plugin: RPKProfessionsBukkit) : HideableCharacterCardF
                 return@thenApplyAsync professionService.getProfessions(character)
                     .join()
                     .joinToString(", ") { profession -> profession.name.value }
+            }
+        }
+    }
+
+    override fun get(character: RPKCharacter, viewer: RPKProfile): CompletableFuture<String> {
+        return isHidden(character).thenApplyAsync { hidden ->
+            if (viewer.hasPermission("rpkit.characters.command.character.card.bypasshidden").join() || !hidden) {
+                val professionService = Services[RPKProfessionService::class.java]
+                    ?: return@thenApplyAsync plugin.messages["no-profession-service"]
+                return@thenApplyAsync professionService.getProfessions(character)
+                    .join()
+                    .joinToString(", ") { profession -> profession.name.value }
+            } else {
+                return@thenApplyAsync "[HIDDEN]"
             }
         }
     }

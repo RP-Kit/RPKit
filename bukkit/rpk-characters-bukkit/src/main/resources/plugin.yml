@@ -27,6 +27,9 @@ permissions:
   rpkit.characters.command.character.card.other:
     description: Allows viewing other character cards
     default: true
+  rpkit.characters.command.character.card.bypasshidden:
+    description: Allows seeing hidden character card fields
+    default: op
   rpkit.characters.command.character.list:
     description: Allows viewing your own character list
     default: true

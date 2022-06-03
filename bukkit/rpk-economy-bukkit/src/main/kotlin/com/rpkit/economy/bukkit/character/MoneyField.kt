@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import com.rpkit.economy.bukkit.RPKEconomyBukkit
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import com.rpkit.economy.bukkit.database.table.RPKMoneyHiddenTable
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
+import com.rpkit.permissions.bukkit.group.hasPermission
+import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -44,6 +46,22 @@ class MoneyField(val plugin: RPKEconomyBukkit) : HideableCharacterCardField {
                         val balance = economyService.getPreloadedBalance(character, currency)
                         "$balance ${if (balance == 1) currency.nameSingular else currency.namePlural}"
                     }
+            }
+        }
+    }
+
+    override fun get(character: RPKCharacter, viewer: RPKProfile): CompletableFuture<String> {
+        return isHidden(character).thenApplyAsync { hidden ->
+            if (viewer.hasPermission("rpkit.characters.command.character.card.bypasshidden").join() || !hidden) {
+                val economyService = Services[RPKEconomyService::class.java] ?: return@thenApplyAsync plugin.messages["no-economy-service"]
+                val currencyService = Services[RPKCurrencyService::class.java] ?: return@thenApplyAsync plugin.messages["no-currency-service"]
+                currencyService.currencies
+                    .joinToString(", ") { currency ->
+                        val balance = economyService.getPreloadedBalance(character, currency)
+                        "$balance ${if (balance == 1) currency.nameSingular else currency.namePlural}"
+                    }
+            } else {
+                return@thenApplyAsync "[HIDDEN]"
             }
         }
     }
