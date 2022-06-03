@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +16,11 @@
 
 package com.rpkit.characters.bukkit.web.character
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.characters.bukkit.web.ErrorResponse
@@ -37,7 +40,7 @@ import org.http4k.lens.Path
 import org.http4k.lens.Query
 import org.http4k.lens.int
 
-class CharacterHandler {
+class CharacterHandler(private val plugin: RPKCharactersBukkit) {
 
     val idLens = Path.int().of("id")
 
@@ -84,6 +87,16 @@ class CharacterHandler {
         character.isRaceHidden = characterPutRequest.isRaceHidden
         character.isDescriptionHidden = characterPutRequest.isDescriptionHidden
         characterService.updateCharacter(character).join()
+        if (plugin.config.getBoolean("characters.set-player-nameplate")
+            && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
+            val minecraftProfile = character.minecraftProfile
+            if (minecraftProfile?.isOnline == true) {
+                val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+                if (bukkitPlayer != null) {
+                    reloadPlayer(bukkitPlayer, character, plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
+                }
+            }
+        }
         return Response(NO_CONTENT)
     }
 
@@ -116,6 +129,16 @@ class CharacterHandler {
         character.isRaceHidden = characterPatchRequest.isRaceHidden ?: character.isRaceHidden
         character.isDescriptionHidden = characterPatchRequest.isDescriptionHidden ?: character.isDescriptionHidden
         characterService.updateCharacter(character).join()
+        if (plugin.config.getBoolean("characters.set-player-nameplate")
+            && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
+            val minecraftProfile = character.minecraftProfile
+            if (minecraftProfile?.isOnline == true) {
+                val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
+                if (bukkitPlayer != null) {
+                    reloadPlayer(bukkitPlayer, character, plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
+                }
+            }
+        }
         return Response(NO_CONTENT)
     }
 

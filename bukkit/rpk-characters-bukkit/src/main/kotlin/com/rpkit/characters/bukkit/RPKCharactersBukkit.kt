@@ -92,23 +92,23 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
             return
         }
         database = Database(
-                DatabaseConnectionProperties(
-                        databaseUrl,
-                        databaseUsername,
-                        databasePassword,
-                        databaseSqlDialect,
-                        databaseMaximumPoolSize,
-                        databaseMinimumIdle
-                ),
-                DatabaseMigrationProperties(
-                        when (databaseSqlDialect) {
-                            "MYSQL" -> "com/rpkit/characters/migrations/mysql"
-                            "SQLITE" -> "com/rpkit/characters/migrations/sqlite"
-                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
-                        },
-                        "flyway_schema_history_characters"
-                ),
-                classLoader
+            DatabaseConnectionProperties(
+                databaseUrl,
+                databaseUsername,
+                databasePassword,
+                databaseSqlDialect,
+                databaseMaximumPoolSize,
+                databaseMinimumIdle
+            ),
+            DatabaseMigrationProperties(
+                when (databaseSqlDialect) {
+                    "MYSQL" -> "com/rpkit/characters/migrations/mysql"
+                    "SQLITE" -> "com/rpkit/characters/migrations/sqlite"
+                    else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                },
+                "flyway_schema_history_characters"
+            ),
+            classLoader
         )
         database.addTable(RPKCharacterTable(database, this))
         database.addTable(RPKNewCharacterCooldownTable(database, this))
@@ -160,9 +160,16 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
                         PlaceholderAPIField(
                             this,
                             key,
-                            config.getString("placeholder-api.fields.${key}") ?: "")
+                            config.getString("placeholder-api.fields.${key}") ?: ""
+                        )
                     )
                 }
+        }
+
+        if (config.getBoolean("characters.set-player-nameplate")) {
+            if (server.pluginManager.getPlugin("ProtocolLib") != null) {
+                logger.info("Detected ProtocolLib, enabling player nameplates")
+            }
         }
     }
 
