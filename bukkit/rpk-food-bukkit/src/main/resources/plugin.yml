@@ -5,4 +5,19 @@ main: com.rpkit.food.bukkit.RPKFoodBukkit
 depend:
 - rpk-core-bukkit
 - rpk-food-lib-bukkit
+- rpk-player-lib-bukkit
 api-version: '1.18'
+commands:
+  expiry:
+    description: |
+      Expiry command
+      /expiry view - Views the expiry of the currently held item
+      /expiry set - Sets the expiry of the currently held item
+    usage: /<command> [view|set]
+permissions:
+  rpkit.food.command.expiry.view:
+    description: Allows viewing expiry time
+    default: true
+  rpkit.food.command.expiry.set:
+    description: Allows setting expiry time
+    default: op

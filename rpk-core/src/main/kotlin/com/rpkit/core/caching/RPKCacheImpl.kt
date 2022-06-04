@@ -17,10 +17,11 @@
 package com.rpkit.core.caching
 
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 
 internal class RPKCacheImpl<K, V>(private val capacity: Long) : RPKCache<K, V> {
 
-    private val records = mutableMapOf<K, RPKCacheRecord<V>>()
+    private val records = ConcurrentHashMap<K, RPKCacheRecord<V>>()
 
     private class RPKCacheRecord<V>(
         val value: V,
