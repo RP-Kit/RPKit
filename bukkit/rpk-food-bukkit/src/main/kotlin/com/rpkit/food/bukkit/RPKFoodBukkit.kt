@@ -16,12 +16,15 @@
 
 package com.rpkit.food.bukkit
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
+import com.rpkit.food.bukkit.command.ExpiryCommand
 import com.rpkit.food.bukkit.expiry.RPKExpiryService
 import com.rpkit.food.bukkit.expiry.RPKExpiryServiceImpl
 import com.rpkit.food.bukkit.listener.*
+import com.rpkit.food.bukkit.messages.FoodMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -30,18 +33,24 @@ import org.bukkit.plugin.java.JavaPlugin
  */
 class RPKFoodBukkit : JavaPlugin(), RPKPlugin {
 
+    lateinit var messages: FoodMessages
+
     override fun onEnable() {
         Metrics(this, 4397)
         saveDefaultConfig()
+
+        messages = FoodMessages(this)
+        messages.saveDefaultMessagesConfig()
 
         val expiryService = RPKExpiryServiceImpl(this)
         Services[RPKExpiryService::class.java] = expiryService
         Services[RPKExpiryServiceImpl::class.java] = expiryService
 
         registerListeners()
+        registerCommands()
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
                 EntityDeathListener(),
                 FurnaceSmeltListener(this),
@@ -52,6 +61,10 @@ class RPKFoodBukkit : JavaPlugin(), RPKPlugin {
                 EntityPickupItemListener(),
                 PrepareItemCraftListener()
         )
+    }
+
+    private fun registerCommands() {
+        getCommand("expiry")?.setExecutor(ExpiryCommand(this).toBukkit())
     }
 
 }
