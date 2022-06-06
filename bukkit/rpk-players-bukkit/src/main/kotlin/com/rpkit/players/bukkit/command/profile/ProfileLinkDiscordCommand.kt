@@ -16,7 +16,8 @@
 
 package com.rpkit.players.bukkit.command.profile
 
-import com.rpkit.chat.bukkit.discord.DiscordReaction
+import com.rpkit.chat.bukkit.discord.DiscordButton
+import com.rpkit.chat.bukkit.discord.DiscordTextButton
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.core.command.RPKCommandExecutor
 import com.rpkit.core.command.result.*
@@ -28,14 +29,16 @@ import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level.SEVERE
 
 class ProfileLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
 
     class InvalidDiscordUserTagFailure : CommandFailure()
     class InvalidDiscordUserFailure : CommandFailure()
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
         if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
             return CompletableFuture.completedFuture(NotAPlayerFailure())
@@ -78,13 +81,19 @@ class ProfileLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : RPKComma
             discordService.sendMessage(
                 discordProfile,
                 "There was a request to link this account to profile ${profile.name.value}. " +
-                        "Press tick to accept this request."
-            ) { message ->
-                message.addReaction(DiscordReaction.unicode("\u2705"))
-                discordService.setMessageAsProfileLinkRequest(message, profile)
-            }
+                        "Do you wish to accept this request?",
+                DiscordTextButton(UUID.randomUUID().toString(), DiscordButton.Variant.SUCCESS, "Accept") { event ->
+                    discordProfile.profile = profile
+                    discordProfileService.updateDiscordProfile(discordProfile).thenRun {
+                        event.reply("Account linked.")
+                    }
+                }
+            )
             sender.sendMessage(plugin.messages.profileLinkDiscordValid)
             return@thenApply CommandSuccess
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed", exception)
+            return@exceptionally CommandSuccess
         }
     }
 }

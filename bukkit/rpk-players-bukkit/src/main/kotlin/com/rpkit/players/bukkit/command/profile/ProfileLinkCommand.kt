@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class ProfileLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
     private val profileLinkMinecraftCommand = ProfileLinkMinecraftCommand(plugin)
     private val profileLinkDiscordCommand = ProfileLinkDiscordCommand(plugin)
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
         if (!sender.hasPermission("rpkit.players.command.profile.link")) {
             sender.sendMessage(plugin.messages.noPermissionProfileLink)
             return CompletableFuture.completedFuture(NoPermissionFailure("rpkit.players.command.profile.link"))
