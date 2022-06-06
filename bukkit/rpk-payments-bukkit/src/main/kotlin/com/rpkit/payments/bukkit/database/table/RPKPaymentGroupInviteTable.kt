@@ -27,7 +27,8 @@ import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP_INVITE
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.invite.RPKPaymentGroupInvite
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents payment group invite table.
@@ -40,7 +41,7 @@ class RPKPaymentGroupInviteTable(
     fun insert(entity: RPKPaymentGroupInvite): CompletableFuture<Void> {
         val paymentGroupId = entity.paymentGroup.id ?: return CompletableFuture.completedFuture(null)
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_PAYMENT_GROUP_INVITE,
@@ -53,7 +54,7 @@ class RPKPaymentGroupInviteTable(
                 )
                 .execute()
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert payment group invite", exception)
+            plugin.logger.log(SEVERE, "Failed to insert payment group invite", exception)
             throw exception
         }
     }
@@ -75,7 +76,7 @@ class RPKPaymentGroupInviteTable(
                     return@mapNotNull RPKPaymentGroupInvite(paymentGroup, character)
                 }
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get payment group invites", exception)
+            plugin.logger.log(SEVERE, "Failed to get payment group invites", exception)
             throw exception
         }
     }
@@ -83,16 +84,26 @@ class RPKPaymentGroupInviteTable(
     fun delete(entity: RPKPaymentGroupInvite): CompletableFuture<Void> {
         val paymentGroupId = entity.paymentGroup.id ?: return CompletableFuture.completedFuture(null)
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
                 .where(RPKIT_PAYMENT_GROUP_INVITE.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .and(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID.eq(characterId.value))
                 .execute()
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete payment group invite", exception)
+            plugin.logger.log(SEVERE, "Failed to delete payment group invite", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PAYMENT_GROUP_INVITE)
+            .where(RPKIT_PAYMENT_GROUP_INVITE.CHARACTER_ID.eq(characterId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete payment group invites for character id", exception)
+        throw exception
     }
 
 }

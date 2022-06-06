@@ -29,6 +29,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
 
 
@@ -48,7 +49,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
     fun insert(entity: RPKWarning): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
         val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_WARNING,
@@ -77,7 +78,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
         val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_WARNING)
                 .set(RPKIT_WARNING.REASON, entity.reason)
@@ -148,12 +149,20 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
 
     fun delete(entity: RPKWarning): CompletableFuture<Void> {
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
         }
+    }
+
+    fun delete(profileId: RPKProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_WARNING)
+            .where(RPKIT_WARNING.PROFILE_ID.eq(profileId.value))
+            .execute()
+        cache?.removeMatching { it.profile.id?.value == profileId.value }
     }
 }

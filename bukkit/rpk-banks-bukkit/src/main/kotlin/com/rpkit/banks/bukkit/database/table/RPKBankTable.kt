@@ -28,7 +28,8 @@ import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the bank table.
@@ -54,7 +55,7 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
     fun insert(entity: RPKBank): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_BANK,
@@ -70,7 +71,7 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
                 .execute()
             cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert bank", exception)
+            plugin.logger.log(SEVERE, "Failed to insert bank", exception)
             throw exception
         }
     }
@@ -78,7 +79,7 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
     fun update(entity: RPKBank): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_BANK)
                 .set(RPKIT_BANK.CURRENCY_NAME, currencyName.value)
@@ -88,7 +89,7 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
                 .execute()
             cache?.set(CharacterCurrencyCacheKey(characterId.value, currencyName.value), entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update bank", exception)
+            plugin.logger.log(SEVERE, "Failed to update bank", exception)
             throw exception
         }
     }
@@ -123,7 +124,7 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
             cache?.set(cacheKey, bank)
             return@supplyAsync bank
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get bank", exception)
+            plugin.logger.log(SEVERE, "Failed to get bank", exception)
             throw exception
         }
     }
@@ -175,7 +176,7 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
             }
             return@supplyAsync banks
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get top bank balances", exception)
+            plugin.logger.log(SEVERE, "Failed to get top bank balances", exception)
             throw exception
         }
     }
@@ -183,7 +184,7 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
     fun delete(entity: RPKBank): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_BANK)
                 .where(RPKIT_BANK.CHARACTER_ID.eq(characterId.value))
@@ -191,9 +192,20 @@ class RPKBankTable(private val database: Database, private val plugin: RPKBanksB
                 .execute()
             cache?.remove(CharacterCurrencyCacheKey(characterId.value, currencyName.value))
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete bank", exception)
+            plugin.logger.log(SEVERE, "Failed to delete bank", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_BANK)
+            .where(RPKIT_BANK.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete banks for character", exception)
+        throw exception
     }
 
 }

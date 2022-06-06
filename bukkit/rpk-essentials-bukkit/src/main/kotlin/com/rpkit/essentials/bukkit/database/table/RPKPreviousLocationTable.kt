@@ -24,8 +24,11 @@ import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_PREVIOUS_LOCATION
 import com.rpkit.essentials.bukkit.locationhistory.RPKPreviousLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKPreviousLocationTable(private val database: Database, private val plugin: RPKEssentialsBukkit) : Table {
@@ -143,6 +146,17 @@ class RPKPreviousLocationTable(private val database: Database, private val plugi
             plugin.logger.log(Level.SEVERE, "Failed to delete previous location", exception)
             throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PREVIOUS_LOCATION)
+            .where(RPKIT_PREVIOUS_LOCATION.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete previous location for Minecraft profile id", exception)
+        throw exception
     }
 
 }

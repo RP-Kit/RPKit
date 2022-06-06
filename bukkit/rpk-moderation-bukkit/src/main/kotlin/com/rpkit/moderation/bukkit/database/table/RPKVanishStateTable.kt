@@ -23,8 +23,11 @@ import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_VANISHED
 import com.rpkit.moderation.bukkit.vanish.RPKVanishState
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKVanishStateTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -91,6 +94,17 @@ class RPKVanishStateTable(private val database: Database, private val plugin: RP
             plugin.logger.log(Level.SEVERE, "Failed to delete vanish state", exception)
             throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_VANISHED)
+            .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete vanish state for Minecraft profile id", exception)
+        throw exception
     }
 
 }

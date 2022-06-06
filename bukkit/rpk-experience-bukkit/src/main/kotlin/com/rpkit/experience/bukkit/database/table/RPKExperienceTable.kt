@@ -17,6 +17,7 @@
 package com.rpkit.experience.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.experience.bukkit.RPKExperienceBukkit
@@ -24,7 +25,9 @@ import com.rpkit.experience.bukkit.database.create
 import com.rpkit.experience.bukkit.database.jooq.Tables.RPKIT_EXPERIENCE_
 import com.rpkit.experience.bukkit.experience.RPKExperienceValue
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKExperienceTable(private val database: Database, private val plugin: RPKExperienceBukkit) : Table {
@@ -42,7 +45,7 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
 
     fun delete(entity: RPKExperienceValue): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_EXPERIENCE_)
                 .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
@@ -52,6 +55,17 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
             plugin.logger.log(Level.SEVERE, "Failed to delete experience value", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_EXPERIENCE_)
+            .where(RPKIT_EXPERIENCE_.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.remove(characterId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete experience value for character id", exception)
+        throw exception
     }
 
     operator fun get(character: RPKCharacter): CompletableFuture<RPKExperienceValue?> {
@@ -82,7 +96,7 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
 
     fun insert(entity: RPKExperienceValue): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_EXPERIENCE_,
@@ -103,7 +117,7 @@ class RPKExperienceTable(private val database: Database, private val plugin: RPK
 
     fun update(entity: RPKExperienceValue): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_EXPERIENCE_)
                 .set(RPKIT_EXPERIENCE_.VALUE, entity.value)

@@ -32,10 +32,7 @@ import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKGroupServiceImpl
-import com.rpkit.permissions.bukkit.listener.AsyncPlayerPreLoginListener
-import com.rpkit.permissions.bukkit.listener.PlayerJoinListener
-import com.rpkit.permissions.bukkit.listener.PlayerQuitListener
-import com.rpkit.permissions.bukkit.listener.RPKBukkitCharacterSwitchListener
+import com.rpkit.permissions.bukkit.listener.*
 import com.rpkit.permissions.bukkit.messages.PermissionsMessages
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsService
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsServiceImpl
@@ -119,18 +116,20 @@ class RPKPermissionsBukkit : JavaPlugin(), RPKPlugin {
         }
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("group")?.setExecutor(GroupCommand(this))
         getCommand("charactergroup")?.setExecutor(CharacterGroupCommand(this))
         getCommand("permissions")?.setExecutor(PermissionsCommand(this).toBukkit())
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             PlayerJoinListener(),
             PlayerQuitListener(this),
-            RPKBukkitCharacterSwitchListener(this),
-            AsyncPlayerPreLoginListener()
+            RPKCharacterSwitchListener(this),
+            AsyncPlayerPreLoginListener(),
+            RPKCharacterDeleteListener(this),
+            RPKProfileDeleteListener(this)
         )
     }
 }

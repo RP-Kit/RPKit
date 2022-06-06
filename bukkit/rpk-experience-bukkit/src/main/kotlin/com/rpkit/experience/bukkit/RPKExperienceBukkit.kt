@@ -116,7 +116,8 @@ class RPKExperienceBukkit : JavaPlugin(), RPKPlugin {
             PlayerJoinListener(this),
             AsyncPlayerPreLoginListener(),
             PlayerQuitListener(),
-            RPKCharacterSwitchListener(this)
+            RPKCharacterSwitchListener(this),
+            RPKCharacterDeleteListener(this)
         )
     }
 

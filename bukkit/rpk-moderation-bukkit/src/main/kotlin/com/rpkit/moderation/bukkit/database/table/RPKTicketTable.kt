@@ -28,8 +28,10 @@ import com.rpkit.moderation.bukkit.ticket.RPKTicketId
 import com.rpkit.moderation.bukkit.ticket.RPKTicketImpl
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 
 class RPKTicketTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -47,7 +49,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
 
     fun insert(entity: RPKTicket): CompletableFuture<Void> {
         val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_TICKET,
@@ -83,7 +85,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
             entity.id = RPKTicketId(id)
             cache?.set(id, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert ticket", exception)
+            plugin.logger.log(SEVERE, "Failed to insert ticket", exception)
             throw exception
         }
     }
@@ -91,7 +93,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
     fun update(entity: RPKTicket): CompletableFuture<Void> {
         val ticketId = entity.id ?: return CompletableFuture.completedFuture(null)
         val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_TICKET)
                 .set(RPKIT_TICKET.REASON, entity.reason)
@@ -110,7 +112,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 .execute()
             cache?.set(ticketId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update ticket", exception)
+            plugin.logger.log(SEVERE, "Failed to update ticket", exception)
             throw exception
         }
     }
@@ -183,23 +185,34 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
                 return@supplyAsync null
             }
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get ticket", exception)
+            plugin.logger.log(SEVERE, "Failed to get ticket", exception)
             throw exception
         }
     }
 
     fun delete(entity: RPKTicket): CompletableFuture<Void> {
         val ticketId = entity.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_TICKET)
                 .where(RPKIT_TICKET.ID.eq(ticketId.value))
                 .execute()
             cache?.remove(ticketId.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete ticket", exception)
+            plugin.logger.log(SEVERE, "Failed to delete ticket", exception)
             throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_TICKET)
+            .where(RPKIT_TICKET.ISSUER_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete tickets for Minecraft profile id", exception)
+        throw exception
     }
 
     fun getOpenTickets(): CompletableFuture<List<RPKTicket>> {
@@ -213,7 +226,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
             CompletableFuture.allOf(*ticketFutures.toTypedArray()).join()
             return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<out RPKTicket?>::join)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get open tickets", exception)
+            plugin.logger.log(SEVERE, "Failed to get open tickets", exception)
             throw exception
         }
     }
@@ -229,7 +242,7 @@ class RPKTicketTable(private val database: Database, private val plugin: RPKMode
             CompletableFuture.allOf(*ticketFutures.toTypedArray()).join()
             return@supplyAsync ticketFutures.mapNotNull(CompletableFuture<out RPKTicket?>::join)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get closed tickets", exception)
+            plugin.logger.log(SEVERE, "Failed to get closed tickets", exception)
             throw exception
         }
     }

@@ -23,8 +23,10 @@ import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldown
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 
 class RPKNewCharacterCooldownTable(private val database: Database, private val plugin: RPKCharactersBukkit) : Table {
@@ -42,7 +44,7 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
 
     fun insert(entity: RPKNewCharacterCooldown): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_NEW_CHARACTER_COOLDOWN,
@@ -56,14 +58,14 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
                 .execute()
             profileCache?.set(profileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert new character cooldown", exception)
+            plugin.logger.log(SEVERE, "Failed to insert new character cooldown", exception)
             throw exception
         }
     }
 
     fun update(entity: RPKNewCharacterCooldown): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_NEW_CHARACTER_COOLDOWN)
                 .set(RPKIT_NEW_CHARACTER_COOLDOWN.COOLDOWN_TIMESTAMP, entity.cooldownExpiryTime)
@@ -71,7 +73,7 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
                 .execute()
             profileCache?.set(profileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update new character cooldown", exception)
+            plugin.logger.log(SEVERE, "Failed to update new character cooldown", exception)
             throw exception
         }
     }
@@ -97,23 +99,34 @@ class RPKNewCharacterCooldownTable(private val database: Database, private val p
             profileCache?.set(profileId.value, newCharacterCooldown)
             return@supplyAsync newCharacterCooldown
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get new character cooldown", exception)
+            plugin.logger.log(SEVERE, "Failed to get new character cooldown", exception)
             throw exception
         }
     }
 
     fun delete(entity: RPKNewCharacterCooldown): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_NEW_CHARACTER_COOLDOWN)
                 .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
                 .execute()
             profileCache?.remove(profileId.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete new character cooldown", exception)
+            plugin.logger.log(SEVERE, "Failed to delete new character cooldown", exception)
             throw exception
         }
+    }
+
+    fun delete(profileId: RPKProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_NEW_CHARACTER_COOLDOWN)
+            .where(RPKIT_NEW_CHARACTER_COOLDOWN.PROFILE_ID.eq(profileId.value))
+            .execute()
+        profileCache?.remove(profileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete new character cooldown for profile id", exception)
+        throw exception
     }
 
 }

@@ -16,6 +16,7 @@
 
 package com.rpkit.store.bukkit
 
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
@@ -26,6 +27,7 @@ import com.rpkit.store.bukkit.command.ClaimCommand
 import com.rpkit.store.bukkit.command.PurchaseCommand
 import com.rpkit.store.bukkit.command.PurchasesCommand
 import com.rpkit.store.bukkit.database.table.*
+import com.rpkit.store.bukkit.listener.RPKProfileDeleteListener
 import com.rpkit.store.bukkit.messages.StoresMessages
 import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import com.rpkit.store.bukkit.purchase.RPKPurchaseServiceImpl
@@ -104,12 +106,17 @@ class RPKStoresBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKStoreItemService::class.java] = RPKStoreItemServiceImpl(this)
 
         registerCommands()
+        registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("purchase")?.setExecutor(PurchaseCommand(this))
         getCommand("purchases")?.setExecutor(PurchasesCommand(this))
         getCommand("claim")?.setExecutor(ClaimCommand(this))
+    }
+
+    private fun registerListeners() {
+        registerListeners(RPKProfileDeleteListener())
     }
 
 }

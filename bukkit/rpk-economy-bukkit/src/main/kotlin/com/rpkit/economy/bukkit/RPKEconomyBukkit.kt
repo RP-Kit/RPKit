@@ -133,7 +133,8 @@ class RPKEconomyBukkit : JavaPlugin(), RPKPlugin {
             SignChangeListener(this),
             AsyncPlayerPreLoginListener(),
             CharacterSwitchListener(),
-            PlayerQuitListener()
+            PlayerQuitListener(),
+            RPKCharacterDeleteListener(this)
         )
     }
 

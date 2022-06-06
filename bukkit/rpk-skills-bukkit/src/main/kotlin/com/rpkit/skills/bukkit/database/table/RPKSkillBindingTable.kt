@@ -31,7 +31,9 @@ import com.rpkit.skills.bukkit.skills.RPKSkillBinding
 import com.rpkit.skills.bukkit.skills.RPKSkillName
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 class RPKSkillBindingTable(private val database: Database, private val plugin: RPKSkillsBukkit): Table {
 
@@ -175,5 +177,15 @@ class RPKSkillBindingTable(private val database: Database, private val plugin: R
             plugin.logger.log(Level.SEVERE, "Failed to delete skill binding", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_SKILL_BINDING)
+            .where(RPKIT_SKILL_BINDING.CHARACTER_ID.eq(characterId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete skill bindings for character id", exception)
+        throw exception
     }
 }

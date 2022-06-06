@@ -28,6 +28,7 @@ import com.rpkit.drink.bukkit.drink.RPKDrinkService
 import com.rpkit.drinks.bukkit.database.table.RPKDrunkennessTable
 import com.rpkit.drinks.bukkit.drink.RPKDrinkServiceImpl
 import com.rpkit.drinks.bukkit.listener.PlayerItemConsumeListener
+import com.rpkit.drinks.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -133,7 +134,8 @@ class RPKDrinksBukkit : JavaPlugin(), RPKPlugin {
 
     private fun registerListeners() {
         registerListeners(
-                PlayerItemConsumeListener(this)
+            PlayerItemConsumeListener(this),
+            RPKCharacterDeleteListener(this)
         )
     }
 }

@@ -17,6 +17,7 @@
 package com.rpkit.essentials.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
@@ -24,7 +25,8 @@ import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_TRACKING_DISABLED
 import com.rpkit.essentials.bukkit.tracking.RPKTrackingDisabled
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 
 class RPKTrackingDisabledTable(private val database: Database, private val plugin: RPKEssentialsBukkit) : Table {
@@ -42,7 +44,7 @@ class RPKTrackingDisabledTable(private val database: Database, private val plugi
 
     fun insert(entity: RPKTrackingDisabled): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_TRACKING_DISABLED,
@@ -54,7 +56,7 @@ class RPKTrackingDisabledTable(private val database: Database, private val plugi
                 .execute()
             cache?.set(characterId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert tracking disabled", exception)
+            plugin.logger.log(SEVERE, "Failed to insert tracking disabled", exception)
             throw exception
         }
     }
@@ -76,22 +78,33 @@ class RPKTrackingDisabledTable(private val database: Database, private val plugi
             cache?.set(characterId.value, trackingEnabled)
             return@supplyAsync trackingEnabled
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get tracking disabled", exception)
+            plugin.logger.log(SEVERE, "Failed to get tracking disabled", exception)
             throw exception
         }
     }
 
     fun delete(entity: RPKTrackingDisabled): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_TRACKING_DISABLED)
                 .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.remove(characterId.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete tracking disabled", exception)
+            plugin.logger.log(SEVERE, "Failed to delete tracking disabled", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_TRACKING_DISABLED)
+            .where(RPKIT_TRACKING_DISABLED.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.remove(characterId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete tracking disabled for character id", exception)
+        throw exception
     }
 }

@@ -102,11 +102,11 @@ class RPKUnconsciousnessBukkit : JavaPlugin(), RPKPlugin {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("wake")?.setExecutor(WakeCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             PlayerDeathListener(),
             PlayerRespawnListener(this),
@@ -120,7 +120,8 @@ class RPKUnconsciousnessBukkit : JavaPlugin(), RPKPlugin {
             EntityDamageByEntityListener(),
             AsyncPlayerPreLoginListener(),
             RPKCharacterSwitchListener(),
-            PlayerQuitListener()
+            PlayerQuitListener(),
+            RPKCharacterDeleteListener(this)
         )
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
 
-class RPKBukkitCharacterDeleteListener(private val plugin: RPKProfessionsBukkit) : Listener {
+class RPKCharacterDeleteListener(private val plugin: RPKProfessionsBukkit) : Listener {
 
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {

@@ -28,7 +28,8 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 
 class RPKPlayerGettingKeyTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -46,7 +47,7 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
 
     fun insert(entity: RPKPlayerGettingKey): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_PLAYER_GETTING_KEY,
@@ -56,7 +57,7 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert player getting key", exception)
+            plugin.logger.log(SEVERE, "Failed to insert player getting key", exception)
             throw exception
         }
     }
@@ -78,7 +79,7 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
             cache?.set(minecraftProfileId.value, playerGettingKey)
             return@supplyAsync playerGettingKey
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get player getting key", exception)
+            plugin.logger.log(SEVERE, "Failed to get player getting key", exception)
             throw exception
         }
     }
@@ -90,23 +91,34 @@ class RPKPlayerGettingKeyTable(private val database: Database, private val plugi
                 .fetch()
                 .map { it.toDomain() }
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get all players getting keys", exception)
+            plugin.logger.log(SEVERE, "Failed to get all players getting keys", exception)
             throw exception
         }
     }
 
     fun delete(entity: RPKPlayerGettingKey): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
                 .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete player getting key", exception)
+            plugin.logger.log(SEVERE, "Failed to delete player getting key", exception)
             throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PLAYER_GETTING_KEY)
+            .where(RPKIT_PLAYER_GETTING_KEY.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete player getting key for Minecraft profile id", exception)
+        throw exception
     }
 
     private fun RpkitPlayerGettingKeyRecord.toDomain() = Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(

@@ -35,7 +35,8 @@ import com.rpkit.core.service.Services
 import com.rpkit.economy.bukkit.currency.RPKCurrencyName
 import com.rpkit.economy.bukkit.currency.RPKCurrencyService
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the auction table.
@@ -59,7 +60,7 @@ class RPKAuctionTable(
     fun insert(entity: RPKAuction): CompletableFuture<Void> {
         val currencyName = entity.currency.name
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_AUCTION,
@@ -103,7 +104,7 @@ class RPKAuctionTable(
             entity.id = RPKAuctionId(id)
             cache?.set(id, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert auction", exception)
+            plugin.logger.log(SEVERE, "Failed to insert auction", exception)
             throw exception
         }
     }
@@ -112,7 +113,7 @@ class RPKAuctionTable(
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_AUCTION)
                 .set(RPKIT_AUCTION.ITEM, entity.item.toByteArray())
@@ -135,7 +136,7 @@ class RPKAuctionTable(
                 .execute()
             cache?.set(id.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update auction", exception)
+            plugin.logger.log(SEVERE, "Failed to update auction", exception)
             throw exception
         }
     }
@@ -215,7 +216,7 @@ class RPKAuctionTable(
                     return@supplyAsync null
                 }
             }.exceptionally { exception ->
-                plugin.logger.log(Level.SEVERE, "Failed to get auction", exception)
+                plugin.logger.log(SEVERE, "Failed to get auction", exception)
                 throw exception
             }
         }
@@ -236,7 +237,7 @@ class RPKAuctionTable(
                 get(RPKAuctionId(result[RPKIT_AUCTION.ID])).join()
             }.filterNotNull()
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get all auctions", exception)
+            plugin.logger.log(SEVERE, "Failed to get all auctions", exception)
             throw exception
         }
     }
@@ -244,7 +245,7 @@ class RPKAuctionTable(
     fun delete(entity: RPKAuction): CompletableFuture<Void> {
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
         val bidTable = database.getTable(RPKBidTable::class.java)
-        return CompletableFuture.runAsync {
+        return runAsync {
             entity.bids.thenAccept { bids ->
                 CompletableFuture.allOf(*bids.map { bidTable.delete(it) }.toTypedArray()).join()
             }
@@ -254,9 +255,20 @@ class RPKAuctionTable(
                 .execute()
             cache?.remove(id.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete auction", exception)
+            plugin.logger.log(SEVERE, "Failed to delete auction", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_AUCTION)
+            .where(RPKIT_AUCTION.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete auctions for character", exception)
+        throw exception
     }
 
 }

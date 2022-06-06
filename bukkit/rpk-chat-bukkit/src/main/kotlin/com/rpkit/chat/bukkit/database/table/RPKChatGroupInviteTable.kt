@@ -30,7 +30,8 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents chat group invite table.
@@ -40,7 +41,7 @@ class RPKChatGroupInviteTable(private val database: Database, private val plugin
     fun insert(entity: RPKChatGroupInvite): CompletableFuture<Void> {
         val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHAT_GROUP_INVITE,
@@ -82,7 +83,7 @@ class RPKChatGroupInviteTable(private val database: Database, private val plugin
                     )
                 }
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get chat group invites", exception)
+            plugin.logger.log(SEVERE, "Failed to get chat group invites", exception)
             throw exception
         }
     }
@@ -117,13 +118,23 @@ class RPKChatGroupInviteTable(private val database: Database, private val plugin
     fun delete(entity: RPKChatGroupInvite): CompletableFuture<Void> {
         val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHAT_GROUP_INVITE)
                 .where(RPKIT_CHAT_GROUP_INVITE.CHAT_GROUP_ID.eq(chatGroupId.value))
                 .and(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_CHAT_GROUP_INVITE)
+            .where(RPKIT_CHAT_GROUP_INVITE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete chat group invites for Minecraft profile id", exception)
+        throw exception
     }
 
 }

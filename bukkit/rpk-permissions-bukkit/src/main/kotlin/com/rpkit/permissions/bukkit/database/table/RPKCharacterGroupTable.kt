@@ -17,6 +17,7 @@
 package com.rpkit.permissions.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
@@ -28,7 +29,9 @@ import com.rpkit.permissions.bukkit.group.RPKGroup
 import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKCharacterGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
@@ -52,7 +55,7 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
     fun insert(entity: RPKCharacterGroup): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHARACTER_GROUP,
@@ -76,7 +79,7 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
     fun update(entity: RPKCharacterGroup): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_CHARACTER_GROUP)
                 .set(RPKIT_CHARACTER_GROUP.PRIORITY, entity.priority)
@@ -148,7 +151,7 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
     fun delete(entity: RPKCharacterGroup): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val groupName = entity.group.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHARACTER_GROUP)
                 .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
@@ -159,6 +162,17 @@ class RPKCharacterGroupTable(private val database: Database, private val plugin:
             plugin.logger.log(Level.SEVERE, "Failed to delete character group", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_CHARACTER_GROUP)
+            .where(RPKIT_CHARACTER_GROUP.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete character groups for character id", exception)
+        throw exception
     }
 
 }

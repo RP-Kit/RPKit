@@ -17,6 +17,7 @@
 package com.rpkit.drinks.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.drinks.bukkit.RPKDrinksBukkit
@@ -24,7 +25,9 @@ import com.rpkit.drinks.bukkit.database.create
 import com.rpkit.drinks.bukkit.database.jooq.Tables.RPKIT_DRUNKENNESS
 import com.rpkit.drinks.bukkit.drink.RPKDrunkenness
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKDrunkennessTable(private val database: Database, private val plugin: RPKDrinksBukkit) : Table {
@@ -42,7 +45,7 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
 
     fun insert(entity: RPKDrunkenness): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_DRUNKENNESS,
@@ -63,7 +66,7 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
 
     fun update(entity: RPKDrunkenness): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_DRUNKENNESS)
                 .set(RPKIT_DRUNKENNESS.DRUNKENNESS, entity.drunkenness)
@@ -98,13 +101,24 @@ class RPKDrunkennessTable(private val database: Database, private val plugin: RP
 
     fun delete(entity: RPKDrunkenness): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_DRUNKENNESS)
                 .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
                 .execute()
             cache?.remove(characterId.value)
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_DRUNKENNESS)
+            .where(RPKIT_DRUNKENNESS.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete drunkenness for character id", exception)
+        throw exception
     }
 
 }

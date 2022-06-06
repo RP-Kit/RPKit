@@ -25,9 +25,11 @@ import com.rpkit.featureflags.bukkit.database.jooq.Tables.RPKIT_PROFILE_FEATURE_
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlag
 import com.rpkit.featureflags.bukkit.featureflag.RPKProfileFeatureFlag
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 
 class RPKProfileFeatureFlagTable(private val database: Database, private val plugin: RPKFeatureFlagsBukkit) : Table {
@@ -43,7 +45,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
 
     fun insert(entity: RPKProfileFeatureFlag): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_PROFILE_FEATURE_FLAG,
@@ -58,14 +60,14 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 )
                 .execute()
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert feature flag", exception)
+            plugin.logger.log(SEVERE, "Failed to insert feature flag", exception)
             throw exception
         }
     }
 
     fun update(entity: RPKProfileFeatureFlag): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_PROFILE_FEATURE_FLAG)
                 .set(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID, profileId.value)
@@ -74,7 +76,7 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
                 .execute()
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update feature flag", exception)
+            plugin.logger.log(SEVERE, "Failed to update feature flag", exception)
             throw exception
         }
     }
@@ -105,14 +107,14 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
             cache?.set(featureFlag.name.value, profileFeatureFlag)
             return@supplyAsync profileFeatureFlag
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get feature flag", exception)
+            plugin.logger.log(SEVERE, "Failed to get feature flag", exception)
             throw exception
         }
     }
 
     fun delete(entity: RPKProfileFeatureFlag): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_PROFILE_FEATURE_FLAG)
                 .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
@@ -120,9 +122,20 @@ class RPKProfileFeatureFlagTable(private val database: Database, private val plu
                 .execute()
             cache?.remove(entity.featureFlag.name.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete feature flag", exception)
+            plugin.logger.log(SEVERE, "Failed to delete feature flag", exception)
             throw exception
         }
+    }
+
+    fun delete(profileId: RPKProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PROFILE_FEATURE_FLAG)
+            .where(RPKIT_PROFILE_FEATURE_FLAG.PROFILE_ID.eq(profileId.value))
+            .execute()
+        cache?.removeMatching { it.profile.id?.value == profileId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete feature flag for profile id", exception)
+        throw exception
     }
 
 }

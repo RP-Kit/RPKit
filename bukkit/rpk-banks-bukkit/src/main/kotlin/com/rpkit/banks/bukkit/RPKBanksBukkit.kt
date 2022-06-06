@@ -20,6 +20,7 @@ import com.rpkit.banks.bukkit.bank.RPKBankService
 import com.rpkit.banks.bukkit.bank.RPKBankServiceImpl
 import com.rpkit.banks.bukkit.database.table.RPKBankTable
 import com.rpkit.banks.bukkit.listener.PlayerInteractListener
+import com.rpkit.banks.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.banks.bukkit.listener.SignChangeListener
 import com.rpkit.banks.bukkit.messages.BanksMessages
 import com.rpkit.core.bukkit.listener.registerListeners
@@ -99,7 +100,11 @@ class RPKBanksBukkit : JavaPlugin(), RPKPlugin {
     }
 
     fun registerListeners() {
-        registerListeners(SignChangeListener(this), PlayerInteractListener(this))
+        registerListeners(
+            SignChangeListener(this),
+            PlayerInteractListener(this),
+            RPKCharacterDeleteListener(this)
+        )
     }
 
 }

@@ -30,6 +30,7 @@ import com.rpkit.statbuilds.bukkit.command.statbuild.StatBuildCommand
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
 import com.rpkit.statbuilds.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.statbuilds.bukkit.listener.PlayerQuitListener
+import com.rpkit.statbuilds.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.statbuilds.bukkit.listener.RPKCharacterSwitchListener
 import com.rpkit.statbuilds.bukkit.messages.StatBuildsMessages
 import com.rpkit.statbuilds.bukkit.skillpoint.RPKSkillPointServiceImpl
@@ -130,7 +131,8 @@ class RPKStatBuildsBukkit : JavaPlugin(), RPKPlugin {
         registerListeners(
             AsyncPlayerPreLoginListener(),
             PlayerQuitListener(),
-            RPKCharacterSwitchListener()
+            RPKCharacterSwitchListener(),
+            RPKCharacterDeleteListener(this)
         )
     }
 

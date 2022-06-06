@@ -24,10 +24,7 @@ import com.rpkit.classes.bukkit.classes.RPKClassServiceImpl
 import com.rpkit.classes.bukkit.command.`class`.ClassCommand
 import com.rpkit.classes.bukkit.database.table.RPKCharacterClassTable
 import com.rpkit.classes.bukkit.database.table.RPKClassExperienceTable
-import com.rpkit.classes.bukkit.listener.AsyncPlayerPreLoginListener
-import com.rpkit.classes.bukkit.listener.PlayerQuitListener
-import com.rpkit.classes.bukkit.listener.RPKCharacterSwitchListener
-import com.rpkit.classes.bukkit.listener.RPKCharacterUpdateListener
+import com.rpkit.classes.bukkit.listener.*
 import com.rpkit.classes.bukkit.messages.ClassesMessages
 import com.rpkit.classes.bukkit.placeholder.RPKClassesPlaceholderExpansion
 import com.rpkit.classes.bukkit.skillpoint.RPKSkillPointServiceImpl
@@ -154,7 +151,8 @@ class RPKClassesBukkit : JavaPlugin(), RPKPlugin {
             AsyncPlayerPreLoginListener(),
             PlayerQuitListener(),
             RPKCharacterSwitchListener(),
-            RPKCharacterUpdateListener(this)
+            RPKCharacterUpdateListener(this),
+            RPKCharacterDeleteListener(this)
         )
     }
 

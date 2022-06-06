@@ -23,8 +23,11 @@ import com.rpkit.essentials.bukkit.database.create
 import com.rpkit.essentials.bukkit.database.jooq.Tables.RPKIT_LOG_MESSAGES_ENABLED
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessagesEnabled
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKLogMessagesEnabledTable(
@@ -45,7 +48,7 @@ class RPKLogMessagesEnabledTable(
 
     fun insert(entity: RPKLogMessagesEnabled): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_LOG_MESSAGES_ENABLED,
@@ -86,7 +89,7 @@ class RPKLogMessagesEnabledTable(
 
     fun delete(entity: RPKLogMessagesEnabled): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_LOG_MESSAGES_ENABLED)
                 .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
@@ -96,6 +99,17 @@ class RPKLogMessagesEnabledTable(
             plugin.logger.log(Level.SEVERE, "Failed to delete log messages enabled", exception)
             throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_LOG_MESSAGES_ENABLED)
+            .where(RPKIT_LOG_MESSAGES_ENABLED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete log messages enabled for Minecraft profile id", exception)
+        throw exception
     }
 
 }

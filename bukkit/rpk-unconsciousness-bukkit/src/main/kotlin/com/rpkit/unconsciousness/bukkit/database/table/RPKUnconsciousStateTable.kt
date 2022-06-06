@@ -17,6 +17,7 @@
 package com.rpkit.unconsciousness.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.unconsciousness.bukkit.RPKUnconsciousnessBukkit
@@ -24,7 +25,9 @@ import com.rpkit.unconsciousness.bukkit.database.create
 import com.rpkit.unconsciousness.bukkit.database.jooq.Tables.RPKIT_UNCONSCIOUS_STATE
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousState
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKUnconsciousStateTable(private val database: Database, private val plugin: RPKUnconsciousnessBukkit) : Table {
@@ -116,6 +119,17 @@ class RPKUnconsciousStateTable(private val database: Database, private val plugi
             plugin.logger.log(Level.SEVERE, "Failed to delete unconscious state", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_UNCONSCIOUS_STATE)
+            .where(RPKIT_UNCONSCIOUS_STATE.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.remove(characterId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete unconscious state for character id", exception)
+        throw exception
     }
 
 }

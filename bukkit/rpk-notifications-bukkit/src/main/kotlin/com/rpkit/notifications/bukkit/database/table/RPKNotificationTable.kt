@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 class RPKNotificationTable(private val database: Database, private val plugin: RPKNotificationsBukkit) : Table {
 
@@ -115,6 +116,16 @@ class RPKNotificationTable(private val database: Database, private val plugin: R
             plugin.logger.log(Level.SEVERE, "Failed to delete notification", exception)
             throw exception
         }
+    }
+
+    fun delete(profileId: RPKProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_NOTIFICATION)
+            .where(RPKIT_NOTIFICATION.RECIPIENT_ID.eq(profileId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete notifications for profile id", exception)
+        throw exception
     }
 
     private fun RpkitNotificationRecord.toDomain(): RPKNotificationImpl? {

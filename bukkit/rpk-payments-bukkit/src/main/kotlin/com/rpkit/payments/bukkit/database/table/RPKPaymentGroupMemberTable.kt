@@ -27,7 +27,9 @@ import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP_MEMBER
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.member.RPKPaymentGroupMember
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents payment group member table.
@@ -95,6 +97,16 @@ class RPKPaymentGroupMemberTable(
             plugin.logger.log(Level.SEVERE, "Failed to delete payment group member", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PAYMENT_GROUP_MEMBER)
+            .where(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID.eq(characterId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete payment group members for character id", exception)
+        throw exception
     }
 
 }

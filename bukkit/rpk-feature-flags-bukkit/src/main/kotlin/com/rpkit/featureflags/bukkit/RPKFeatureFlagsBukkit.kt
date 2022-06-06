@@ -16,6 +16,7 @@
 
 package com.rpkit.featureflags.bukkit
 
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
@@ -25,6 +26,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.featureflags.bukkit.database.table.RPKProfileFeatureFlagTable
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagService
 import com.rpkit.featureflags.bukkit.featureflag.RPKFeatureFlagServiceImpl
+import com.rpkit.featureflags.bukkit.listener.RPKProfileDeleteListener
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
@@ -85,6 +87,14 @@ class RPKFeatureFlagsBukkit : JavaPlugin(), RPKPlugin {
         database.addTable(RPKProfileFeatureFlagTable(database, this))
 
         Services[RPKFeatureFlagService::class.java] = RPKFeatureFlagServiceImpl(this)
+
+        registerListeners()
+    }
+
+    private fun registerListeners() {
+        registerListeners(
+            RPKProfileDeleteListener(this)
+        )
     }
 
 }

@@ -99,7 +99,7 @@ class RPKCraftingSkillBukkit : JavaPlugin(), RPKPlugin {
 
     private fun registerListeners() {
         registerListeners(
-            RPKBukkitCharacterDeleteListener(this),
+            RPKCharacterDeleteListener(this),
             BlockBreakListener(this),
             CraftItemListener(this),
             PrepareItemCraftListener(this),

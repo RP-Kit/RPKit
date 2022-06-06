@@ -123,7 +123,7 @@ class RPKProfessionsBukkit : JavaPlugin(), RPKPlugin {
             CraftItemListener(this),
             InventoryClickListener(this),
             PrepareItemCraftListener(this),
-            RPKBukkitCharacterDeleteListener(this),
+            RPKCharacterDeleteListener(this),
             AsyncPlayerPreLoginListener(),
             PlayerQuitListener(),
             RPKCharacterSwitchListener()

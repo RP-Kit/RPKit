@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package com.rpkit.core.caching
 
 interface RPKCacheManager {
 
-    fun <K, V> createCache(
+    fun <K : Any, V : Any> createCache(
         name: String,
         keyType: Class<K>,
         valueType: Class<V>,
         capacity: Long
     ): RPKCache<K, V>
 
-    fun <K, V> createCache(config: RPKCacheConfiguration<K, V>): RPKCache<K, V>
+    fun <K : Any, V : Any> createCache(config: RPKCacheConfiguration<K, V>): RPKCache<K, V>
 
 }

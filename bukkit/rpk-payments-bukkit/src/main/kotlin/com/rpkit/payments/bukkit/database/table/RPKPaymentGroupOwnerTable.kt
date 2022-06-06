@@ -27,7 +27,9 @@ import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP_OWNER
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.owner.RPKPaymentGroupOwner
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents payment group owner table.
@@ -95,6 +97,16 @@ class RPKPaymentGroupOwnerTable(
             plugin.logger.log(Level.SEVERE, "Failed to delete payment group owner", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PAYMENT_GROUP_OWNER)
+            .where(RPKIT_PAYMENT_GROUP_OWNER.CHARACTER_ID.eq(characterId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete payment group owners for character id", exception)
+        throw exception
     }
 
 }

@@ -27,8 +27,11 @@ import com.rpkit.permissions.bukkit.group.RPKGroupName
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKProfileGroup
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileId
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKProfileGroupTable(private val database: Database, private val plugin: RPKPermissionsBukkit) : Table {
@@ -161,6 +164,17 @@ class RPKProfileGroupTable(private val database: Database, private val plugin: R
             plugin.logger.log(Level.SEVERE, "Failed to delete profile group", exception)
             throw exception
         }
+    }
+
+    fun delete(profileId: RPKProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PROFILE_GROUP)
+            .where(RPKIT_PROFILE_GROUP.PROFILE_ID.eq(profileId.value))
+            .execute()
+        cache?.removeMatching { it.profile.id?.value == profileId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete profile groups for profile id", exception)
+        throw exception
     }
 
 }
