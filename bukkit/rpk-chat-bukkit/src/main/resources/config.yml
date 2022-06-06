@@ -35,6 +35,11 @@ chat-channels:
       color: '#AAAAAA'
     - ==: MessagePart
       color: '#FFFFFF'
+      links:
+        enable-link-replacement: true
+        text: '[link]'
+        color: '#5555FF'
+        underlined: true
     directed-post-format-pipeline:
     - ==: SendMessageComponent
     undirected-pipeline:
@@ -79,6 +84,11 @@ chat-channels:
       color: '#00AA00'
     - ==: MessagePart
       color: '#FFFFFF'
+      links:
+        enable-link-replacement: true
+        text: '[link]'
+        color: '#5555FF'
+        underlined: true
     directed-post-format-pipeline:
     - ==: SendMessageComponent
     undirected-pipeline:
@@ -123,6 +133,11 @@ chat-channels:
       color: '#AA00AA'
     - ==: MessagePart
       color: '#FFFFFF'
+      links:
+        enable-link-replacement: true
+        text: '[link]'
+        color: '#5555FF'
+        underlined: true
     directed-post-format-pipeline:
     - ==: SendMessageComponent
     undirected-pipeline:
@@ -164,6 +179,11 @@ chat-channels:
           text: 'Click here to switch channel to say.'
     - ==: MessagePart
       color: '#FFFFFF'
+      links:
+        enable-link-replacement: true
+        text: '[link]'
+        color: '#5555FF'
+        underlined: true
     directed-post-format-pipeline:
     - ==: SendMessageComponent
     - ==: SnoopComponent
@@ -205,6 +225,11 @@ chat-channels:
           text: 'Click here to switch channel to shout.'
     - ==: MessagePart
       color: '#FFFFFF'
+      links:
+        enable-link-replacement: true
+        text: '[link]'
+        color: '#5555FF'
+        underlined: true
     directed-post-format-pipeline:
     - ==: SendMessageComponent
     - ==: SnoopComponent
@@ -246,6 +271,11 @@ chat-channels:
           text: 'Click here to switch channel to whisper.'
     - ==: MessagePart
       color: '#FFFFFF'
+      links:
+        enable-link-replacement: true
+        text: '[link]'
+        color: '#5555FF'
+        underlined: true
     directed-post-format-pipeline:
     - ==: SendMessageComponent
     - ==: SnoopComponent
@@ -273,6 +303,11 @@ chat-channels:
     - ==: MessagePart
       color: '#FFFF55'
       italic: true
+      links:
+        enable-link-replacement: true
+        text: '[link]'
+        color: '#5555FF'
+        underlined: true
     directed-post-format-pipeline:
     - ==: SendMessageComponent
     - ==: SnoopComponent
