@@ -24,6 +24,7 @@ import com.rpkit.auctions.bukkit.bid.RPKBid
 import com.rpkit.auctions.bukkit.bid.RPKBidId
 import com.rpkit.auctions.bukkit.bid.RPKBidImpl
 import com.rpkit.auctions.bukkit.database.create
+import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_AUCTION
 import com.rpkit.auctions.bukkit.database.jooq.Tables.RPKIT_BID
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
@@ -31,6 +32,7 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
 
 /**
@@ -55,7 +57,7 @@ class RPKBidTable(
     fun insert(entity: RPKBid): CompletableFuture<Void> {
         val auctionId = entity.auction.id ?: return CompletableFuture.completedFuture(null)
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_BID,
@@ -82,7 +84,7 @@ class RPKBidTable(
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
         val auctionId = entity.auction.id ?: return CompletableFuture.completedFuture(null)
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_BID)
                 .set(RPKIT_BID.AUCTION_ID, auctionId.value)
@@ -162,7 +164,7 @@ class RPKBidTable(
 
     fun delete(entity: RPKBid): CompletableFuture<Void> {
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_BID)
                 .where(RPKIT_BID.ID.eq(id.value))
@@ -172,5 +174,20 @@ class RPKBidTable(
             plugin.logger.log(Level.SEVERE, "Failed to delete bid", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_BID.innerJoin(RPKIT_AUCTION).on(RPKIT_BID.AUCTION_ID.eq(RPKIT_AUCTION.ID)))
+            .where(RPKIT_AUCTION.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        database.create
+            .deleteFrom(RPKIT_BID)
+            .where(RPKIT_BID.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { bid -> bid.character.id?.value == characterId.value || bid.auction.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(Level.SEVERE, "Failed to delete bids for character", exception)
+        throw exception
     }
 }

@@ -31,7 +31,9 @@ import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeName
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKCharacterStatPoints
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 class RPKCharacterStatPointsTable(private val database: Database, private val plugin: RPKStatBuildsBukkit) : Table {
 
@@ -53,7 +55,7 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
 
     fun insert(entity: RPKCharacterStatPoints): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHARACTER_STAT_POINTS,
@@ -75,7 +77,7 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
 
     fun update(entity: RPKCharacterStatPoints): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             val statAttributeName = entity.statAttribute.name
             database.create
                 .update(RPKIT_CHARACTER_STAT_POINTS)
@@ -130,7 +132,7 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
 
     fun delete(entity: RPKCharacterStatPoints): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHARACTER_STAT_POINTS)
                 .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
@@ -141,6 +143,17 @@ class RPKCharacterStatPointsTable(private val database: Database, private val pl
             plugin.logger.log(Level.SEVERE, "Failed to delete character stat points", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_CHARACTER_STAT_POINTS)
+            .where(RPKIT_CHARACTER_STAT_POINTS.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete character stat points for character id", exception)
+        throw exception
     }
 
     private fun RpkitCharacterStatPointsRecord.toDomain(): RPKCharacterStatPoints? {

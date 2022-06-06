@@ -16,6 +16,7 @@
 
 package com.rpkit.payments.bukkit
 
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
@@ -29,6 +30,7 @@ import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupOwnerTable
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupTable
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupServiceImpl
+import com.rpkit.payments.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.payments.bukkit.messages.PaymentsMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
@@ -104,9 +106,14 @@ class RPKPaymentsBukkit : JavaPlugin(), RPKPlugin {
                 .runTaskTimer(this, 1200L, 1200L)
 
         registerCommands()
+        registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerListeners() {
+        registerListeners(RPKCharacterDeleteListener(this))
+    }
+
+    private fun registerCommands() {
         getCommand("payment")?.setExecutor(PaymentCommand(this))
     }
 

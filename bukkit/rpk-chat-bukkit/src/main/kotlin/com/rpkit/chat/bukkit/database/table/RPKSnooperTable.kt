@@ -27,7 +27,8 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the snooper table.
@@ -60,7 +61,7 @@ class RPKSnooperTable(
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert snooper", exception)
+            plugin.logger.log(SEVERE, "Failed to insert snooper", exception)
             throw exception
         }
     }
@@ -75,7 +76,7 @@ class RPKSnooperTable(
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update snooper", exception)
+            plugin.logger.log(SEVERE, "Failed to update snooper", exception)
             throw exception
         }
     }
@@ -104,7 +105,7 @@ class RPKSnooperTable(
                 cache?.set(minecraftProfileId.value, snooper)
                 return@supplyAsync snooper
             }.exceptionally { exception ->
-                plugin.logger.log(Level.SEVERE, "Failed to get snooper", exception)
+                plugin.logger.log(SEVERE, "Failed to get snooper", exception)
                 throw exception
             }
         }
@@ -130,7 +131,7 @@ class RPKSnooperTable(
                 return@mapNotNull RPKSnooper(minecraftProfile)
             }
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get all snoopers", exception)
+            plugin.logger.log(SEVERE, "Failed to get all snoopers", exception)
             throw exception
         }
     }
@@ -144,9 +145,20 @@ class RPKSnooperTable(
                 .execute()
             cache?.remove(minecraftProfileId.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete snooper", exception)
+            plugin.logger.log(SEVERE, "Failed to delete snooper", exception)
             throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_SNOOPER)
+            .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete snooper for Minecraft profile id", exception)
+        throw exception
     }
 
 }

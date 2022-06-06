@@ -25,6 +25,7 @@ import com.rpkit.auctions.bukkit.command.bid.BidCommand
 import com.rpkit.auctions.bukkit.database.table.RPKAuctionTable
 import com.rpkit.auctions.bukkit.database.table.RPKBidTable
 import com.rpkit.auctions.bukkit.listener.PlayerInteractListener
+import com.rpkit.auctions.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.auctions.bukkit.listener.SignChangeListener
 import com.rpkit.auctions.bukkit.messages.AuctionsMessages
 import com.rpkit.core.bukkit.listener.registerListeners
@@ -107,15 +108,16 @@ class RPKAuctionsBukkit : JavaPlugin(), RPKPlugin {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("auction")?.setExecutor(AuctionCommand(this))
         getCommand("bid")?.setExecutor(BidCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                SignChangeListener(this),
-                PlayerInteractListener(this)
+            SignChangeListener(this),
+            PlayerInteractListener(this),
+            RPKCharacterDeleteListener(this)
         )
     }
 

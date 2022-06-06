@@ -17,6 +17,7 @@
 package com.rpkit.economy.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
@@ -24,7 +25,9 @@ import com.rpkit.economy.bukkit.character.RPKMoneyHidden
 import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_MONEY_HIDDEN
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the money hidden table.
@@ -47,7 +50,7 @@ class RPKMoneyHiddenTable(
 
     fun insert(entity: RPKMoneyHidden): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_MONEY_HIDDEN,
@@ -93,7 +96,7 @@ class RPKMoneyHiddenTable(
 
     fun delete(entity: RPKMoneyHidden): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_MONEY_HIDDEN)
                 .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
@@ -103,6 +106,17 @@ class RPKMoneyHiddenTable(
             plugin.logger.log(Level.SEVERE, "Failed to delete money hidden", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_MONEY_HIDDEN)
+            .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        characterCache?.remove(characterId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete money hidden for character id", exception)
+        throw exception
     }
 
 }

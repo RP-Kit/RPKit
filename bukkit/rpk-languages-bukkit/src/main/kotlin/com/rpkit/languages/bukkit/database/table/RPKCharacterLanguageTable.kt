@@ -28,6 +28,7 @@ import com.rpkit.languages.bukkit.language.RPKLanguage
 import com.rpkit.languages.bukkit.language.RPKLanguageName
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
 
 class RPKCharacterLanguageTable(
@@ -54,7 +55,7 @@ class RPKCharacterLanguageTable(
     fun insert(entity: RPKCharacterLanguage): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHARACTER_LANGUAGE,
@@ -78,7 +79,7 @@ class RPKCharacterLanguageTable(
     fun update(entity: RPKCharacterLanguage): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_CHARACTER_LANGUAGE)
                 .set(RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING, entity.understanding.toDouble())
@@ -150,7 +151,7 @@ class RPKCharacterLanguageTable(
     fun delete(entity: RPKCharacterLanguage): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value))

@@ -32,9 +32,7 @@ import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
 import com.rpkit.essentials.bukkit.database.table.RPKTrackingDisabledTable
 import com.rpkit.essentials.bukkit.kit.RPKKitImpl
 import com.rpkit.essentials.bukkit.kit.RPKKitServiceImpl
-import com.rpkit.essentials.bukkit.listener.PlayerJoinListener
-import com.rpkit.essentials.bukkit.listener.PlayerQuitListener
-import com.rpkit.essentials.bukkit.listener.PlayerTeleportListener
+import com.rpkit.essentials.bukkit.listener.*
 import com.rpkit.essentials.bukkit.locationhistory.RPKLocationHistoryServiceImpl
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
 import com.rpkit.essentials.bukkit.messages.EssentialsMessages
@@ -157,7 +155,7 @@ class RPKEssentialsBukkit : JavaPlugin(), RPKPlugin {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("back")?.setExecutor(BackCommand(this))
         getCommand("clone")?.setExecutor(CloneCommand(this))
         getCommand("distance")?.setExecutor(DistanceCommand(this))
@@ -190,11 +188,13 @@ class RPKEssentialsBukkit : JavaPlugin(), RPKPlugin {
         getCommand("unsign")?.setExecutor(UnsignCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                PlayerJoinListener(this),
-                PlayerQuitListener(this),
-                PlayerTeleportListener()
+            PlayerJoinListener(this),
+            PlayerQuitListener(this),
+            PlayerTeleportListener(),
+            RPKCharacterDeleteListener(this),
+            RPKMinecraftProfileDeleteListener(this)
         )
     }
 

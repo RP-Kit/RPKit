@@ -17,6 +17,7 @@
 package com.rpkit.locks.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.bukkit.extension.toByteArray
 import com.rpkit.core.bukkit.extension.toItemStackArray
 import com.rpkit.core.database.Database
@@ -26,7 +27,9 @@ import com.rpkit.locks.bukkit.database.create
 import com.rpkit.locks.bukkit.database.jooq.Tables.RPKIT_KEYRING
 import com.rpkit.locks.bukkit.keyring.RPKKeyring
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKKeyringTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -44,7 +47,7 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
 
     fun insert(entity: RPKKeyring): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_KEYRING,
@@ -65,7 +68,7 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
 
     fun update(entity: RPKKeyring): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_KEYRING)
                 .set(RPKIT_KEYRING.ITEMS, entity.items.toTypedArray().toByteArray())
@@ -107,7 +110,7 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
 
     fun delete(entity: RPKKeyring): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_KEYRING)
                 .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
@@ -117,5 +120,16 @@ class RPKKeyringTable(private val database: Database, private val plugin: RPKLoc
             plugin.logger.log(Level.SEVERE, "Failed to delete keyring", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_KEYRING)
+            .where(RPKIT_KEYRING.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.remove(characterId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete keyring for character id", exception)
+        throw exception
     }
 }

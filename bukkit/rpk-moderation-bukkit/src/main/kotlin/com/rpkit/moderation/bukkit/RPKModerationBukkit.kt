@@ -35,6 +35,8 @@ import com.rpkit.moderation.bukkit.database.table.RPKTicketTable
 import com.rpkit.moderation.bukkit.database.table.RPKVanishStateTable
 import com.rpkit.moderation.bukkit.database.table.RPKWarningTable
 import com.rpkit.moderation.bukkit.listener.PlayerJoinListener
+import com.rpkit.moderation.bukkit.listener.RPKMinecraftProfileDeleteListener
+import com.rpkit.moderation.bukkit.listener.RPKProfileDeleteListener
 import com.rpkit.moderation.bukkit.messages.ModerationMessages
 import com.rpkit.moderation.bukkit.ticket.RPKTicketService
 import com.rpkit.moderation.bukkit.ticket.RPKTicketServiceImpl
@@ -115,7 +117,7 @@ class RPKModerationBukkit : JavaPlugin(), RPKPlugin {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("amivanished")?.setExecutor(AmIVanishedCommand(this))
         getCommand("onlinestaff")?.setExecutor(OnlineStaffCommand(this))
         getCommand("ticket")?.setExecutor(TicketCommand(this))
@@ -126,9 +128,11 @@ class RPKModerationBukkit : JavaPlugin(), RPKPlugin {
         getCommand("unvanish")?.setExecutor(UnvanishCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                PlayerJoinListener(this)
+                PlayerJoinListener(this),
+            RPKMinecraftProfileDeleteListener(this),
+            RPKProfileDeleteListener(this)
         )
     }
 

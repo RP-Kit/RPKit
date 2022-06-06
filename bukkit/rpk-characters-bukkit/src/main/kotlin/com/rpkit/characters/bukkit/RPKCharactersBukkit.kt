@@ -173,18 +173,20 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
         }
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("character")?.setExecutor(CharacterCommand(this))
         getCommand("race")?.setExecutor(RaceCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             PlayerJoinListener(this),
             PlayerInteractEntityListener(this),
             AsyncPlayerPreLoginListener(this),
             PlayerEditBookListener(this),
-            PlayerQuitListener()
+            PlayerQuitListener(),
+            RPKMinecraftProfileDeleteListener(this),
+            RPKProfileDeleteListener(this)
         )
         if (config.getBoolean("characters.strict-movement-prevention-when-dead")) {
             registerListeners(PlayerMoveListener(this))

@@ -18,8 +18,9 @@ package com.rpkit.core.caching
 
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
+import java.util.function.Predicate
 
-internal class RPKCacheImpl<K, V>(private val capacity: Long) : RPKCache<K, V> {
+internal class RPKCacheImpl<K : Any, V : Any>(private val capacity: Long) : RPKCache<K, V> {
 
     private val records = ConcurrentHashMap<K, RPKCacheRecord<V>>()
 
@@ -48,6 +49,12 @@ internal class RPKCacheImpl<K, V>(private val capacity: Long) : RPKCache<K, V> {
 
     override fun remove(key: K) {
         records.remove(key)
+    }
+
+    override fun removeMatching(predicate: Predicate<V>) {
+        records.entries.filter { (_, value) ->
+            predicate.test(value.value)
+        }.forEach { (key, _) -> remove(key) }
     }
 
     override fun keys(): Set<K> = records.keys

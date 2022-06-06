@@ -27,6 +27,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.notifications.bukkit.command.notification.NotificationCommand
 import com.rpkit.notifications.bukkit.database.table.RPKNotificationTable
 import com.rpkit.notifications.bukkit.listener.PlayerJoinListener
+import com.rpkit.notifications.bukkit.listener.RPKProfileDeleteListener
 import com.rpkit.notifications.bukkit.messages.NotificationsMessages
 import com.rpkit.notifications.bukkit.notification.RPKNotificationService
 import com.rpkit.notifications.bukkit.notification.RPKNotificationServiceImpl
@@ -92,7 +93,10 @@ class RPKNotificationsBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKNotificationService::class.java] = RPKNotificationServiceImpl(this, database)
 
         registerCommands()
-        registerListeners(PlayerJoinListener(this))
+        registerListeners(
+            PlayerJoinListener(this),
+            RPKProfileDeleteListener(this)
+        )
     }
 
     private fun registerCommands() {

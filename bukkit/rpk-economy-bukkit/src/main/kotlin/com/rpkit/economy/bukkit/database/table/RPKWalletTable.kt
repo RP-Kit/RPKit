@@ -28,7 +28,9 @@ import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_WALLET
 import com.rpkit.economy.bukkit.wallet.RPKWallet
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the wallet table.
@@ -57,7 +59,7 @@ class RPKWalletTable(
     fun insert(entity: RPKWallet): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_WALLET,
@@ -81,7 +83,7 @@ class RPKWalletTable(
     fun update(entity: RPKWallet): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_WALLET)
                 .set(RPKIT_WALLET.BALANCE, entity.balance)
@@ -158,7 +160,7 @@ class RPKWalletTable(
     fun delete(entity: RPKWallet): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val currencyName = entity.currency.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_WALLET)
                 .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
@@ -169,6 +171,17 @@ class RPKWalletTable(
             plugin.logger.log(Level.SEVERE, "Failed to delete wallet", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_WALLET)
+            .where(RPKIT_WALLET.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete wallets for character id", exception)
+        throw exception
     }
 
 }

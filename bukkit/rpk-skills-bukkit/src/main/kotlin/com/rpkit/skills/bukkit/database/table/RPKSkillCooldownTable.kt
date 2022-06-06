@@ -17,6 +17,7 @@
 package com.rpkit.skills.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
@@ -28,7 +29,9 @@ import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
 import com.rpkit.skills.bukkit.skills.RPKSkillName
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKSkillCooldownTable(private val database: Database, private val plugin: RPKSkillsBukkit) : Table {
@@ -153,6 +156,17 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
             plugin.logger.log(Level.SEVERE, "Failed to delete skill cooldown", exception)
             throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_SKILL_COOLDOWN)
+            .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete skill cooldown for character id", exception)
+        throw exception
     }
 
 }

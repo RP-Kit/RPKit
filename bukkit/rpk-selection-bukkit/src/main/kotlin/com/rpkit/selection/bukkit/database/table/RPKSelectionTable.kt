@@ -20,13 +20,15 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.location.RPKBlockLocation
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.selection.bukkit.RPKSelectionBukkit
 import com.rpkit.selection.bukkit.database.create
 import com.rpkit.selection.bukkit.database.jooq.Tables.RPKIT_SELECTION_
 import com.rpkit.selection.bukkit.selection.RPKSelection
 import com.rpkit.selection.bukkit.selection.RPKSelectionImpl
 import java.util.concurrent.CompletableFuture
-import java.util.logging.Level
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 
 class RPKSelectionTable(private val database: Database, private val plugin: RPKSelectionBukkit) : Table {
@@ -44,7 +46,7 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
 
     fun insert(entity: RPKSelection): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create.insertInto(
                 RPKIT_SELECTION_,
                 RPKIT_SELECTION_.MINECRAFT_PROFILE_ID,
@@ -68,14 +70,14 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert selection", exception)
+            plugin.logger.log(SEVERE, "Failed to insert selection", exception)
             throw exception
         }
     }
 
     fun update(entity: RPKSelection): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_SELECTION_)
                 .set(RPKIT_SELECTION_.WORLD, entity.world)
@@ -89,7 +91,7 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update selection", exception)
+            plugin.logger.log(SEVERE, "Failed to update selection", exception)
             throw exception
         }
     }
@@ -134,7 +136,7 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
                 cache?.set(minecraftProfileId.value, selection)
                 return@supplyAsync selection
             }.exceptionally { exception ->
-                plugin.logger.log(Level.SEVERE, "Failed to get selection", exception)
+                plugin.logger.log(SEVERE, "Failed to get selection", exception)
                 throw exception
             }
         }
@@ -142,16 +144,27 @@ class RPKSelectionTable(private val database: Database, private val plugin: RPKS
 
     fun delete(entity: RPKSelection): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_SELECTION_)
                 .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete selection", exception)
+            plugin.logger.log(SEVERE, "Failed to delete selection", exception)
             throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_SELECTION_)
+            .where(RPKIT_SELECTION_.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete selection for Minecraft profile id", exception)
+        throw exception
     }
 
 }

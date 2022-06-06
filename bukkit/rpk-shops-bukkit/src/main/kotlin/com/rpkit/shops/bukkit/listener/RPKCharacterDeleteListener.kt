@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.rpkit.languages.bukkit.listener
+package com.rpkit.shops.bukkit.listener
 
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
-import com.rpkit.languages.bukkit.RPKLanguagesBukkit
-import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
+import com.rpkit.shops.bukkit.RPKShopsBukkit
+import com.rpkit.shops.bukkit.database.table.RPKShopCountTable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class RPKBukkitCharacterDeleteListener(private val plugin: RPKLanguagesBukkit) : Listener {
+class RPKCharacterDeleteListener(private val plugin: RPKShopsBukkit) : Listener {
 
     @EventHandler
     fun onCharacterDelete(event: RPKBukkitCharacterDeleteEvent) {
-        val characterLanguageTable = plugin.database.getTable(RPKCharacterLanguageTable::class.java)
-        characterLanguageTable.get(event.character).thenAccept { characterLanguages ->
-            characterLanguages.forEach { characterLanguageTable.delete(it).join() }
+        val characterId = event.character.id
+        if (characterId != null) {
+            plugin.database.getTable(RPKShopCountTable::class.java).delete(characterId)
         }
     }
 

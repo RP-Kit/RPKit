@@ -116,13 +116,13 @@ class RPKLocksBukkit : JavaPlugin(), RPKPlugin {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("getkey")?.setExecutor(GetKeyCommand(this))
         getCommand("keyring")?.setExecutor(KeyringCommand(this))
         getCommand("unlock")?.setExecutor(UnlockCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             CraftItemListener(this),
             InventoryClickListener(this),
@@ -130,7 +130,9 @@ class RPKLocksBukkit : JavaPlugin(), RPKPlugin {
             PlayerInteractListener(this),
             AsyncPlayerPreLoginListener(),
             PlayerQuitListener(),
-            RPKCharacterSwitchListener()
+            RPKCharacterSwitchListener(),
+            RPKCharacterDeleteListener(this),
+            RPKMinecraftProfileDeleteListener(this)
         )
     }
 

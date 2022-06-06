@@ -26,6 +26,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.selection.bukkit.command.WandCommand
 import com.rpkit.selection.bukkit.database.table.RPKSelectionTable
 import com.rpkit.selection.bukkit.listener.PlayerInteractListener
+import com.rpkit.selection.bukkit.listener.RPKMinecraftProfileDeleteListener
 import com.rpkit.selection.bukkit.messages.SelectionMessages
 import com.rpkit.selection.bukkit.selection.RPKSelectionService
 import com.rpkit.selection.bukkit.selection.RPKSelectionServiceImpl
@@ -97,13 +98,14 @@ class RPKSelectionBukkit : JavaPlugin(), RPKPlugin {
         registerCommands()
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                PlayerInteractListener(this)
+            PlayerInteractListener(this),
+            RPKMinecraftProfileDeleteListener(this)
         )
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("wand")?.setExecutor(WandCommand(this))
     }
 

@@ -107,6 +107,7 @@ class RPKShopsBukkit : JavaPlugin(), RPKPlugin {
             InventoryClickListener(this),
             AsyncPlayerPreLoginListener(),
             RPKCharacterSwitchListener(),
+            RPKCharacterDeleteListener(this),
             PlayerQuitListener()
         )
     }

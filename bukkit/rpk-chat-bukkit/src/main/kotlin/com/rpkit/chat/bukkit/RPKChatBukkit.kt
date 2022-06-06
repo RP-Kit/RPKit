@@ -45,6 +45,7 @@ import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.chat.bukkit.irc.RPKIRCServiceImpl
 import com.rpkit.chat.bukkit.listener.AsyncPlayerChatListener
 import com.rpkit.chat.bukkit.listener.PlayerCommandPreprocessListener
+import com.rpkit.chat.bukkit.listener.RPKMinecraftProfileDeleteListener
 import com.rpkit.chat.bukkit.messages.ChatMessages
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
@@ -211,7 +212,7 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         }
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("chatchannel")?.setExecutor(ChatChannelCommand(this))
         getCommand("mute")?.setExecutor(MuteCommand(this))
         getCommand("unmute")?.setExecutor(UnmuteCommand(this))
@@ -222,10 +223,11 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         getCommand("snoop")?.setExecutor(SnoopCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                AsyncPlayerChatListener(this),
-                PlayerCommandPreprocessListener(this)
+            AsyncPlayerChatListener(this),
+            PlayerCommandPreprocessListener(this),
+            RPKMinecraftProfileDeleteListener(this)
         )
     }
 

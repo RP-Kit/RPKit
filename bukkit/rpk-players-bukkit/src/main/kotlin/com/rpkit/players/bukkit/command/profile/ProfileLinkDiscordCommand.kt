@@ -92,7 +92,7 @@ class ProfileLinkDiscordCommand(private val plugin: RPKPlayersBukkit) : RPKComma
             sender.sendMessage(plugin.messages.profileLinkDiscordValid)
             return@thenApply CommandSuccess
         }.exceptionally { exception ->
-            plugin.logger.log(SEVERE, "Failed", exception)
+            plugin.logger.log(SEVERE, "Failed to send Discord message", exception)
             return@exceptionally CommandSuccess
         }
     }
