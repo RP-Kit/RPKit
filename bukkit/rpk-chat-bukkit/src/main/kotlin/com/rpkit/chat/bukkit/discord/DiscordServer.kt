@@ -29,11 +29,13 @@ import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent.*
 import org.bukkit.ChatColor
+import java.util.concurrent.ConcurrentHashMap
 
 class DiscordServer(
         private val plugin: RPKChatBukkit,
@@ -58,6 +60,8 @@ class DiscordServer(
     private val commands = mapOf<String, DiscordCommand>(
             "list" to DiscordListCommand(plugin)
     )
+
+    private val buttonListeners = ConcurrentHashMap<String, DiscordButtonClickListener>()
 
     init {
         jda.addEventListener(this)
@@ -122,6 +126,19 @@ class DiscordServer(
         }
     }
 
+    override fun onButtonInteraction(event: ButtonInteractionEvent) {
+        val listener = buttonListeners[event.button.id]
+        if (listener != null) {
+            listener.onClick(object : DiscordButtonClickEvent {
+                override fun reply(message: String) {
+                    event.reply(message).queue()
+                }
+            })
+        } else {
+            event.reply("That action has expired, please try again.").queue()
+        }
+    }
+
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
         val commandName = event.name
         val command = commands[commandName]
@@ -159,6 +176,10 @@ class DiscordServer(
 
     fun disconnect() {
         jda.shutdown()
+    }
+
+    fun addButtonListener(id: String, listener: DiscordButtonClickListener) {
+        buttonListeners[id] = listener
     }
 
 }

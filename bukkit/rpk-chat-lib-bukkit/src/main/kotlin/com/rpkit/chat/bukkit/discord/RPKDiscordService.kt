@@ -26,6 +26,7 @@ interface RPKDiscordService : Service {
 
     fun sendMessage(channel: DiscordChannel, message: String, callback: DiscordMessageCallback? = null)
     fun sendMessage(profile: RPKDiscordProfile, message: String, callback: DiscordMessageCallback? = null)
+    fun sendMessage(profile: RPKDiscordProfile, message: String, vararg buttons: DiscordButton)
     fun getUserName(discordId: DiscordUserId): String?
     fun getUserId(discordUserName: String): DiscordUserId?
     fun setMessageAsProfileLinkRequest(messageId: Long, profile: RPKProfile)

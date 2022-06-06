@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class ProfileCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor 
     private val profileConfirmLinkCommand = ProfileConfirmLinkCommand(plugin)
     private val profileDenyLinkCommand = ProfileDenyLinkCommand(plugin)
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.profileUsage)
             return CompletableFuture.completedFuture(IncorrectUsageFailure())
