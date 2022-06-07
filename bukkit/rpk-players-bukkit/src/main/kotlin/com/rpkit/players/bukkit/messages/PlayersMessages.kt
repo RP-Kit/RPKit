@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +23,7 @@ import com.rpkit.players.bukkit.RPKPlayersBukkit
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
 import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.github.RPKGitHubProfile
 
 class PlayersMessages(plugin: RPKPlayersBukkit) : BukkitMessages(plugin) {
 
@@ -43,6 +45,11 @@ class PlayersMessages(plugin: RPKPlayersBukkit) : BukkitMessages(plugin) {
             }.toTypedArray()
     }
 
+    class ProfileLinkGithubValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(githubProfile: RPKGitHubProfile) =
+            message.withParameters("github_username" to githubProfile.name.value)
+    }
+
     val profileLinkUsage = get("profile-link-usage")
     val profileLinkDiscordUsage = get("profile-link-discord-usage")
     val profileLinkDiscordInvalidUserTag = get("profile-link-discord-invalid-user-tag")
@@ -55,6 +62,10 @@ class PlayersMessages(plugin: RPKPlayersBukkit) : BukkitMessages(plugin) {
     val profileLinkMinecraftUsage = get("profile-link-minecraft-usage")
     val profileLinkMinecraftInvalidMinecraftProfile = get("profile-link-minecraft-invalid-minecraft-profile")
     val profileLinkMinecraftValid = get("profile-link-minecraft-valid")
+    val profileLinkGithubUsage = get("profile-link-github-usage")
+    val profileLinkGithubInvalidToken = get("profile-link-github-invalid-token")
+    val profileLinkGithubValid = getParameterized("profile-link-github-valid")
+        .let(::ProfileLinkGithubValidMessage)
     val profileConfirmLinkUsage = get("profile-confirm-link-usage")
     val profileConfirmLinkInvalidId = get("profile-confirm-link-invalid-id")
     val profileConfirmLinkInvalidAlreadyLinked = get("profile-confirm-link-invalid-already-linked")
@@ -86,6 +97,7 @@ class PlayersMessages(plugin: RPKPlayersBukkit) : BukkitMessages(plugin) {
     val noPermissionProfileLinkDiscord = get("no-permission-profile-link-discord")
     val noPermissionProfileLinkIrc = get("no-permission-profile-link-irc")
     val noPermissionProfileLinkMinecraft = get("no-permission-profile-link-minecraft")
+    val noPermissionProfileLinkGithub = get("no-permission-profile-link-github")
     val noPermissionProfileViewSelf = get("no-permission-profile-view-self")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
     val noIrcService = get("no-irc-service")
@@ -93,5 +105,6 @@ class PlayersMessages(plugin: RPKPlayersBukkit) : BukkitMessages(plugin) {
     val noProfileService = get("no-profile-service")
     val noDiscordService = get("no-discord-service")
     val noDiscordProfileService = get("no-discord-profile-service")
+    val noGithubProfileService = get("no-github-profile-service")
     val notFromConsole = get("not-from-console")
 }

@@ -28,6 +28,8 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.command.RPKBukkitMinecraftProfileCommandSenderResolver
 import com.rpkit.players.bukkit.command.profile.ProfileCommand
 import com.rpkit.players.bukkit.database.table.*
+import com.rpkit.players.bukkit.github.RPKGitHubService
+import com.rpkit.players.bukkit.github.RPKGitHubServiceImpl
 import com.rpkit.players.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerQuitListener
@@ -125,6 +127,7 @@ class RPKPlayersBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKIRCProfileService::class.java] = RPKIRCProfileServiceImpl(this)
         Services[RPKMinecraftProfileService::class.java] = RPKMinecraftProfileServiceImpl(this)
         Services[RPKProfileService::class.java] = RPKProfileServiceImpl(this)
+        Services[RPKGitHubService::class.java] = RPKGitHubServiceImpl(this)
 
         Services.require(RPKBukkitCommandSenderResolutionService::class.java).whenAvailable { commandSenderResolutionService ->
             commandSenderResolutionService.addResolver(RPKBukkitMinecraftProfileCommandSenderResolver())
