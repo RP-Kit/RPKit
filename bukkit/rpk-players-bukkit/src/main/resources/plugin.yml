@@ -31,6 +31,9 @@ permissions:
   rpkit.players.command.profile.link.minecraft:
     description: Allows linking Minecraft profiles
     default: true
+  rpkit.players.command.profile.link.github:
+    description: Allows linking Github profiles
+    default: true
   rpkit.players.command.profile.view.self:
     description: Allows viewing your own profile
     default: true

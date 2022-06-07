@@ -26,6 +26,7 @@ import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.dailyquote.bukkit.dailyquote.RPKDailyQuoteService
 import com.rpkit.essentials.bukkit.command.*
+import com.rpkit.essentials.bukkit.command.issue.IssueCommand
 import com.rpkit.essentials.bukkit.dailyquote.RPKDailyQuoteServiceImpl
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
@@ -166,6 +167,7 @@ class RPKEssentialsBukkit : JavaPlugin(), RPKPlugin {
         getCommand("getsign")?.setExecutor(GetSignCommand(this))
         getCommand("heal")?.setExecutor(HealCommand(this))
         getCommand("inventory")?.setExecutor(InventoryCommand(this))
+        getCommand("issue")?.setExecutor(IssueCommand(this).toBukkit())
         getCommand("item")?.setExecutor(ItemCommand(this))
         getCommand("itemmeta")?.setExecutor(ItemMetaCommand(this))
         getCommand("jump")?.setExecutor(JumpCommand(this))

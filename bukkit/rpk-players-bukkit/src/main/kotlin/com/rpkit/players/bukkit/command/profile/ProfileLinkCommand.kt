@@ -33,6 +33,7 @@ class ProfileLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
     private val profileLinkIRCCommand = ProfileLinkIRCCommand(plugin)
     private val profileLinkMinecraftCommand = ProfileLinkMinecraftCommand(plugin)
     private val profileLinkDiscordCommand = ProfileLinkDiscordCommand(plugin)
+    private val profileLinkGithubCommand = ProfileLinkGithubCommand(plugin)
 
     override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
         if (!sender.hasPermission("rpkit.players.command.profile.link")) {
@@ -48,6 +49,8 @@ class ProfileLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
                     profileLinkMinecraftCommand.onCommand(sender, newArgs)
                 args[0].equals("discord", ignoreCase = true) ->
                     profileLinkDiscordCommand.onCommand(sender, newArgs)
+                args[0].equals("github", ignoreCase = true) ->
+                    profileLinkGithubCommand.onCommand(sender, newArgs)
                 else -> {
                     sender.sendMessage(plugin.messages.profileLinkUsage)
                     CompletableFuture.completedFuture(IncorrectUsageFailure())

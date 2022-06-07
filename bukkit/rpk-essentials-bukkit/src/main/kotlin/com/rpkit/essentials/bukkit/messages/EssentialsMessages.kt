@@ -115,6 +115,14 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
         )
     }
 
+    class IssueSubmitValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(
+            link: String
+        ) = message.withParameters(
+            "link" to link
+        )
+    }
+
     class ItemValidPluralMessage(private val message: ParameterizedMessage) {
         fun withParameters(
             item: ItemStack
@@ -372,6 +380,11 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
         .let(::InventoryValidMessage)
     val inventoryInvalidPlayer = get("inventory-invalid-player")
     val inventoryUsage = get("inventory-usage")
+    val issueUsage = get("issue-usage")
+    val issueSubmitInvalidBook = get("issue-submit-invalid-book")
+    val issueSubmitInvalidTitle = get("issue-submit-invalid-title")
+    val issueSubmitValid = getParameterized("issue-submit-valid")
+        .let(::IssueSubmitValidMessage)
     val itemInvalidAmount = get("item-invalid-amount")
     val itemValidPlural = getParameterized("item-valid-plural")
         .let(::ItemValidPluralMessage)
@@ -472,6 +485,7 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
     val noPermissionGetSign = get("no-permission-get-sign")
     val noPermissionHeal = get("no-permission-heal")
     val noPermissionInventory = get("no-permission-inventory")
+    val noPermissionIssueSubmit = get("no-permission-issue-submit")
     val noPermissionItem = get("no-permission-item")
     val noPermissionItemMeta = get("no-permission-item-meta")
     val noPermissionJump = get("no-permission-jump")
@@ -497,10 +511,14 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
     val noCharacterSelf = get("no-character-self")
     val noCharacterOther = get("no-character-other")
     val noMinecraftProfile = get("no-minecraft-profile")
+    val noProfileSelf = get("no-profile-self")
+    val noGithubProfile = get("no-github-profile")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
     val noCharacterService = get("no-character-service")
     val noLocationHistoryService = get("no-location-history-service")
     val noKitService = get("no-kit-service")
     val noLogMessageService = get("no-log-message-service")
     val noTrackingService = get("no-tracking-service")
+    val noGithubProfileService = get("no-github-profile-service")
+    val noGithubService = get("no-github-service")
 }
