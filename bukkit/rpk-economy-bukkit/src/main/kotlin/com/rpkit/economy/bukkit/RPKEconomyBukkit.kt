@@ -111,7 +111,7 @@ class RPKEconomyBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKEconomyService::class.java] = economyService
 
         Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
-            service.characterCardFields.add(MoneyField(this))
+            service.addCharacterCardField(MoneyField(this))
         }
 
         registerCommands()

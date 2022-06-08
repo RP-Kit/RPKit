@@ -17,9 +17,12 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * A character card field for age.
@@ -53,7 +56,9 @@ class AgeField : HideableCharacterCardField {
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isAgeHidden = hidden
-        return CompletableFuture.completedFuture(null)
+        return Services[RPKCharacterService::class.java]?.updateCharacter(character)
+            ?.thenApply { null }
+            ?: completedFuture(null)
     }
 
 }

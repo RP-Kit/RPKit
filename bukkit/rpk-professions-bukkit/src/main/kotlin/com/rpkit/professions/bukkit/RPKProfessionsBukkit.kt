@@ -102,7 +102,7 @@ class RPKProfessionsBukkit : JavaPlugin(), RPKPlugin {
 
         Services[RPKProfessionService::class.java] = RPKProfessionServiceImpl(this)
         Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
-            service.characterCardFields.add(ProfessionField(this))
+            service.addCharacterCardField(ProfessionField(this))
         }
 
         registerCommands()

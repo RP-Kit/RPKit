@@ -18,6 +18,7 @@ package com.rpkit.characters.bukkit.messages
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.message.ParameterizedMessage
@@ -34,6 +35,26 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
             "min_age" to minAge.toString(),
             "max_age" to maxAge.toString()
         )
+    }
+
+    class CharacterHideInvalidFieldMessage(private val message: ParameterizedMessage) {
+        fun withParameters(fields: List<HideableCharacterCardField>) =
+            message.withParameters("fields" to fields.joinToString(transform = HideableCharacterCardField::name))
+    }
+
+    class CharacterHideValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: HideableCharacterCardField) =
+            message.withParameters("field" to field.name)
+    }
+
+    class CharacterUnhideInvalidFieldMessage(private val message: ParameterizedMessage) {
+        fun withParameters(fields: List<HideableCharacterCardField>) =
+            message.withParameters("fields" to fields.joinToString(transform = HideableCharacterCardField::name))
+    }
+
+    class CharacterUnhideValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: HideableCharacterCardField) =
+            message.withParameters("field" to field.name)
     }
 
     class CharacterCardOwnerMessage(val messages: List<ParameterizedMessage>) {
@@ -116,6 +137,18 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
         )
     }
 
+    class NoPermissionCharacterHideMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: HideableCharacterCardField) = message.withParameters(
+            "field" to field.name
+        )
+    }
+
+    class NoPermissionCharacterUnhideMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: HideableCharacterCardField) = message.withParameters(
+            "field" to field.name
+        )
+    }
+
     val characterUsage = get("character-usage")
     val characterSetUsage = get("character-set-usage")
     val characterSetAgePrompt = get("character-set-age-prompt")
@@ -137,19 +170,15 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterSetRaceInvalidRace = get("character-set-race-invalid-race")
     val characterSetRaceValid = get("character-set-race-valid")
     val characterHideUsage = get("character-hide-usage")
-    val characterHideAgeValid = get("character-hide-age-valid")
-    val characterHideDescriptionValid = get("character-hide-description-valid")
-    val characterHideProfileValid = get("character-hide-profile-valid")
-    val characterHideNameValid = get("character-hide-name-valid")
-    val characterHideGenderValid = get("character-hide-gender-valid")
-    val characterHideRaceValid = get("character-hide-race-valid")
+    val characterHideInvalidField = getParameterized("character-hide-invalid-field")
+        .let(::CharacterHideInvalidFieldMessage)
+    val characterHideValid = getParameterized("character-hide-valid")
+        .let(::CharacterHideValidMessage)
     val characterUnhideUsage = get("character-unhide-usage")
-    val characterUnhideAgeValid = get("character-unhide-age-valid")
-    val characterUnhideDescriptionValid = get("character-unhide-description-valid")
-    val characterUnhideProfileValid = get("character-unhide-profile-valid")
-    val characterUnhideNameValid = get("character-unhide-name-valid")
-    val characterUnhideGenderValid = get("character-unhide-gender-valid")
-    val characterUnhideRaceValid = get("character-unhide-race-valid")
+    val characterUnhideInvalidField = getParameterized("character-unhide-invalid-field")
+        .let(::CharacterUnhideInvalidFieldMessage)
+    val characterUnhideValid = getParameterized("character-unhide-valid")
+        .let(::CharacterUnhideValidMessage)
     val characterCardOwner = getParameterizedList("character-card-owner").let(::CharacterCardOwnerMessage)
     val characterCardNotOwner = getParameterizedList("character-card-not-owner").let(::CharacterCardNotOwnerMessage)
     val characterListTitle = get("character-list-title")
@@ -194,18 +223,10 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val noPermissionCharacterSetGender = get("no-permission-character-set-gender")
     val noPermissionCharacterSetName = get("no-permission-character-set-name")
     val noPermissionCharacterSetRace = get("no-permission-character-set-race")
-    val noPermissionCharacterHideAge = get("no-permission-character-hide-age")
-    val noPermissionCharacterHideDescription = get("no-permission-character-hide-description")
-    val noPermissionCharacterHideGender = get("no-permission-character-hide-gender")
-    val noPermissionCharacterHideName = get("no-permission-character-hide-name")
-    val noPermissionCharacterHideProfile = get("no-permission-character-hide-profile")
-    val noPermissionCharacterHideRace = get("no-permission-character-hide-race")
-    val noPermissionCharacterUnhideAge = get("no-permission-character-unhide-age")
-    val noPermissionCharacterUnhideDescription = get("no-permission-character-unhide-description")
-    val noPermissionCharacterUnhideGender = get("no-permission-character-unhide-gender")
-    val noPermissionCharacterUnhideName = get("no-permission-character-unhide-name")
-    val noPermissionCharacterUnhideProfile = get("no-permission-character-unhide-profile")
-    val noPermissionCharacterUnhideRace = get("no-permission-character-unhide-race")
+    val noPermissionCharacterHide = getParameterized("no-permission-character-hide")
+        .let(::NoPermissionCharacterHideMessage)
+    val noPermissionCharacterUnhide = getParameterized("no-permission-character-unhide")
+        .let(::NoPermissionCharacterUnhideMessage)
     val noPermissionCharacterSwitch = get("no-permission-character-switch")
     val noPermissionCharacterDelete = get("no-permission-character-delete")
     val noPermissionRaceAdd = get("no-permission-race-add")

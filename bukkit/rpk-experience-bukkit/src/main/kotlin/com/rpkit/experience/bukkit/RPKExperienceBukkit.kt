@@ -98,8 +98,8 @@ class RPKExperienceBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKExperienceService::class.java] = RPKExperienceServiceImpl(this)
 
         Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
-            service.characterCardFields.add(ExperienceField(this))
-            service.characterCardFields.add(LevelField(this))
+            service.addCharacterCardField(ExperienceField(this))
+            service.addCharacterCardField(LevelField(this))
         }
 
         registerListeners()

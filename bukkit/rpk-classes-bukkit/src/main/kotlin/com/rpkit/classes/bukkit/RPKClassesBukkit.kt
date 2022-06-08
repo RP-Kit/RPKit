@@ -131,7 +131,7 @@ class RPKClassesBukkit : JavaPlugin(), RPKPlugin {
         }
 
         Services.require(RPKCharacterCardFieldService::class.java).whenAvailable { service ->
-            service.characterCardFields.add(ClassField())
+            service.addCharacterCardField(ClassField())
         }
 
         registerCommands()
