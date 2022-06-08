@@ -123,21 +123,21 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKCharacterCardFieldService::class.java] = characterCardFieldService
         Services[RPKNewCharacterCooldownService::class.java] = newCharacterCooldownService
 
-        characterCardFieldService.characterCardFields.add(NameField())
-        characterCardFieldService.characterCardFields.add(ProfileField())
-        characterCardFieldService.characterCardFields.add(GenderField())
-        characterCardFieldService.characterCardFields.add(AgeField())
-        characterCardFieldService.characterCardFields.add(RaceField())
-        characterCardFieldService.characterCardFields.add(DescriptionField())
-        characterCardFieldService.characterCardFields.add(DeadField())
-        characterCardFieldService.characterCardFields.add(HealthField())
-        characterCardFieldService.characterCardFields.add(MaxHealthField())
-        characterCardFieldService.characterCardFields.add(ManaField())
-        characterCardFieldService.characterCardFields.add(MaxManaField())
-        characterCardFieldService.characterCardFields.add(FoodField())
-        characterCardFieldService.characterCardFields.add(MaxFoodField())
-        characterCardFieldService.characterCardFields.add(ThirstField())
-        characterCardFieldService.characterCardFields.add(MaxThirstField())
+        characterCardFieldService.addCharacterCardField(NameField())
+        characterCardFieldService.addCharacterCardField(ProfileField())
+        characterCardFieldService.addCharacterCardField(GenderField())
+        characterCardFieldService.addCharacterCardField(AgeField())
+        characterCardFieldService.addCharacterCardField(RaceField())
+        characterCardFieldService.addCharacterCardField(DescriptionField())
+        characterCardFieldService.addCharacterCardField(DeadField())
+        characterCardFieldService.addCharacterCardField(HealthField())
+        characterCardFieldService.addCharacterCardField(MaxHealthField())
+        characterCardFieldService.addCharacterCardField(ManaField())
+        characterCardFieldService.addCharacterCardField(MaxManaField())
+        characterCardFieldService.addCharacterCardField(FoodField())
+        characterCardFieldService.addCharacterCardField(MaxFoodField())
+        characterCardFieldService.addCharacterCardField(ThirstField())
+        characterCardFieldService.addCharacterCardField(MaxThirstField())
 
         registerCommands()
         registerListeners()
@@ -156,7 +156,7 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
             config.getConfigurationSection("placeholder-api.fields")
                 ?.getKeys(false)
                 ?.forEach { key ->
-                    characterCardFieldService.characterCardFields.add(
+                    characterCardFieldService.addCharacterCardField(
                         PlaceholderAPIField(
                             this,
                             key,

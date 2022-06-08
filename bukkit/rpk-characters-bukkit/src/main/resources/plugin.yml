@@ -66,42 +66,6 @@ permissions:
   rpkit.characters.command.character.set.race:
     description: Allows setting your character''s race
     default: true
-  rpkit.characters.command.character.hide.age:
-    description: Allows hiding your character''s age
-    default: true
-  rpkit.characters.command.character.hide.description:
-    description: Allows hiding your character''s description
-    default: true
-  rpkit.characters.command.character.hide.gender:
-    description: Allows hiding your character''s gender
-    default: true
-  rpkit.characters.command.character.hide.name:
-    description: Allows hiding your character''s name
-    default: true
-  rpkit.characters.command.character.hide.profile:
-    description: Allows hiding your character''s profile
-    default: true
-  rpkit.characters.command.character.hide.race:
-    description: Allows hiding your character''s race
-    default: true
-  rpkit.characters.command.character.unhide.age:
-    description: Allows unhiding your character''s age
-    default: true
-  rpkit.characters.command.character.unhide.description:
-    description: Allows unhiding your character''s description
-    default: true
-  rpkit.characters.command.character.unhide.gender:
-    description: Allows unhiding your character''s gender
-    default: true
-  rpkit.characters.command.character.unhide.name:
-    description: Allows unhiding your character''s name
-    default: true
-  rpkit.characters.command.character.unhide.profile:
-    description: Allows unhiding your character''s profile
-    default: true
-  rpkit.characters.command.character.unhide.race:
-    description: Allows unhiding your character''s race
-    default: true
   rpkit.characters.command.character.switch:
     description: Allows switching to other characters
     default: true

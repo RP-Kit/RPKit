@@ -17,6 +17,8 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
@@ -53,7 +55,9 @@ class ProfileField : HideableCharacterCardField {
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isProfileHidden = hidden
-        return CompletableFuture.completedFuture(null)
+        return Services[RPKCharacterService::class.java]?.updateCharacter(character)
+            ?.thenApply { null }
+            ?: CompletableFuture.completedFuture(null)
     }
 
 }

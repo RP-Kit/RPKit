@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,43 @@
 
 package com.rpkit.characters.bukkit.character.field
 
-import com.rpkit.core.plugin.RPKPlugin
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
+import org.bukkit.permissions.Permission
+import org.bukkit.permissions.PermissionDefault
 
 /**
  * Character card field service implementation.
  */
-class RPKCharacterCardFieldServiceImpl(override val plugin: RPKPlugin) : RPKCharacterCardFieldService {
+class RPKCharacterCardFieldServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCharacterCardFieldService {
 
     override val characterCardFields = mutableListOf<CharacterCardField>()
+
+    override fun addCharacterCardField(field: CharacterCardField) {
+        if (field is HideableCharacterCardField) {
+            plugin.server.pluginManager.addPermission(
+                Permission(
+                    "rpkit.characters.command.character.hide.${field.name}",
+                    "Allows hiding your character's ${field.name}",
+                    PermissionDefault.TRUE
+                )
+            )
+            plugin.server.pluginManager.addPermission(
+                Permission(
+                    "rpkit.characters.command.character.unhide.${field.name}",
+                    "Allows unhiding your character's ${field.name}",
+                    PermissionDefault.TRUE
+                )
+            )
+        }
+        characterCardFields.add(field)
+    }
+
+    override fun removeCharacterCardField(field: CharacterCardField) {
+        if (field is HideableCharacterCardField) {
+            plugin.server.pluginManager.removePermission("rpkit.characters.command.character.hide.${field.name}")
+            plugin.server.pluginManager.removePermission("rpkit.characters.command.character.unhide.${field.name}")
+        }
+        characterCardFields.remove(field)
+    }
 
 }

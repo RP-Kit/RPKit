@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.rpkit.characters.bukkit.command.character.list.CharacterListCommand
 import com.rpkit.characters.bukkit.command.character.set.CharacterSetCommand
 import com.rpkit.characters.bukkit.command.character.switch.CharacterSwitchCommand
 import com.rpkit.characters.bukkit.command.character.unhide.CharacterUnhideCommand
+import com.rpkit.core.bukkit.command.toBukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -36,8 +37,8 @@ import org.bukkit.command.CommandSender
 class CharacterCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     private val characterSetCommand = CharacterSetCommand(plugin)
-    private val characterHideCommand = CharacterHideCommand(plugin)
-    private val characterUnhideCommand = CharacterUnhideCommand(plugin)
+    private val characterHideCommand = CharacterHideCommand(plugin).toBukkit()
+    private val characterUnhideCommand = CharacterUnhideCommand(plugin).toBukkit()
     private val characterCardCommand = CharacterCardCommand(plugin)
     private val characterSwitchCommand = CharacterSwitchCommand(plugin)
     private val characterListCommand = CharacterListCommand(plugin)

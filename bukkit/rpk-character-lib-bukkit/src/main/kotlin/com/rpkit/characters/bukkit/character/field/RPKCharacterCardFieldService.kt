@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,21 @@ interface RPKCharacterCardFieldService : Service {
 
     /**
      * A list of all character card fields.
-     * In order to make character card fields usable on character cards, they must be added to this.
      */
-    val characterCardFields: MutableList<CharacterCardField>
+    val characterCardFields: List<CharacterCardField>
+
+    /**
+     * Adds a character card field to the character card.
+     *
+     * @param field The field to add
+     */
+    fun addCharacterCardField(field: CharacterCardField)
+
+    /**
+     * Removes a character card field from the character card.
+     *
+     * @param field The field to remove
+     */
+    fun removeCharacterCardField(field: CharacterCardField)
 
 }
