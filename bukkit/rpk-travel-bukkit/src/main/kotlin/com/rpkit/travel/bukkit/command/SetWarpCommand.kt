@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,13 +48,13 @@ class SetWarpCommand(private val plugin: RPKTravelBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.noWarpService)
             return true
         }
-        warpService.getWarp(RPKWarpName(args[0])).thenAccept { existingWarpName ->
+        warpService.getWarp(RPKWarpName(args[0].lowercase())).thenAccept { existingWarpName ->
             if (existingWarpName != null) {
                 sender.sendMessage(plugin.messages.setWarpInvalidNameAlreadyInUse)
                 return@thenAccept
             }
             val warp = RPKWarpImpl(
-                name = RPKWarpName(args[0]),
+                name = RPKWarpName(args[0].lowercase()),
                 location = sender.location.toRPKLocation(),
             )
             warpService.addWarp(warp).thenRun {
