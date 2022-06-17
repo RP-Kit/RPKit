@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.rpkit.rolling.bukkit
+package com.rpkit.rolling.bukkit.command
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import com.rpkit.rolling.bukkit.RPKRollingBukkit
 import com.rpkit.rolling.bukkit.roll.Roll
 import com.rpkit.rolling.bukkit.roll.RollPartResult
 import org.bukkit.ChatColor.*
@@ -27,16 +28,15 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-
-class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
+class PrivateRollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (!sender.hasPermission("rpkit.rolling.command.roll")) return true
+        if (!sender.hasPermission("rpkit.rolling.command.privateroll")) return true
         if (sender !is Player) {
             sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages.rollUsage)
+            sender.sendMessage(plugin.messages.privateRollUsage)
             return true
         }
         val input = Roll.parse(args.joinToString("").replace(Regex("\\s+"), ""))
@@ -57,7 +57,7 @@ class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages.noMinecraftProfile)
+            sender.sendMessage(plugin.messages.noMinecraftProfileSelf)
             return true
         }
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
@@ -65,7 +65,6 @@ class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages.noCharacter)
             return true
         }
-        val radius = plugin.config.getInt("rolls.radius")
         val parsedRoll = input.toDisplayString()
         val total = partResultList.map(RollPartResult::result).sum()
         val results = partResultList
@@ -77,16 +76,10 @@ class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
                 }
             }
             .reduce { a, b -> "$a+$b" } + " = $total"
-        sender.world.players
-                .filter { player -> player.location.distanceSquared(sender.location) <= radius * radius }
-                .forEach {
-                    it.sendMessage(plugin.messages.roll.withParameters(
-                        character = character,
-                        player = minecraftProfile,
-                        roll = results,
-                        dice = parsedRoll
-                    ))
-                }
+        sender.sendMessage(plugin.messages.privateRoll.withParameters(
+            roll = results,
+            dice = parsedRoll
+        ))
         return true
     }
 }
