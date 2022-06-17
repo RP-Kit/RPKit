@@ -16,8 +16,14 @@
 
 package com.rpkit.rolling.bukkit
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.plugin.RPKPlugin
+import com.rpkit.core.service.Services
+import com.rpkit.rolling.bukkit.command.PrivateRollCommand
+import com.rpkit.rolling.bukkit.command.RollCommand
+import com.rpkit.rolling.bukkit.command.turnorder.TurnOrderCommand
 import com.rpkit.rolling.bukkit.messages.RollingMessages
+import com.rpkit.rolling.bukkit.turnorder.RPKTurnOrderService
 import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -35,12 +41,15 @@ class RPKRollingBukkit : JavaPlugin(), RPKPlugin {
 
         messages = RollingMessages(this)
 
+        Services[RPKTurnOrderService::class.java] = RPKTurnOrderService(this)
+
         registerCommands()
     }
 
     fun registerCommands() {
         getCommand("roll")?.setExecutor(RollCommand(this))
         getCommand("privateroll")?.setExecutor(PrivateRollCommand(this))
+        getCommand("turnorder")?.setExecutor(TurnOrderCommand(this).toBukkit())
     }
 
 }

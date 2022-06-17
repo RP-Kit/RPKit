@@ -15,6 +15,15 @@ commands:
     description: Rolls privately
     usage: /<command> [roll]
     aliases: [proll, rollscreen, dmroll]
+  turnorder:
+    description: |
+      Manages turn orders
+      /turnorder create [name] [entry1] [entry2] [etc...] - Creates a turn order
+      /turnorder add (name) [entry1] [entry2] [etc...] - Adds more entries to an existing turn order
+      /turnorder remove (name) [entry1] [entry2] [etc...] - Removes entries from an existing turn order
+      /turnorder advance (name) - Advances the turn order to the next entry
+      /turnorder hide - Hides your current turn order
+      /turnorder show [name] [player] - Shows a turn order to a player
 permissions:
   rpkit.rolling.command.roll:
     description: Allows rolling
@@ -22,3 +31,21 @@ permissions:
   rpkit.rolling.command.privateroll:
     description: Allows private rolls
     default: op
+  rpkit.rolling.command.turnorder.add:
+    description: Allows adding entries to turn orders
+    default: true
+  rpkit.rolling.command.turnorder.advance:
+    description: Allows advancing turn orders
+    default: true
+  rpkit.rolling.command.turnorder.create:
+    description: Allows creating turn orders
+    default: true
+  rpkit.rolling.command.turnorder.hide:
+    description: Allows hiding turn orders
+    default: true
+  rpkit.rolling.command.turnorder.remove:
+    description: Allows removing entries from turn orders
+    default: true
+  rpkit.rolling.command.turnorder.show:
+    description: Allows showing turn orders to other players
+    default: true
