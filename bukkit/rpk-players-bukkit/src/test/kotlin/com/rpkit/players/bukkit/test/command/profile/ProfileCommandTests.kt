@@ -16,7 +16,7 @@
 
 package com.rpkit.players.bukkit.test.command.profile
 
-import com.rpkit.chat.bukkit.discord.DiscordButton
+import com.rpkit.chat.bukkit.discord.DiscordTextButton
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.command.result.CommandSuccess
@@ -982,7 +982,7 @@ class ProfileCommandTests : WordSpec({
             every { discordProfile.discordId } returns userId
             val discordService = mockk<RPKDiscordService>()
             every { discordService.getUserId(any()) } returns userId
-            every { discordService.sendMessage(discordProfile, any(), any<DiscordButton>()) } just runs
+            every { discordService.sendMessage(discordProfile, any(), any<DiscordTextButton>()) } just runs
             val discordProfileService = mockk<RPKDiscordProfileService>()
             every { discordProfileService.getDiscordProfile(userId) } returns CompletableFuture.completedFuture(discordProfile)
             val testServicesDelegate = mockk<ServicesDelegate>()
@@ -992,7 +992,7 @@ class ProfileCommandTests : WordSpec({
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("link", "discord", "abcd#1234")).join() should beInstanceOf<CommandSuccess>()
             verify(exactly = 1) { sender.sendMessage(discordProfileLinkedMessage) }
-            verify(exactly = 1) { discordService.sendMessage(discordProfile, any(), any<DiscordButton>()) }
+            verify(exactly = 1) { discordService.sendMessage(discordProfile, any(), any<DiscordTextButton>()) }
         }
         "return not a player failure when confirmlink is used from console" {
             val notAPlayerMessage = "not a player"

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +42,7 @@ class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permissi
         return true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun playerHas(worldName: String, playerName: String, permission: String): Boolean {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerHas)")
@@ -51,10 +53,12 @@ class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permissi
         return profile.hasPermission(permission).join()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun playerAdd(worldName: String, playerName: String, permission: String): Boolean {
         return false
     }
 
+    @Deprecated("Deprecated in Java")
     override fun playerRemove(worldName: String, playerName: String, permission: String): Boolean {
         return false
     }
@@ -76,6 +80,7 @@ class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permissi
         return false
     }
 
+    @Deprecated("Deprecated in Java")
     override fun playerInGroup(worldName: String, playerName: String, groupName: String): Boolean {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerInGroup)")
@@ -88,6 +93,7 @@ class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permissi
         return profile.groups.join().map(RPKGroup::name).contains(group.name)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun playerAddGroup(worldName: String, playerName: String, groupName: String): Boolean {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerAddGroup)")
@@ -101,6 +107,7 @@ class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permissi
         return true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun playerRemoveGroup(worldName: String, playerName: String, groupName: String): Boolean {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (playerRemoveGroup)")
@@ -114,6 +121,7 @@ class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permissi
         return true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPlayerGroups(worldName: String, playerName: String): Array<String> {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getPlayerGroups)")
@@ -124,6 +132,7 @@ class RPKPermissionsVaultPermissions(plugin: RPKPermissionsLibBukkit) : Permissi
         return profile.groups.join().map { group -> group.name.value }.toTypedArray()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPrimaryGroup(worldName: String, playerName: String): String? {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getPrimaryGroup)")
