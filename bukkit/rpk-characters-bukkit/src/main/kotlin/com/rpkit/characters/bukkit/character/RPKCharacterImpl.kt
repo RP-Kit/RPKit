@@ -54,7 +54,7 @@ class RPKCharacterImpl(
     description: String = plugin.config.getString("characters.defaults.description") ?: "",
     dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
     override var location: RPKLocation = Bukkit.getWorlds()[0].spawnLocation.toRPKLocation(),
-    override var inventoryContents: Array<ItemStack> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>).toTypedArray(),
+    override var inventoryContents: Array<ItemStack?> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>).toTypedArray(),
     override var helmet: ItemStack? = plugin.config.getItemStack("characters.defaults.helmet"),
     override var chestplate: ItemStack? = plugin.config.getItemStack("characters.defaults.chestplate"),
     override var leggings: ItemStack? = plugin.config.getItemStack("characters.defaults.leggings"),

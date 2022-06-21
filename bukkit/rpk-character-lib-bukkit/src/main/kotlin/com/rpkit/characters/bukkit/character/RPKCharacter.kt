@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +105,7 @@ interface RPKCharacter {
      * contents of the character last time they were switched to. In this situation you may wish to use the inventory
      * contents of the player currently playing the character instead.
      */
-    var inventoryContents: Array<ItemStack>
+    var inventoryContents: Array<ItemStack?>
 
     /**
      * The helmet of the character.

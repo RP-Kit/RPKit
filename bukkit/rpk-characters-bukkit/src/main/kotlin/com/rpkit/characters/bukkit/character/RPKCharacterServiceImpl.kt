@@ -211,7 +211,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         description: String?,
         isDead: Boolean?,
         location: RPKLocation?,
-        inventoryContents: Array<ItemStack>?,
+        inventoryContents: Array<ItemStack?>?,
         helmet: ItemStack?,
         chestplate: ItemStack?,
         leggings: ItemStack?,
@@ -243,7 +243,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
             location ?: plugin.server.worlds[0].spawnLocation.toRPKLocation(),
             inventoryContents
-                ?: (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>)
+                ?: (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>)
                     .toTypedArray(),
             helmet ?: plugin.config.getItemStack("characters.defaults.helmet"),
             chestplate ?: plugin.config.getItemStack("characters.defaults.chestplate"),

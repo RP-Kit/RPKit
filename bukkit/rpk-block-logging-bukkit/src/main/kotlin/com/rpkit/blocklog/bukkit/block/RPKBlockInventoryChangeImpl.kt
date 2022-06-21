@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +30,7 @@ class RPKBlockInventoryChangeImpl(
         override val profile: RPKProfile?,
         override val minecraftProfile: RPKMinecraftProfile?,
         override val character: RPKCharacter?,
-        override val from: Array<ItemStack>,
-        override val to: Array<ItemStack>,
+        override val from: Array<ItemStack?>,
+        override val to: Array<ItemStack?>,
         override val reason: String
 ) : RPKBlockInventoryChange
