@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,30 +28,30 @@ import org.bukkit.entity.Player
 
 class GetKeyCommand(private val plugin: RPKLocksBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("rpkit.locks.command.getkey")) {
-            if (sender is Player) {
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-                if (minecraftProfileService == null) {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-                    return true
-                }
-                val lockService = Services[RPKLockService::class.java]
-                if (lockService == null) {
-                    sender.sendMessage(plugin.messages["no-lock-service"])
-                    return true
-                }
-                val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
-                if (minecraftProfile != null) {
-                    lockService.setGettingKey(minecraftProfile, true)
-                    sender.sendMessage(plugin.messages["get-key-valid"])
-                } else {
-                    sender.sendMessage(plugin.messages["no-minecraft-profile"])
-                }
-            } else {
-                sender.sendMessage(plugin.messages["not-from-console"])
-            }
+        if (!sender.hasPermission("rpkit.locks.command.getkey")) {
+            sender.sendMessage(plugin.messages.noPermissionGetKey)
+            return true
+        }
+        if (sender !is Player) {
+            sender.sendMessage(plugin.messages.notFromConsole)
+            return true
+        }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        if (minecraftProfileService == null) {
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
+            return true
+        }
+        val lockService = Services[RPKLockService::class.java]
+        if (lockService == null) {
+            sender.sendMessage(plugin.messages.noLockService)
+            return true
+        }
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
+        if (minecraftProfile != null) {
+            lockService.setGettingKey(minecraftProfile, true)
+            sender.sendMessage(plugin.messages.getKeyValid)
         } else {
-            sender.sendMessage(plugin.messages["no-permission-get-key"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
         }
         return true
     }

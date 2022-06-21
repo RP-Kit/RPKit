@@ -16,6 +16,7 @@
 
 package com.rpkit.locks.bukkit
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -23,6 +24,7 @@ import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
+import com.rpkit.locks.bukkit.command.CopyKeyCommand
 import com.rpkit.locks.bukkit.command.GetKeyCommand
 import com.rpkit.locks.bukkit.command.KeyringCommand
 import com.rpkit.locks.bukkit.command.UnlockCommand
@@ -117,6 +119,7 @@ class RPKLocksBukkit : JavaPlugin(), RPKPlugin {
     }
 
     private fun registerCommands() {
+        getCommand("copykey")?.setExecutor(CopyKeyCommand(this).toBukkit())
         getCommand("getkey")?.setExecutor(GetKeyCommand(this))
         getCommand("keyring")?.setExecutor(KeyringCommand(this))
         getCommand("unlock")?.setExecutor(UnlockCommand(this))

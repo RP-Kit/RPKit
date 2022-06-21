@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ class CraftItemListener(private val plugin: RPKLocksBukkit) : Listener {
     fun onCraftItem(event: CraftItemEvent) {
         val lockService = Services[RPKLockService::class.java]
         if (lockService == null) {
-            event.whoClicked.sendMessage(plugin.messages["no-lock-service"])
+            event.whoClicked.sendMessage(plugin.messages.noLockService)
             return
         }
         for (item in event.inventory.contents) {
             if (item == null) continue
             if (!lockService.isKey(item)) continue
             event.isCancelled = true
-            event.whoClicked.sendMessage(plugin.messages["crafting-no-keys"])
+            event.whoClicked.sendMessage(plugin.messages.craftingNoKeys)
         }
     }
 }
