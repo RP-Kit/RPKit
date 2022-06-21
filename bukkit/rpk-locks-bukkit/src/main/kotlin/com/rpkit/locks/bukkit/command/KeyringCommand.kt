@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,36 +30,36 @@ import org.bukkit.entity.Player
 class KeyringCommand(private val plugin: RPKLocksBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.locks.command.keyring")) {
-            sender.sendMessage(plugin.messages["no-permission-keyring"])
+            sender.sendMessage(plugin.messages.noPermissionKeyring)
             return true
         }
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+            sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
         val keyringService = Services[RPKKeyringService::class.java]
         if (keyringService == null) {
-            sender.sendMessage(plugin.messages["no-keyring-service"])
+            sender.sendMessage(plugin.messages.noKeyringService)
             return true
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
         val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
         if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
+            sender.sendMessage(plugin.messages.noCharacter)
             return true
         }
         keyringService.getKeyring(character).thenAccept { keyring ->

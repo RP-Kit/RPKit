@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,30 +29,30 @@ import org.bukkit.entity.Player
 class UnlockCommand(private val plugin: RPKLocksBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.locks.command.unlock")) {
-            sender.sendMessage(plugin.messages["no-permission-unlock"])
+            sender.sendMessage(plugin.messages.noPermissionUnlock)
             return true
         }
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val lockService = Services[RPKLockService::class.java]
         if (lockService == null) {
-            sender.sendMessage(plugin.messages["no-lock-service"])
+            sender.sendMessage(plugin.messages.noLockService)
             return true
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
         lockService.setUnclaiming(minecraftProfile, true)
-        sender.sendMessage(plugin.messages["unlock-valid"])
+        sender.sendMessage(plugin.messages.unlockValid)
         return true
     }
 }
