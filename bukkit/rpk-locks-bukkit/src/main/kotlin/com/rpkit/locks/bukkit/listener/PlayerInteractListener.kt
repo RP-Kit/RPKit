@@ -141,7 +141,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
                 val inventory = bukkitPlayer.inventory
                 val inventoryContents = inventory.contents
                 return keyringService.getPreloadedKeyring(character)
-                        ?.any { it.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) } ?: false
+                        ?.any { it?.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) == true } ?: false
                             || inventoryContents
                         .filterNotNull()
                         .any { it.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) }
@@ -158,7 +158,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             val iterator = keyring.iterator()
             while (iterator.hasNext()) {
                 val key = iterator.next()
-                if (key.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation()))) {
+                if (key?.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) == true) {
                     if (key.amount > 1) {
                         key.amount = key.amount - 1
                     } else {

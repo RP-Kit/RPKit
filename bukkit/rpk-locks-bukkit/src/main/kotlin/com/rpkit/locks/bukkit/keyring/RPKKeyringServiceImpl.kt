@@ -27,9 +27,9 @@ import java.util.logging.Level
 
 class RPKKeyringServiceImpl(override val plugin: RPKLocksBukkit) : RPKKeyringService {
 
-    private val keyrings = ConcurrentHashMap<Int, MutableList<ItemStack>>()
+    private val keyrings = ConcurrentHashMap<Int, MutableList<ItemStack?>>()
 
-    override fun getKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack>> {
+    override fun getKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack?>> {
         val preloadedKeyring = getPreloadedKeyring(character)
         if (preloadedKeyring != null) return CompletableFuture.completedFuture(preloadedKeyring)
         return plugin.database.getTable(RPKKeyringTable::class.java)[character].thenApply {
@@ -37,7 +37,7 @@ class RPKKeyringServiceImpl(override val plugin: RPKLocksBukkit) : RPKKeyringSer
         }
     }
 
-    override fun setKeyring(character: RPKCharacter, items: MutableList<ItemStack>): CompletableFuture<Void> {
+    override fun setKeyring(character: RPKCharacter, items: MutableList<ItemStack?>): CompletableFuture<Void> {
         val keyringTable = plugin.database.getTable(RPKKeyringTable::class.java)
         return keyringTable[character].thenAcceptAsync { keyring ->
             if (keyring == null) {
@@ -54,7 +54,7 @@ class RPKKeyringServiceImpl(override val plugin: RPKLocksBukkit) : RPKKeyringSer
         }
     }
 
-    override fun loadKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack>> {
+    override fun loadKeyring(character: RPKCharacter): CompletableFuture<MutableList<ItemStack?>> {
         plugin.logger.info("Loading keyring for character ${character.name} (${character.id?.value})...")
         return plugin.database.getTable(RPKKeyringTable::class.java)[character].thenApply { keyring ->
             val items = keyring?.items ?: mutableListOf()
@@ -68,7 +68,7 @@ class RPKKeyringServiceImpl(override val plugin: RPKLocksBukkit) : RPKKeyringSer
         character.id?.value?.let { keyrings.remove(it) }
     }
 
-    override fun getPreloadedKeyring(character: RPKCharacter): MutableList<ItemStack>? {
+    override fun getPreloadedKeyring(character: RPKCharacter): MutableList<ItemStack?>? {
         return character.id?.value?.let { keyrings[it] }
     }
 

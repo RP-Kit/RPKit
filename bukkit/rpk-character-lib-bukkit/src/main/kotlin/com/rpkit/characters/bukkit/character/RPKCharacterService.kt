@@ -160,7 +160,7 @@ interface RPKCharacterService : Service {
         description: String? = null,
         isDead: Boolean? = null,
         location: RPKLocation? = null,
-        inventoryContents: Array<ItemStack>? = null,
+        inventoryContents: Array<ItemStack?>? = null,
         helmet: ItemStack? = null,
         chestplate: ItemStack? = null,
         leggings: ItemStack? = null,
