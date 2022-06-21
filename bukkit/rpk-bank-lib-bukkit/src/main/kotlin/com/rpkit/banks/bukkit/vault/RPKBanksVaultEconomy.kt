@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         throw UnsupportedOperationException("rpk-bank-lib does not support listing of banks.")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getBalance(playerName: String): Double {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getBalance)")
@@ -62,6 +63,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getBalance(playerName: String, world: String): Double {
         return getBalance(playerName)
     }
@@ -70,6 +72,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         return "rpk-banks"
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isBankOwner(name: String, playerName: String): EconomyResponse {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (isBankOwner)")
@@ -125,10 +128,12 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun has(playerName: String, amount: Double): Boolean {
         return getBalance(playerName) >= amount
     }
 
+    @Deprecated("Deprecated in Java")
     override fun has(playerName: String, worldName: String, amount: Double): Boolean {
         return has(playerName, amount)
     }
@@ -306,6 +311,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun depositPlayer(playerName: String, amount: Double): EconomyResponse {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (depositPlayer)")
@@ -363,10 +369,12 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun depositPlayer(playerName: String, worldName: String, amount: Double): EconomyResponse {
         return depositPlayer(playerName, amount)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun createBank(name: String, playerName: String): EconomyResponse {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (createBank)")
@@ -424,6 +432,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun hasAccount(playerName: String): Boolean {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (hasAccount)")
@@ -436,22 +445,27 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         return character != null
     }
 
+    @Deprecated("Deprecated in Java")
     override fun hasAccount(playerName: String, worldName: String): Boolean {
         return hasAccount(playerName)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isBankMember(name: String, playerName: String): EconomyResponse {
         return EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banks may not have members.")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun createPlayerAccount(playerName: String): Boolean {
         return false
     }
 
+    @Deprecated("Deprecated in Java")
     override fun createPlayerAccount(playerName: String, worldName: String): Boolean {
         return createPlayerAccount(playerName)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun withdrawPlayer(playerName: String, amount: Double): EconomyResponse {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (withdrawPlayer)")
@@ -509,6 +523,7 @@ class RPKBanksVaultEconomy(private val plugin: RPKBankLibBukkit) : AbstractEcono
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun withdrawPlayer(playerName: String, worldName: String, amount: Double): EconomyResponse {
         return withdrawPlayer(playerName, amount)
     }
