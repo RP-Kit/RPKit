@@ -7,7 +7,7 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-unconsciousness-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
   wake:
     description: Wakes a player from being unconscious

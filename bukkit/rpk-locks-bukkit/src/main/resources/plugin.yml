@@ -7,7 +7,7 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-lock-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
   copykey:
     description: Copies the key in your hand, consuming an iron ingot

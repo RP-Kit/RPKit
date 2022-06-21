@@ -11,7 +11,7 @@ depend:
 - rpk-chat-lib-bukkit
 - rpk-drink-lib-bukkit
 - rpk-language-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
   chatchannel:
     description: Switches which chat channel you are speaking in

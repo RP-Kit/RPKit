@@ -9,7 +9,7 @@ depend:
 softdepend:
 - rpk-chat-lib-bukkit
 - PlaceholderAPI
-api-version: '1.18'
+api-version: '1.19'
 commands:
   profile:
     description: |
