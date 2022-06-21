@@ -6,7 +6,7 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-store-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
   claim:
     description: Claims a consumable purchase

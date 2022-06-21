@@ -2,13 +2,13 @@ distance-command:
   maximum-distance: 64000
   item-requirement:
     ==: org.bukkit.inventory.ItemStack
-    v: 2975
+    v: 3105
     type: COMPASS
 track-command:
   maximum-distance: 1000
   item-requirement:
     ==: org.bukkit.inventory.ItemStack
-    v: 2975
+    v: 3105
     type: COMPASS
 daily-messages:
 - '&7"Ye can''t crown a king with a bobble ''at"'
@@ -33,7 +33,7 @@ kits:
   name: eggxample # "I take full credit" - LiamLime
   items:
   - ==: org.bukkit.inventory.ItemStack
-    v: 2975
+    v: 3105
     type: EGG
 time:
   change-speed-enabled: true

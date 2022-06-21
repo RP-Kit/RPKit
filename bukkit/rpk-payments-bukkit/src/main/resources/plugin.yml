@@ -10,7 +10,7 @@ depend:
 - rpk-bank-lib-bukkit
 - rpk-payment-lib-bukkit
 - rpk-notification-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
   payment:
     description: Payment management command
