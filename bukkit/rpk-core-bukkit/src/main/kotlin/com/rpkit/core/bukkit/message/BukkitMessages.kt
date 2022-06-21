@@ -16,18 +16,18 @@
 
 package com.rpkit.core.bukkit.message
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.message.Messages
 import com.rpkit.core.message.ParameterizedMessage
 import org.bukkit.ChatColor
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.Plugin
 import java.io.File
 import java.io.IOException
 import java.util.logging.Level.SEVERE
 
 
-open class BukkitMessages(private val plugin: RPKBukkitPlugin) : Messages {
+open class BukkitMessages(private val plugin: Plugin) : Messages {
 
     private val messagesConfigFile = File(plugin.dataFolder, "messages.yml")
     private val defaultMessagesConfig: FileConfiguration

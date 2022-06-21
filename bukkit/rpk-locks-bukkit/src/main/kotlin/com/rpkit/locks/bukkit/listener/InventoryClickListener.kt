@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class InventoryClickListener(private val plugin: RPKLocksBukkit) : Listener {
         event.isCancelled = true
         val lockService = Services[RPKLockService::class.java]
         if (lockService == null) {
-            event.whoClicked.sendMessage(plugin.messages["no-lock-service"])
+            event.whoClicked.sendMessage(plugin.messages.noLockService)
             return
         }
         if (lockService.isKey(currentItem)) {
@@ -44,7 +44,7 @@ class InventoryClickListener(private val plugin: RPKLocksBukkit) : Listener {
             event.isCancelled = false
         }
         if (event.isCancelled) {
-            event.whoClicked.sendMessage(plugin.messages["keyring-invalid-item"])
+            event.whoClicked.sendMessage(plugin.messages.keyringInvalidItem)
         }
     }
 

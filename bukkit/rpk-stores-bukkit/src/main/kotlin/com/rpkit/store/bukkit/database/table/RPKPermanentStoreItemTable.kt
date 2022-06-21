@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,12 @@ import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKPermanentStoreItemImpl
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKPermanentStoreItemTable(
         private val database: Database,
-        plugin: RPKStoresBukkit
+        private val plugin: RPKStoresBukkit
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_permanent_store_item.id.enabled")) {
@@ -58,6 +59,9 @@ class RPKPermanentStoreItemTable(
                 .execute()
             entity.id = id
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert permanent store item", exception)
+            throw exception
         }
     }
 
@@ -66,10 +70,13 @@ class RPKPermanentStoreItemTable(
         return CompletableFuture.runAsync {
             database.getTable(RPKStoreItemTable::class.java).update(entity).join()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update permanent store item", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKStoreItemId): CompletableFuture<RPKPermanentStoreItem?> {
+    operator fun get(id: RPKStoreItemId): CompletableFuture<out RPKPermanentStoreItem?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -97,6 +104,9 @@ class RPKPermanentStoreItemTable(
                 )
                 cache?.set(id.value, storeItem)
                 return@supplyAsync storeItem
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get permanent store item", exception)
+                throw exception
             }
         }
     }
@@ -110,6 +120,9 @@ class RPKPermanentStoreItemTable(
                 .where(RPKIT_PERMANENT_STORE_ITEM.STORE_ITEM_ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete permanent store item", exception)
+            throw exception
         }
     }
 

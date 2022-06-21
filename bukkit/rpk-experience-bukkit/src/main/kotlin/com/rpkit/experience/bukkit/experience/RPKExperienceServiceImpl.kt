@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.experience.bukkit.database.table.RPKExperienceTable
 import com.rpkit.experience.bukkit.event.experience.RPKBukkitExperienceChangeEvent
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 
 class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKExperienceService {
@@ -47,6 +49,9 @@ class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKEx
             val experienceTable = plugin.database.getTable(RPKExperienceTable::class.java)
             val experienceValue = experienceTable[character]
             return@supplyAsync experienceValue.join()?.value ?: 0
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get experience", exception)
+            throw exception
         }
     }
 
@@ -94,6 +99,9 @@ class RPKExperienceServiceImpl(override val plugin: RPKExperienceBukkit) : RPKEx
                 }
 
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set experience", exception)
+            throw exception
         }
     }
 

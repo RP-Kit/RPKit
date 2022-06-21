@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +45,7 @@ interface RPKCharacterService : Service {
      * @param id The ID of the character
      * @return A future that completes once the character has been fetched.
      */
-    fun loadCharacter(id: RPKCharacterId): CompletableFuture<RPKCharacter?>
+    fun loadCharacter(id: RPKCharacterId): CompletableFuture<out RPKCharacter?>
 
     /**
      * Unloads the character with the given ID.
@@ -60,7 +61,7 @@ interface RPKCharacterService : Service {
      * @param id The ID of the character
      * @return A future returning the character once it has been fetched
      */
-    fun getCharacter(id: RPKCharacterId): CompletableFuture<RPKCharacter?>
+    fun getCharacter(id: RPKCharacterId): CompletableFuture<out RPKCharacter?>
 
     /**
      * Gets a Minecraft profile's active character, if said character has been pre-loaded.
@@ -159,7 +160,7 @@ interface RPKCharacterService : Service {
         description: String? = null,
         isDead: Boolean? = null,
         location: RPKLocation? = null,
-        inventoryContents: Array<ItemStack>? = null,
+        inventoryContents: Array<ItemStack?>? = null,
         helmet: ItemStack? = null,
         chestplate: ItemStack? = null,
         leggings: ItemStack? = null,

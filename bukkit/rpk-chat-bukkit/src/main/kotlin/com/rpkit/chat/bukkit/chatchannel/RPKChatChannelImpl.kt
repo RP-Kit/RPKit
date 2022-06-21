@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +36,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.awt.Color
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Chat channel implementation.
@@ -63,6 +65,10 @@ class RPKChatChannelImpl(
                     .thenApplyAsync {
                         futures.mapNotNull(CompletableFuture<RPKMinecraftProfile?>::join)
                     }
+                    .exceptionally { exception ->
+                        plugin.logger.log(Level.SEVERE, "Failed to get speakers", exception)
+                        throw exception
+                    }
             }
 
     override val listeners: CompletableFuture<List<RPKMinecraftProfile>>
@@ -77,6 +83,10 @@ class RPKChatChannelImpl(
                 CompletableFuture.allOf(*futures.toTypedArray())
                     .thenApplyAsync {
                         futures.mapNotNull(CompletableFuture<RPKMinecraftProfile?>::join)
+                    }
+                    .exceptionally { exception ->
+                        plugin.logger.log(Level.SEVERE, "Failed to get listeners", exception)
+                        throw exception
                     }
             }
 
@@ -173,6 +183,9 @@ class RPKChatChannelImpl(
                     context = component.process(context).join()
                 }
                 callback?.invoke()
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to send message", exception)
+                throw exception
             }
         })
     }

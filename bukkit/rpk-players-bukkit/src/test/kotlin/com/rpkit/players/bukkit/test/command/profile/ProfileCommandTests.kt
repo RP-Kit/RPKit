@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +16,7 @@
 
 package com.rpkit.players.bukkit.test.command.profile
 
+import com.rpkit.chat.bukkit.discord.DiscordTextButton
 import com.rpkit.chat.bukkit.discord.RPKDiscordService
 import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.core.command.result.CommandSuccess
@@ -980,7 +982,7 @@ class ProfileCommandTests : WordSpec({
             every { discordProfile.discordId } returns userId
             val discordService = mockk<RPKDiscordService>()
             every { discordService.getUserId(any()) } returns userId
-            every { discordService.sendMessage(discordProfile, any(), any()) } just runs
+            every { discordService.sendMessage(discordProfile, any(), any<DiscordTextButton>()) } just runs
             val discordProfileService = mockk<RPKDiscordProfileService>()
             every { discordProfileService.getDiscordProfile(userId) } returns CompletableFuture.completedFuture(discordProfile)
             val testServicesDelegate = mockk<ServicesDelegate>()
@@ -990,7 +992,7 @@ class ProfileCommandTests : WordSpec({
             val profileCommand = ProfileCommand(plugin)
             profileCommand.onCommand(sender, arrayOf("link", "discord", "abcd#1234")).join() should beInstanceOf<CommandSuccess>()
             verify(exactly = 1) { sender.sendMessage(discordProfileLinkedMessage) }
-            verify(exactly = 1) { discordService.sendMessage(discordProfile, any(), any()) }
+            verify(exactly = 1) { discordService.sendMessage(discordProfile, any(), any<DiscordTextButton>()) }
         }
         "return not a player failure when confirmlink is used from console" {
             val notAPlayerMessage = "not a player"

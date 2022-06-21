@@ -16,11 +16,12 @@
 
 package com.rpkit.payments.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.payments.bukkit.command.payment.PaymentCommand
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupInviteTable
@@ -29,15 +30,17 @@ import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupOwnerTable
 import com.rpkit.payments.bukkit.database.table.RPKPaymentGroupTable
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupService
 import com.rpkit.payments.bukkit.group.RPKPaymentGroupServiceImpl
+import com.rpkit.payments.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.payments.bukkit.messages.PaymentsMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK payments plugin default implementation.
  */
-class RPKPaymentsBukkit : RPKBukkitPlugin() {
+class RPKPaymentsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: PaymentsMessages
@@ -92,9 +95,9 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
                 classLoader
         )
         database.addTable(RPKPaymentGroupTable(database, this))
-        database.addTable(RPKPaymentGroupInviteTable(database))
-        database.addTable(RPKPaymentGroupMemberTable(database))
-        database.addTable(RPKPaymentGroupOwnerTable(database))
+        database.addTable(RPKPaymentGroupInviteTable(database, this))
+        database.addTable(RPKPaymentGroupMemberTable(database, this))
+        database.addTable(RPKPaymentGroupOwnerTable(database, this))
 
         Services[RPKPaymentGroupService::class.java] = RPKPaymentGroupServiceImpl(this)
 
@@ -103,9 +106,14 @@ class RPKPaymentsBukkit : RPKBukkitPlugin() {
                 .runTaskTimer(this, 1200L, 1200L)
 
         registerCommands()
+        registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerListeners() {
+        registerListeners(RPKCharacterDeleteListener(this))
+    }
+
+    private fun registerCommands() {
         getCommand("payment")?.setExecutor(PaymentCommand(this))
     }
 

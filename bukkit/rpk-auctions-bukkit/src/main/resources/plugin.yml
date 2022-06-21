@@ -8,7 +8,7 @@ depend:
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
 - rpk-auction-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
   auction:
     description: Auction management command

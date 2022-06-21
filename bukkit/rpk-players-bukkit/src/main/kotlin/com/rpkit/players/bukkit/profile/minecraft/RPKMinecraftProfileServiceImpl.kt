@@ -82,7 +82,7 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
         plugin.logger.info("Unloaded Minecraft profile for user ${minecraftProfile.minecraftUUID}")
     }
 
-    override fun getMinecraftProfile(id: RPKMinecraftProfileId): CompletableFuture<RPKMinecraftProfile?> {
+    override fun getMinecraftProfile(id: RPKMinecraftProfileId): CompletableFuture<out RPKMinecraftProfile?> {
         return plugin.database.getTable(RPKMinecraftProfileTable::class.java)[id]
     }
 
@@ -192,7 +192,7 @@ class RPKMinecraftProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RP
         }
     }
 
-    override fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): CompletableFuture<List<RPKMinecraftProfileLinkRequest>> {
+    override fun getMinecraftProfileLinkRequests(minecraftProfile: RPKMinecraftProfile): CompletableFuture<out List<RPKMinecraftProfileLinkRequest>> {
         return plugin.database.getTable(RPKMinecraftProfileLinkRequestTable::class.java).get(minecraftProfile)
     }
 

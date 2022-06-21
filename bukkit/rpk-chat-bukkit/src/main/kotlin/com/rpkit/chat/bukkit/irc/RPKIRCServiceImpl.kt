@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import org.pircbotx.PircBotX
 import org.pircbotx.delay.StaticDelay
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.logging.Level
 import kotlin.concurrent.thread
 
 /**
@@ -39,7 +41,7 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
     private val onlineUsers = CopyOnWriteArrayList<String>()
 
     init {
-        val whitelistValidator = IRCWhitelistValidator()
+        val whitelistValidator = IRCWhitelistValidator(plugin)
         val configuration = Configuration.Builder()
                 .setAutoNickChange(true)
                 .setCapEnabled(true)
@@ -117,6 +119,9 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
     override fun sendMessage(channel: IRCChannel, message: String): CompletableFuture<Void> {
         return CompletableFuture.runAsync {
             ircBot.sendIRC().message(channel.name, message)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to send IRC message", exception)
+            throw exception
         }
     }
 
@@ -127,6 +132,9 @@ class RPKIRCServiceImpl(override val plugin: RPKChatBukkit) : RPKIRCService {
     override fun sendMessage(nick: RPKIRCNick, message: String): CompletableFuture<Void> {
         return CompletableFuture.runAsync {
             ircBot.sendIRC().message(nick.value, message)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to send IRC message", exception)
+            throw exception
         }
     }
 

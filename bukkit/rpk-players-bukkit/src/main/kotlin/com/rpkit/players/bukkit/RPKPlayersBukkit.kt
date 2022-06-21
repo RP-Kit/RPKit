@@ -18,15 +18,18 @@ package com.rpkit.players.bukkit
 
 import com.rpkit.core.bukkit.command.sender.resolver.RPKBukkitCommandSenderResolutionService
 import com.rpkit.core.bukkit.command.toBukkit
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.command.RPKBukkitMinecraftProfileCommandSenderResolver
 import com.rpkit.players.bukkit.command.profile.ProfileCommand
 import com.rpkit.players.bukkit.database.table.*
+import com.rpkit.players.bukkit.github.RPKGitHubService
+import com.rpkit.players.bukkit.github.RPKGitHubServiceImpl
 import com.rpkit.players.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.players.bukkit.listener.PlayerJoinListener
 import com.rpkit.players.bukkit.listener.PlayerQuitListener
@@ -46,6 +49,7 @@ import com.rpkit.players.bukkit.web.PlayersWebAPI
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
@@ -56,7 +60,7 @@ import kotlin.text.Charsets.UTF_8
 /**
  * RPK players plugin default implementation.
  */
-class RPKPlayersBukkit : RPKBukkitPlugin() {
+class RPKPlayersBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: PlayersMessages
@@ -115,7 +119,7 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
         database.addTable(RPKGitHubProfileTable(database, this))
         database.addTable(RPKIRCProfileTable(database, this))
         database.addTable(RPKMinecraftProfileTable(database, this))
-        database.addTable(RPKMinecraftProfileLinkRequestTable(database))
+        database.addTable(RPKMinecraftProfileLinkRequestTable(database, this))
         database.addTable(RPKProfileTable(database, this))
 
         Services[RPKDiscordProfileService::class.java] = RPKDiscordProfileServiceImpl(this)
@@ -123,6 +127,7 @@ class RPKPlayersBukkit : RPKBukkitPlugin() {
         Services[RPKIRCProfileService::class.java] = RPKIRCProfileServiceImpl(this)
         Services[RPKMinecraftProfileService::class.java] = RPKMinecraftProfileServiceImpl(this)
         Services[RPKProfileService::class.java] = RPKProfileServiceImpl(this)
+        Services[RPKGitHubService::class.java] = RPKGitHubServiceImpl(this)
 
         Services.require(RPKBukkitCommandSenderResolutionService::class.java).whenAvailable { commandSenderResolutionService ->
             commandSenderResolutionService.addResolver(RPKBukkitMinecraftProfileCommandSenderResolver())

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +17,7 @@
 package com.rpkit.economy.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.economy.bukkit.RPKEconomyBukkit
@@ -23,13 +25,16 @@ import com.rpkit.economy.bukkit.character.RPKMoneyHidden
 import com.rpkit.economy.bukkit.database.create
 import com.rpkit.economy.bukkit.database.jooq.Tables.RPKIT_MONEY_HIDDEN
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the money hidden table.
  */
 class RPKMoneyHiddenTable(
         private val database: Database,
-        plugin: RPKEconomyBukkit
+        private val plugin: RPKEconomyBukkit
 ) : Table {
 
     private val characterCache = if (plugin.config.getBoolean("caching.rpkit_money_hidden.character_id.enabled")) {
@@ -45,7 +50,7 @@ class RPKMoneyHiddenTable(
 
     fun insert(entity: RPKMoneyHidden): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_MONEY_HIDDEN,
@@ -56,6 +61,9 @@ class RPKMoneyHiddenTable(
                 )
                 .execute()
             characterCache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert money hidden", exception)
+            throw exception
         }
     }
 
@@ -80,18 +88,35 @@ class RPKMoneyHiddenTable(
             val moneyHidden = RPKMoneyHidden(character)
             characterCache?.set(characterId.value, moneyHidden)
             return@supplyAsync moneyHidden
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get money hidden", exception)
+            throw exception
         }
     }
 
     fun delete(entity: RPKMoneyHidden): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_MONEY_HIDDEN)
                 .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .execute()
             characterCache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete money hidden", exception)
+            throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_MONEY_HIDDEN)
+            .where(RPKIT_MONEY_HIDDEN.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        characterCache?.remove(characterId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete money hidden for character id", exception)
+        throw exception
     }
 
 }

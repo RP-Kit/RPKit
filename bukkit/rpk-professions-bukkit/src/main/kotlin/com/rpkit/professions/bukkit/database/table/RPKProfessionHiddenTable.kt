@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.professions.bukkit.character.RPKProfessionHidden
 import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_PROFESSION_HIDDEN
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKProfessionHiddenTable(
@@ -54,6 +56,9 @@ class RPKProfessionHiddenTable(
                 )
                 .execute()
             characterCache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert profession hidden", exception)
+            throw exception
         }
     }
 
@@ -71,6 +76,9 @@ class RPKProfessionHiddenTable(
             val professionHidden = RPKProfessionHidden(character)
             characterCache?.set(characterId.value, professionHidden)
             return@supplyAsync professionHidden
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get profession hidden", exception)
+            throw exception
         }
     }
 
@@ -82,6 +90,9 @@ class RPKProfessionHiddenTable(
                 .where(RPKIT_PROFESSION_HIDDEN.CHARACTER_ID.eq(characterId.value))
                 .execute()
             characterCache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete profession hidden", exception)
+            throw exception
         }
     }
 }

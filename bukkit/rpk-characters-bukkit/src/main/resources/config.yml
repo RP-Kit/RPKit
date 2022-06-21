@@ -30,6 +30,7 @@ characters:
   delete-character-on-death: false
   strict-movement-prevention-when-dead: true
   set-player-display-name: false
+  set-player-nameplate: true
   new-character-cooldown: 604800000
 races:
   Human:

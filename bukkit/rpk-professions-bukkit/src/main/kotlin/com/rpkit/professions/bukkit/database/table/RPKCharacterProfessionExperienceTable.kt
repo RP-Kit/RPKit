@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +25,7 @@ import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESS
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfessionExperience
 import com.rpkit.professions.bukkit.profession.RPKProfession
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKCharacterProfessionExperienceTable(
@@ -65,6 +67,9 @@ class RPKCharacterProfessionExperienceTable(
                 )
                 .execute()
             cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert character profession experience", exception)
+            throw exception
         }
     }
 
@@ -79,6 +84,9 @@ class RPKCharacterProfessionExperienceTable(
                 .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .execute()
             cache?.set(CharacterProfessionCacheKey(characterId.value, professionName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character profession experience", exception)
+            throw exception
         }
     }
 
@@ -102,6 +110,9 @@ class RPKCharacterProfessionExperienceTable(
                 characterProfessionExperience
             )
             return@supplyAsync characterProfessionExperience
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character profession experience", exception)
+            throw exception
         }
     }
 
@@ -115,6 +126,9 @@ class RPKCharacterProfessionExperienceTable(
                 .and(RPKIT_CHARACTER_PROFESSION_EXPERIENCE.PROFESSION.eq(professionName.value))
                 .execute()
             cache?.remove(CharacterProfessionCacheKey(characterId.value, professionName.value))
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character profession experience", exception)
+            throw exception
         }
     }
 
@@ -128,6 +142,9 @@ class RPKCharacterProfessionExperienceTable(
             cache?.keys()
                 ?.filter { it.characterId == characterId.value }
                 ?.forEach { cache.remove(it) }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character profession experience", exception)
+            throw exception
         }
     }
 

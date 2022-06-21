@@ -36,6 +36,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Character implementation.
@@ -53,7 +54,7 @@ class RPKCharacterImpl(
     description: String = plugin.config.getString("characters.defaults.description") ?: "",
     dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
     override var location: RPKLocation = Bukkit.getWorlds()[0].spawnLocation.toRPKLocation(),
-    override var inventoryContents: Array<ItemStack> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>).toTypedArray(),
+    override var inventoryContents: Array<ItemStack?> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>).toTypedArray(),
     override var helmet: ItemStack? = plugin.config.getItemStack("characters.defaults.helmet"),
     override var chestplate: ItemStack? = plugin.config.getItemStack("characters.defaults.chestplate"),
     override var leggings: ItemStack? = plugin.config.getItemStack("characters.defaults.leggings"),
@@ -136,7 +137,12 @@ class RPKCharacterImpl(
                                 ) == "\${${field.name}}"
                             }
                             .forEach { field ->
-                                val textComponent = TextComponent(field.get(this).join())
+                                val textComponent = TextComponent(
+                                    if (profile is RPKProfile)
+                                        field.get(this, profile).join()
+                                    else
+                                        field.get(this).join()
+                                )
                                 if (chatColor != null) {
                                     textComponent.color = chatColor.asBungee()
                                 }
@@ -258,6 +264,9 @@ class RPKCharacterImpl(
                 }
                 minecraftProfile.sendMessage(*messageComponents.toTypedArray())
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to show character card", exception)
+            throw exception
         }
     }
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +32,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKBlockInventoryChangeTable(private val database: Database, private val plugin: RPKBlockLoggingBukkit) : Table {
@@ -74,6 +76,9 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
             val id = database.create.lastID().toInt()
             entity.id = RPKBlockInventoryChangeId(id)
             cache?.set(id, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert block inventory change", exception)
+            throw exception
         }
     }
 
@@ -93,10 +98,13 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
                 .where(RPKIT_BLOCK_INVENTORY_CHANGE.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update block inventory change", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKBlockInventoryChangeId): CompletableFuture<RPKBlockInventoryChange?> {
+    operator fun get(id: RPKBlockInventoryChangeId): CompletableFuture<out RPKBlockInventoryChange?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         }
@@ -153,6 +161,9 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
             )
             cache?.set(id.value, blockInventoryChange)
             return@supplyAsync blockInventoryChange
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get block inventory change", exception)
+            throw exception
         }
     }
 
@@ -166,7 +177,10 @@ class RPKBlockInventoryChangeTable(private val database: Database, private val p
             val futures = results
                 .map { result -> get(RPKBlockInventoryChangeId(result[RPKIT_BLOCK_INVENTORY_CHANGE.ID])) }
             CompletableFuture.allOf(*futures.toTypedArray()).join()
-            return@supplyAsync futures.mapNotNull(CompletableFuture<RPKBlockInventoryChange?>::join)
+            return@supplyAsync futures.mapNotNull(CompletableFuture<out RPKBlockInventoryChange?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get block inventory changes", exception)
+            throw exception
         }
     }
 

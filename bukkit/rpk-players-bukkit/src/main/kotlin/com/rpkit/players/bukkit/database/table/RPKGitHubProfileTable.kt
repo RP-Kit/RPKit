@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,9 +30,13 @@ import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileId
 import com.rpkit.players.bukkit.profile.github.RPKGitHubProfileImpl
 import com.rpkit.players.bukkit.profile.github.RPKGitHubUsername
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
-class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBukkit) : Table {
+class RPKGitHubProfileTable(
+    private val database: Database,
+    private val plugin: RPKPlayersBukkit
+) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_github_profile.id.enabled")) {
         database.cacheManager.createCache(
@@ -75,6 +80,9 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
             entity.id = RPKGitHubProfileId(id)
             cache?.set(id, entity)
             nameCache?.set(entity.name.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert github profile", exception)
+            throw exception
         }
     }
 
@@ -91,10 +99,13 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                 .execute()
             cache?.set(id.value, entity)
             nameCache?.set(entity.name.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update github profile", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKGitHubProfileId): CompletableFuture<RPKGitHubProfile?> {
+    operator fun get(id: RPKGitHubProfileId): CompletableFuture<out RPKGitHubProfile?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         }
@@ -128,10 +139,13 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                     .execute()
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get github profile", exception)
+            throw exception
         }
     }
 
-    operator fun get(name: RPKGitHubUsername): CompletableFuture<RPKGitHubProfile?> {
+    operator fun get(name: RPKGitHubUsername): CompletableFuture<out RPKGitHubProfile?> {
         if (nameCache?.containsKey(name.value) == true) {
             return CompletableFuture.completedFuture(nameCache[name.value])
         }
@@ -168,6 +182,9 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                 nameCache?.remove(name.value)
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get github profile", exception)
+            throw exception
         }
     }
 
@@ -183,9 +200,11 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                 get(RPKGitHubProfileId(result.get(RPKIT_GITHUB_PROFILE.ID)))
             }
             CompletableFuture.allOf(*githubProfileFutures.toTypedArray()).join()
-            return@supplyAsync githubProfileFutures.mapNotNull(CompletableFuture<RPKGitHubProfile?>::join)
+            return@supplyAsync githubProfileFutures.mapNotNull(CompletableFuture<out RPKGitHubProfile?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get github profiles", exception)
+            throw exception
         }
-
     }
 
     fun delete(entity: RPKGitHubProfile): CompletableFuture<Void> {
@@ -197,6 +216,9 @@ class RPKGitHubProfileTable(private val database: Database, plugin: RPKPlayersBu
                 .execute()
             cache?.remove(id.value)
             nameCache?.remove(entity.name.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete github profile", exception)
+            throw exception
         }
     }
 

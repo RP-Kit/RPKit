@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +17,7 @@
 package com.rpkit.shops.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.shops.bukkit.RPKShopsBukkit
@@ -23,6 +25,8 @@ import com.rpkit.shops.bukkit.database.create
 import com.rpkit.shops.bukkit.database.jooq.Tables.RPKIT_SHOP_COUNT
 import com.rpkit.shops.bukkit.shopcount.RPKShopCount
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the shop count table.
@@ -42,7 +46,7 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
 
     fun insert(entity: RPKShopCount): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_SHOP_COUNT,
@@ -55,18 +59,24 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
                 )
                 .execute()
             characterCache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to insert shop count", exception)
+            throw exception
         }
     }
 
     fun update(entity: RPKShopCount): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_SHOP_COUNT)
                 .set(RPKIT_SHOP_COUNT.COUNT, entity.count)
                 .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
                 .execute()
             characterCache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to update shop count", exception)
+            throw exception
         }
     }
 
@@ -97,18 +107,35 @@ class RPKShopCountTable(private val database: Database, private val plugin: RPKS
                 )
                 characterCache?.set(characterId.value, shopCount)
                 return@supplyAsync shopCount
+            }.exceptionally { exception ->
+                plugin.logger.log(SEVERE, "Failed to get shop count", exception)
+                throw exception
             }
         }
     }
 
     fun delete(entity: RPKShopCount): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_SHOP_COUNT)
                 .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
                 .execute()
             characterCache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to delete shop count", exception)
+            throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_SHOP_COUNT)
+            .where(RPKIT_SHOP_COUNT.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        characterCache?.remove(characterId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete shop count for character id", exception)
+        throw exception
     }
 }

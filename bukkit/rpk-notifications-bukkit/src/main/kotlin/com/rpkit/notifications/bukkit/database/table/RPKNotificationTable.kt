@@ -19,6 +19,7 @@ package com.rpkit.notifications.bukkit.database.table
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.notifications.bukkit.RPKNotificationsBukkit
 import com.rpkit.notifications.bukkit.database.create
 import com.rpkit.notifications.bukkit.database.jooq.Tables.RPKIT_NOTIFICATION
 import com.rpkit.notifications.bukkit.database.jooq.tables.records.RpkitNotificationRecord
@@ -33,26 +34,34 @@ import java.time.ZoneOffset.UTC
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.CompletableFuture.supplyAsync
+import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
-class RPKNotificationTable(private val database: Database) : Table {
+class RPKNotificationTable(private val database: Database, private val plugin: RPKNotificationsBukkit) : Table {
 
-    fun get(id: RPKNotificationId): CompletableFuture<RPKNotification?> {
+    fun get(id: RPKNotificationId): CompletableFuture<out RPKNotification?> {
         return supplyAsync {
             val result = database.create
                 .selectFrom(RPKIT_NOTIFICATION)
                 .where(RPKIT_NOTIFICATION.ID.eq(id.value))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync result.toDomain()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get notification", exception)
+            throw exception
         }
     }
 
-    fun get(recipient: RPKProfile): CompletableFuture<List<RPKNotification>> {
+    fun get(recipient: RPKProfile): CompletableFuture<out List<RPKNotification>> {
         return supplyAsync {
             val result = database.create
                 .selectFrom(RPKIT_NOTIFICATION)
                 .where(RPKIT_NOTIFICATION.RECIPIENT_ID.eq(recipient.id?.value))
                 .fetch()
             return@supplyAsync result.mapNotNull { it.toDomain() }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get notifications", exception)
+            throw exception
         }
     }
 
@@ -75,6 +84,9 @@ class RPKNotificationTable(private val database: Database) : Table {
                     notification.read
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert notification", exception)
+            throw exception
         }
     }
 
@@ -88,6 +100,9 @@ class RPKNotificationTable(private val database: Database) : Table {
                 .set(RPKIT_NOTIFICATION.READ, notification.read)
                 .where(RPKIT_NOTIFICATION.ID.eq(notification.id?.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update notification", exception)
+            throw exception
         }
     }
 
@@ -97,7 +112,20 @@ class RPKNotificationTable(private val database: Database) : Table {
                 .deleteFrom(RPKIT_NOTIFICATION)
                 .where(RPKIT_NOTIFICATION.ID.eq(notification.id?.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete notification", exception)
+            throw exception
         }
+    }
+
+    fun delete(profileId: RPKProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_NOTIFICATION)
+            .where(RPKIT_NOTIFICATION.RECIPIENT_ID.eq(profileId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete notifications for profile id", exception)
+        throw exception
     }
 
     private fun RpkitNotificationRecord.toDomain(): RPKNotificationImpl? {

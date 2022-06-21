@@ -28,13 +28,14 @@ import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKWarpServiceImpl(override val plugin: RPKTravelBukkit) : RPKWarpService {
-    override val warps: CompletableFuture<List<RPKWarp>>
+    override val warps: CompletableFuture<out List<RPKWarp>>
         get() = plugin.database.getTable(RPKWarpTable::class.java).getAll()
 
-    override fun getWarp(name: RPKWarpName): CompletableFuture<RPKWarp?> {
+    override fun getWarp(name: RPKWarpName): CompletableFuture<out RPKWarp?> {
         return plugin.database.getTable(RPKWarpTable::class.java)[name.value]
     }
 
@@ -45,6 +46,9 @@ class RPKWarpServiceImpl(override val plugin: RPKTravelBukkit) : RPKWarpService 
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKWarpTable::class.java).insert(event.warp).join()
             this.addWarpPermission(warp)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add warp", exception)
+            throw exception
         }
     }
 

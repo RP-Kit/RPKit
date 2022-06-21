@@ -17,23 +17,23 @@
 package com.rpkit.essentials.bukkit
 
 import com.rpkit.core.bukkit.command.toBukkit
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.dailyquote.bukkit.dailyquote.RPKDailyQuoteService
 import com.rpkit.essentials.bukkit.command.*
+import com.rpkit.essentials.bukkit.command.issue.IssueCommand
 import com.rpkit.essentials.bukkit.dailyquote.RPKDailyQuoteServiceImpl
 import com.rpkit.essentials.bukkit.database.table.RPKLogMessagesEnabledTable
 import com.rpkit.essentials.bukkit.database.table.RPKPreviousLocationTable
 import com.rpkit.essentials.bukkit.database.table.RPKTrackingDisabledTable
 import com.rpkit.essentials.bukkit.kit.RPKKitImpl
 import com.rpkit.essentials.bukkit.kit.RPKKitServiceImpl
-import com.rpkit.essentials.bukkit.listener.PlayerJoinListener
-import com.rpkit.essentials.bukkit.listener.PlayerQuitListener
-import com.rpkit.essentials.bukkit.listener.PlayerTeleportListener
+import com.rpkit.essentials.bukkit.listener.*
 import com.rpkit.essentials.bukkit.locationhistory.RPKLocationHistoryServiceImpl
 import com.rpkit.essentials.bukkit.logmessage.RPKLogMessageService
 import com.rpkit.essentials.bukkit.messages.EssentialsMessages
@@ -46,6 +46,7 @@ import org.bstats.bukkit.Metrics
 import org.bukkit.GameRule.DO_DAYLIGHT_CYCLE
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.time.Duration
 import kotlin.math.max
@@ -53,7 +54,7 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 
-class RPKEssentialsBukkit : RPKBukkitPlugin() {
+class RPKEssentialsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: EssentialsMessages
@@ -155,7 +156,7 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("back")?.setExecutor(BackCommand(this))
         getCommand("clone")?.setExecutor(CloneCommand(this))
         getCommand("distance")?.setExecutor(DistanceCommand(this))
@@ -166,6 +167,7 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
         getCommand("getsign")?.setExecutor(GetSignCommand(this))
         getCommand("heal")?.setExecutor(HealCommand(this))
         getCommand("inventory")?.setExecutor(InventoryCommand(this))
+        getCommand("issue")?.setExecutor(IssueCommand(this).toBukkit())
         getCommand("item")?.setExecutor(ItemCommand(this))
         getCommand("itemmeta")?.setExecutor(ItemMetaCommand(this))
         getCommand("jump")?.setExecutor(JumpCommand(this))
@@ -188,11 +190,13 @@ class RPKEssentialsBukkit : RPKBukkitPlugin() {
         getCommand("unsign")?.setExecutor(UnsignCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                PlayerJoinListener(this),
-                PlayerQuitListener(this),
-                PlayerTeleportListener()
+            PlayerJoinListener(this),
+            PlayerQuitListener(this),
+            PlayerTeleportListener(),
+            RPKCharacterDeleteListener(this),
+            RPKMinecraftProfileDeleteListener(this)
         )
     }
 

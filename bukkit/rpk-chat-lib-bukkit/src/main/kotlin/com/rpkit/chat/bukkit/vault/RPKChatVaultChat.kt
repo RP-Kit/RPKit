@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         throw UnsupportedOperationException("rpk-chat does not support group info nodes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setPlayerInfoBoolean(world: String, playerName: String, node: String, value: Boolean) {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
@@ -50,14 +51,17 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         throw UnsupportedOperationException("rpk-chat does not support group info nodes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setPlayerPrefix(world: String, playerName: String, prefix: String) {
         throw UnsupportedOperationException("rpk-chat does not support individual player prefixes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setPlayerSuffix(world: String, playerName: String, suffix: String) {
         throw UnsupportedOperationException("rpk-chat does not support suffixes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPlayerPrefix(world: String, playerName: String): String {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getPlayerPrefix)")
@@ -80,6 +84,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         prefixService?.getPrefix(group)?.prefix = prefix
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setPlayerInfoDouble(world: String, playerName: String, node: String, value: Double) {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
@@ -88,6 +93,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         throw UnsupportedOperationException("rpk-chat does not support group info nodes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPlayerSuffix(world: String, playerName: String): String {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
@@ -96,18 +102,22 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         throw UnsupportedOperationException("rpk-chat does not support suffixes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPlayerInfoInteger(world: String, playerName: String, node: String, defaultValue: Int): Int {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setPlayerInfoInteger(world: String, playerName: String, node: String, value: Int) {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPlayerInfoDouble(world: String, playerName: String, node: String, defaultValue: Double): Double {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPlayerInfoString(world: String, playerName: String, node: String, defaultValue: String): String {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
@@ -116,6 +126,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         throw UnsupportedOperationException("rpk-chat does not support group info nodes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getPlayerInfoBoolean(world: String, playerName: String, node: String, defaultValue: Boolean): Boolean {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }
@@ -136,6 +147,7 @@ class RPKChatVaultChat(private val plugin: RPKChatLibBukkit) : Chat(plugin.serve
         throw UnsupportedOperationException("rpk-chat does not support suffixes")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setPlayerInfoString(world: String, playerName: String, node: String, value: String) {
         throw UnsupportedOperationException("rpk-chat does not support player info nodes")
     }

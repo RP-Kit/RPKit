@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +16,18 @@
 
 package com.rpkit.permissions.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.permissions.bukkit.vault.RPKPermissionsVaultPermissions
 import net.milkbowl.vault.permission.Permission
 import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.ServicePriority
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * Class to allow permissions lib to load as a plugin.
  * This allows plugins requiring permissions or implementing permissions to depend on the plugin.
  */
-class RPKPermissionsLibBukkit : RPKBukkitPlugin() {
+class RPKPermissionsLibBukkit : JavaPlugin(), RPKPlugin {
     override fun onEnable() {
         Metrics(this, 4408)
         if (server.pluginManager.getPlugin("Vault") != null) {

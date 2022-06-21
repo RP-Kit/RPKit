@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +86,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
                     if (character != null) {
                         val conversation = confirmationConversationFactory.buildConversation(sender)
                         conversation.context.setSessionData("character_id", character.id)
+                        conversation.begin()
                     } else {
                         sender.sendMessage(plugin.messages.characterDeleteInvalidCharacter)
                     }

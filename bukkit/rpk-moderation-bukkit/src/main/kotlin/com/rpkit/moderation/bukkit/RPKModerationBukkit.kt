@@ -16,11 +16,12 @@
 
 package com.rpkit.moderation.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.moderation.bukkit.command.amivanished.AmIVanishedCommand
 import com.rpkit.moderation.bukkit.command.onlinestaff.OnlineStaffCommand
@@ -34,6 +35,8 @@ import com.rpkit.moderation.bukkit.database.table.RPKTicketTable
 import com.rpkit.moderation.bukkit.database.table.RPKVanishStateTable
 import com.rpkit.moderation.bukkit.database.table.RPKWarningTable
 import com.rpkit.moderation.bukkit.listener.PlayerJoinListener
+import com.rpkit.moderation.bukkit.listener.RPKMinecraftProfileDeleteListener
+import com.rpkit.moderation.bukkit.listener.RPKProfileDeleteListener
 import com.rpkit.moderation.bukkit.messages.ModerationMessages
 import com.rpkit.moderation.bukkit.ticket.RPKTicketService
 import com.rpkit.moderation.bukkit.ticket.RPKTicketServiceImpl
@@ -43,10 +46,11 @@ import com.rpkit.moderation.bukkit.warning.RPKWarningService
 import com.rpkit.moderation.bukkit.warning.RPKWarningServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-class RPKModerationBukkit : RPKBukkitPlugin() {
+class RPKModerationBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: ModerationMessages
@@ -113,7 +117,7 @@ class RPKModerationBukkit : RPKBukkitPlugin() {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("amivanished")?.setExecutor(AmIVanishedCommand(this))
         getCommand("onlinestaff")?.setExecutor(OnlineStaffCommand(this))
         getCommand("ticket")?.setExecutor(TicketCommand(this))
@@ -124,9 +128,11 @@ class RPKModerationBukkit : RPKBukkitPlugin() {
         getCommand("unvanish")?.setExecutor(UnvanishCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                PlayerJoinListener(this)
+                PlayerJoinListener(this),
+            RPKMinecraftProfileDeleteListener(this),
+            RPKProfileDeleteListener(this)
         )
     }
 

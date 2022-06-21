@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +26,10 @@ import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the last used chat group table
@@ -46,7 +50,7 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
     fun insert(entity: RPKLastUsedChatGroup): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_LAST_USED_CHAT_GROUP,
@@ -59,19 +63,25 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                 )
                 .execute()
             minecraftProfileCache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to insert last used chat group", exception)
+            throw exception
         }
     }
 
     fun update(entity: RPKLastUsedChatGroup): CompletableFuture<Void> {
         val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_LAST_USED_CHAT_GROUP)
                 .set(RPKIT_LAST_USED_CHAT_GROUP.CHAT_GROUP_ID, chatGroupId.value)
                 .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             minecraftProfileCache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to update last used chat group", exception)
+            throw exception
         }
     }
 
@@ -106,18 +116,35 @@ class RPKLastUsedChatGroupTable(private val database: Database, private val plug
                     .execute()
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to get last used chat group", exception)
+            throw exception
         }
     }
 
     fun delete(entity: RPKLastUsedChatGroup): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_LAST_USED_CHAT_GROUP)
                 .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             minecraftProfileCache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to delete last used chat group", exception)
+            throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_LAST_USED_CHAT_GROUP)
+            .where(RPKIT_LAST_USED_CHAT_GROUP.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        minecraftProfileCache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete last used chat gorup for Minecraft profile id", exception)
+        throw exception
     }
 
 }

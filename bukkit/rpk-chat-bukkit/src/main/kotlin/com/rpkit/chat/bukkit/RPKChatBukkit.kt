@@ -45,6 +45,7 @@ import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.chat.bukkit.irc.RPKIRCServiceImpl
 import com.rpkit.chat.bukkit.listener.AsyncPlayerChatListener
 import com.rpkit.chat.bukkit.listener.PlayerCommandPreprocessListener
+import com.rpkit.chat.bukkit.listener.RPKMinecraftProfileDeleteListener
 import com.rpkit.chat.bukkit.messages.ChatMessages
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
@@ -52,23 +53,25 @@ import com.rpkit.chat.bukkit.prefix.RPKPrefixServiceImpl
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.chat.bukkit.snooper.RPKSnooperServiceImpl
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK chat plugin default implementation.
  */
-class RPKChatBukkit : RPKBukkitPlugin() {
+class RPKChatBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: ChatMessages
@@ -163,7 +166,7 @@ class RPKChatBukkit : RPKBukkitPlugin() {
         database.addTable(RPKChatChannelMuteTable(database, this))
         database.addTable(RPKChatChannelSpeakerTable(database, this))
         database.addTable(RPKChatGroupTable(database, this))
-        database.addTable(RPKChatGroupInviteTable(database))
+        database.addTable(RPKChatGroupInviteTable(database, this))
         database.addTable(RPKChatGroupMemberTable(database, this))
         database.addTable(RPKLastUsedChatGroupTable(database, this))
         database.addTable(RPKSnooperTable(database, this))
@@ -209,7 +212,7 @@ class RPKChatBukkit : RPKBukkitPlugin() {
         }
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("chatchannel")?.setExecutor(ChatChannelCommand(this))
         getCommand("mute")?.setExecutor(MuteCommand(this))
         getCommand("unmute")?.setExecutor(UnmuteCommand(this))
@@ -220,10 +223,11 @@ class RPKChatBukkit : RPKBukkitPlugin() {
         getCommand("snoop")?.setExecutor(SnoopCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                AsyncPlayerChatListener(this),
-                PlayerCommandPreprocessListener(this)
+            AsyncPlayerChatListener(this),
+            PlayerCommandPreprocessListener(this),
+            RPKMinecraftProfileDeleteListener(this)
         )
     }
 

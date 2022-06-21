@@ -2,7 +2,7 @@ name: rpk-block-logging-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.blocklog.bukkit.RPKBlockLoggingBukkit
-api-version: '1.18'
+api-version: '1.19'
 depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftUsername
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
 
@@ -72,6 +74,9 @@ class ProfileViewCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecu
                 )
             )
             return@supplyAsync CommandSuccess
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to view profile", exception)
+            throw exception
         }
     }
 }

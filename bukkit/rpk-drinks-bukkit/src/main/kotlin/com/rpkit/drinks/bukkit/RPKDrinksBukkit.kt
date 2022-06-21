@@ -17,26 +17,29 @@
 package com.rpkit.drinks.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.drink.bukkit.drink.RPKDrinkService
 import com.rpkit.drinks.bukkit.database.table.RPKDrunkennessTable
 import com.rpkit.drinks.bukkit.drink.RPKDrinkServiceImpl
 import com.rpkit.drinks.bukkit.listener.PlayerItemConsumeListener
+import com.rpkit.drinks.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType.*
 import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 
 
-class RPKDrinksBukkit : RPKBukkitPlugin() {
+class RPKDrinksBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
 
@@ -131,7 +134,8 @@ class RPKDrinksBukkit : RPKBukkitPlugin() {
 
     private fun registerListeners() {
         registerListeners(
-                PlayerItemConsumeListener(this)
+            PlayerItemConsumeListener(this),
+            RPKCharacterDeleteListener(this)
         )
     }
 }

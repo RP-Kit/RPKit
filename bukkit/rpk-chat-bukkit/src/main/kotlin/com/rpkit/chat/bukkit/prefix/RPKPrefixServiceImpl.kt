@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import org.bukkit.ChatColor
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Prefix service implementation.
@@ -73,6 +74,9 @@ class RPKPrefixServiceImpl(override val plugin: RPKChatBukkit) : RPKPrefixServic
                 .filter { profile.hasPermission("rpkit.chat.prefix.${it.name}").join() }
                 .forEach { prefixBuilder.append(it.prefix).append(' ') }
             return@supplyAsync prefixBuilder.toString()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get prefix", exception)
+            throw exception
         }
     }
 

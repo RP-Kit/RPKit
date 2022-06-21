@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaId
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaImpl
 import com.rpkit.monsters.bukkit.monsterspawnarea.RPKMonsterSpawnAreaMonster
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKMonsterSpawnAreaTable(private val database: Database, private val plugin: RPKMonstersBukkit) : Table {
@@ -74,6 +75,9 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
             if (!allSpawnAreas.contains(entity)) {
                 allSpawnAreas.add(entity)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert monster spawn area", exception)
+            throw exception
         }
     }
 
@@ -95,10 +99,13 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
             if (!allSpawnAreas.contains(entity)) {
                 allSpawnAreas.add(entity)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update monster spawn area", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKMonsterSpawnAreaId): CompletableFuture<RPKMonsterSpawnArea?> {
+    operator fun get(id: RPKMonsterSpawnAreaId): CompletableFuture<out RPKMonsterSpawnArea?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         }
@@ -146,6 +153,9 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 allSpawnAreas.add(monsterSpawnArea)
             }
             return@supplyAsync monsterSpawnArea
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get monster spawn area", exception)
+            throw exception
         }
     }
 
@@ -158,9 +168,12 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 .fetch()
             val spawnAreaFutures = results.mapNotNull { get(RPKMonsterSpawnAreaId(it[RPKIT_MONSTER_SPAWN_AREA.ID])) }
             CompletableFuture.allOf(*spawnAreaFutures.toTypedArray()).join()
-            allSpawnAreas.addAll(spawnAreaFutures.mapNotNull(CompletableFuture<RPKMonsterSpawnArea?>::join))
+            allSpawnAreas.addAll(spawnAreaFutures.mapNotNull(CompletableFuture<out RPKMonsterSpawnArea?>::join))
             allFetched = true
             return@supplyAsync allSpawnAreas.toList()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get all monster spawn areas", exception)
+            throw exception
         }
     }
 
@@ -172,6 +185,9 @@ class RPKMonsterSpawnAreaTable(private val database: Database, private val plugi
                 .execute()
             entity.id?.let { database.getTable(RPKMonsterSpawnAreaMonsterTable::class.java).delete(it).join() }
             allSpawnAreas.remove(entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete monster spawn area", exception)
+            throw exception
         }
     }
 }

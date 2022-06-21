@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +29,8 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level
 
 
 class RPKWarningTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -46,7 +49,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
     fun insert(entity: RPKWarning): CompletableFuture<Void> {
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
         val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_WARNING,
@@ -65,6 +68,9 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
             val id = database.create.lastID().toInt()
             entity.id = RPKWarningId(id)
             cache?.set(id, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert warning", exception)
+            throw exception
         }
     }
 
@@ -72,7 +78,7 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
         val profileId = entity.profile.id ?: return CompletableFuture.completedFuture(null)
         val issuerId = entity.issuer.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_WARNING)
                 .set(RPKIT_WARNING.REASON, entity.reason)
@@ -82,10 +88,13 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update warning", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKWarningId): CompletableFuture<RPKWarning?> {
+    operator fun get(id: RPKWarningId): CompletableFuture<out RPKWarning?> {
         return CompletableFuture.supplyAsync {
             val result = database.create
                 .select(
@@ -118,6 +127,9 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 cache?.remove(id.value)
                 return@supplyAsync null
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update warning", exception)
+            throw exception
         }
     }
 
@@ -131,18 +143,26 @@ class RPKWarningTable(private val database: Database, private val plugin: RPKMod
                 .fetch()
             val warningFutures = results.map { get(RPKWarningId(it[RPKIT_WARNING.ID])) }
             CompletableFuture.allOf(*warningFutures.toTypedArray()).join()
-            return@supplyAsync warningFutures.mapNotNull(CompletableFuture<RPKWarning?>::join)
+            return@supplyAsync warningFutures.mapNotNull(CompletableFuture<out RPKWarning?>::join)
         }
     }
 
     fun delete(entity: RPKWarning): CompletableFuture<Void> {
         val id = entity.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_WARNING)
                 .where(RPKIT_WARNING.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
         }
+    }
+
+    fun delete(profileId: RPKProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_WARNING)
+            .where(RPKIT_WARNING.PROFILE_ID.eq(profileId.value))
+            .execute()
+        cache?.removeMatching { it.profile.id?.value == profileId.value }
     }
 }

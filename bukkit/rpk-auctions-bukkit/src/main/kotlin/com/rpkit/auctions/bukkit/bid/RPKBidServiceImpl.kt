@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidDeleteEvent
 import com.rpkit.auctions.bukkit.event.bid.RPKBukkitBidUpdateEvent
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Bid service implementation.
@@ -36,6 +38,9 @@ class RPKBidServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKBidService 
             if (event.isCancelled) return@supplyAsync false
             return@supplyAsync plugin.database.getTable(RPKBidTable::class.java).insert(event.bid)
                 .thenApply { true }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add bid", exception)
+            throw exception
         }
     }
 
@@ -57,6 +62,9 @@ class RPKBidServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKBidService 
             if (event.isCancelled) return@supplyAsync false
             return@supplyAsync plugin.database.getTable(RPKBidTable::class.java).update(event.bid)
                 .thenApply { true }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update bid", exception)
+            throw exception
         }
     }
 
@@ -67,6 +75,9 @@ class RPKBidServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKBidService 
             if (event.isCancelled) return@supplyAsync false
             return@supplyAsync plugin.database.getTable(RPKBidTable::class.java).delete(event.bid)
                 .thenApply { true }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove bid", exception)
+            throw exception
         }
     }
 

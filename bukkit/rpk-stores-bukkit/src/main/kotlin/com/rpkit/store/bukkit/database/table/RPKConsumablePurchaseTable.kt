@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +33,7 @@ import com.rpkit.store.bukkit.storeitem.RPKConsumableStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKConsumablePurchaseTable(private val database: Database, private val plugin: RPKStoresBukkit) : Table {
@@ -63,6 +65,9 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
                 .execute()
             entity.id = id
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert consumable purchase", exception)
+            throw exception
         }
     }
 
@@ -76,10 +81,13 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
                 .where(RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update consumable purchase", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKPurchaseId): CompletableFuture<RPKConsumablePurchase?> {
+    operator fun get(id: RPKPurchaseId): CompletableFuture<out RPKConsumablePurchase?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         }
@@ -137,6 +145,9 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
             )
             cache?.set(id.value, consumablePurchase)
             return@supplyAsync consumablePurchase
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get consumable purchase", exception)
+            throw exception
         }
     }
 
@@ -154,7 +165,10 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
                 .fetch()
             val purchaseFutures = result.map { row -> get(RPKPurchaseId(row[RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID])) }
             CompletableFuture.allOf(*purchaseFutures.toTypedArray()).join()
-            return@supplyAsync purchaseFutures.mapNotNull(CompletableFuture<RPKConsumablePurchase?>::join)
+            return@supplyAsync purchaseFutures.mapNotNull(CompletableFuture<out RPKConsumablePurchase?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get consumable purchases", exception)
+            throw exception
         }
     }
 
@@ -167,6 +181,9 @@ class RPKConsumablePurchaseTable(private val database: Database, private val plu
                 .where(RPKIT_CONSUMABLE_PURCHASE.PURCHASE_ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete consumable purchase", exception)
+            throw exception
         }
     }
 }

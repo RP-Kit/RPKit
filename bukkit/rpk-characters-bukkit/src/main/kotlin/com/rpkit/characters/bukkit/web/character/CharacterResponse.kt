@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +17,6 @@
 package com.rpkit.characters.bukkit.web.character
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import org.bukkit.inventory.ItemStack
 import org.http4k.core.Body
 import org.http4k.format.Gson.auto
 
@@ -76,7 +76,7 @@ fun RPKCharacter.toCharacterResponse() = CharacterResponse(
     location.z,
     location.yaw,
     location.pitch,
-    inventoryContents.map(ItemStack::serialize),
+    inventoryContents.map { it?.serialize() },
     helmet?.serialize(),
     chestplate?.serialize(),
     leggings?.serialize(),

@@ -16,11 +16,12 @@
 
 package com.rpkit.craftingskill.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.craftingskill.bukkit.command.craftingskill.CraftingSkillCommand
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
@@ -30,10 +31,11 @@ import com.rpkit.craftingskill.bukkit.listener.*
 import com.rpkit.craftingskill.bukkit.messages.CraftingSkillMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
+class RPKCraftingSkillBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: CraftingSkillMessages
@@ -97,7 +99,7 @@ class RPKCraftingSkillBukkit : RPKBukkitPlugin() {
 
     private fun registerListeners() {
         registerListeners(
-            RPKBukkitCharacterDeleteListener(this),
+            RPKCharacterDeleteListener(this),
             BlockBreakListener(this),
             CraftItemListener(this),
             PrepareItemCraftListener(this),

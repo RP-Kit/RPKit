@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +24,10 @@ import com.rpkit.chat.bukkit.mute.RPKChatChannelMute
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the chat channel mute table
@@ -49,7 +53,7 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
     fun insert(entity: RPKChatChannelMute): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         val chatChannelName = entity.chatChannel.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHAT_CHANNEL_MUTE,
@@ -62,6 +66,9 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
                 )
                 .execute()
             cache?.set(MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to insert chat channel mute", exception)
+            throw exception
         }
     }
 
@@ -88,6 +95,9 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
             )
             cache?.set(cacheKey, chatChannelMute)
             return@supplyAsync chatChannelMute
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to get chat channel mute", exception)
+            throw exception
         }
     }
 
@@ -95,14 +105,28 @@ class RPKChatChannelMuteTable(private val database: Database, private val plugin
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
         val chatChannelName = entity.chatChannel.name
         val cacheKey = MinecraftProfileChatChannelCacheKey(minecraftProfileId.value, chatChannelName.value)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
                 .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .and(RPKIT_CHAT_CHANNEL_MUTE.CHAT_CHANNEL_NAME.eq(chatChannelName.value))
                 .execute()
             cache?.remove(cacheKey)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to delete chat channel mute", exception)
+            throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_CHAT_CHANNEL_MUTE)
+            .where(RPKIT_CHAT_CHANNEL_MUTE.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.removeMatching { it.minecraftProfile.id?.value == minecraftProfileId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete chat channel mutes for Minecraft profile id", exception)
+        throw exception
     }
 
 }

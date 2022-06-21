@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,8 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 
 class RPKPlayerUnclaimingTable(private val database: Database, private val plugin: RPKLocksBukkit) : Table {
@@ -44,7 +47,7 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
 
     fun insert(entity: RPKPlayerUnclaiming): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_PLAYER_UNCLAIMING,
@@ -55,6 +58,9 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
                 )
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to insert player unclaiming", exception)
+            throw exception
         }
     }
 
@@ -72,6 +78,9 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
                 val playerUnclaiming = RPKPlayerUnclaiming(minecraftProfile)
                 cache?.set(minecraftProfileId.value, playerUnclaiming)
                 return@supplyAsync playerUnclaiming
+            }.exceptionally { exception ->
+                plugin.logger.log(SEVERE, "Failed to get player unclaiming", exception)
+                throw exception
             }
         }
     }
@@ -82,18 +91,35 @@ class RPKPlayerUnclaimingTable(private val database: Database, private val plugi
                 .selectFrom(RPKIT_PLAYER_UNCLAIMING)
                 .fetch()
                 .map { it.toDomain() }
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to get all players unclaiming", exception)
+            throw exception
         }
     }
 
     fun delete(entity: RPKPlayerUnclaiming): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
                 .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to delete player unclaiming", exception)
+            throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PLAYER_UNCLAIMING)
+            .where(RPKIT_PLAYER_UNCLAIMING.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete player unclaiming for Minecraft profile id", exception)
+        throw exception
     }
 
     private fun RpkitPlayerUnclaimingRecord.toDomain() = Services[RPKMinecraftProfileService::class.java]?.getMinecraftProfile(

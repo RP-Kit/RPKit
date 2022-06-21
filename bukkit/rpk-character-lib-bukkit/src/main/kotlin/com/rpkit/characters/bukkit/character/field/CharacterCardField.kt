@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.rpkit.characters.bukkit.character.field
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -39,5 +40,15 @@ interface CharacterCardField {
      * @return The value of the character card field for the character
      */
     fun get(character: RPKCharacter): CompletableFuture<String>
+
+    /**
+     * Gets the value of the field for a character and a given viewer.
+     * If the character card field is hidden but the viewer has permission to see it, this will return the actual value.
+     *
+     * @param character The character
+     * @param viewer The person viewing the field
+     * @return The value of the character card field for the character and given viewer
+     */
+    fun get(character: RPKCharacter, viewer: RPKProfile): CompletableFuture<String> = get(character)
 
 }

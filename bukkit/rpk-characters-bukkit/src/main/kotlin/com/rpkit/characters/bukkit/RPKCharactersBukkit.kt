@@ -30,15 +30,17 @@ import com.rpkit.characters.bukkit.placeholder.RPKCharactersPlaceholderExpansion
 import com.rpkit.characters.bukkit.race.RPKRaceService
 import com.rpkit.characters.bukkit.race.RPKRaceServiceImpl
 import com.rpkit.characters.bukkit.web.CharactersWebAPI
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
@@ -49,7 +51,7 @@ import kotlin.text.Charsets.UTF_8
 /**
  * RPK characters plugin default implementation.
  */
-class RPKCharactersBukkit : RPKBukkitPlugin() {
+class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: CharactersMessages
@@ -90,23 +92,23 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
             return
         }
         database = Database(
-                DatabaseConnectionProperties(
-                        databaseUrl,
-                        databaseUsername,
-                        databasePassword,
-                        databaseSqlDialect,
-                        databaseMaximumPoolSize,
-                        databaseMinimumIdle
-                ),
-                DatabaseMigrationProperties(
-                        when (databaseSqlDialect) {
-                            "MYSQL" -> "com/rpkit/characters/migrations/mysql"
-                            "SQLITE" -> "com/rpkit/characters/migrations/sqlite"
-                            else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
-                        },
-                        "flyway_schema_history_characters"
-                ),
-                classLoader
+            DatabaseConnectionProperties(
+                databaseUrl,
+                databaseUsername,
+                databasePassword,
+                databaseSqlDialect,
+                databaseMaximumPoolSize,
+                databaseMinimumIdle
+            ),
+            DatabaseMigrationProperties(
+                when (databaseSqlDialect) {
+                    "MYSQL" -> "com/rpkit/characters/migrations/mysql"
+                    "SQLITE" -> "com/rpkit/characters/migrations/sqlite"
+                    else -> throw UnsupportedDatabaseDialectException("Unsupported database dialect $databaseSqlDialect")
+                },
+                "flyway_schema_history_characters"
+            ),
+            classLoader
         )
         database.addTable(RPKCharacterTable(database, this))
         database.addTable(RPKNewCharacterCooldownTable(database, this))
@@ -121,21 +123,21 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
         Services[RPKCharacterCardFieldService::class.java] = characterCardFieldService
         Services[RPKNewCharacterCooldownService::class.java] = newCharacterCooldownService
 
-        characterCardFieldService.characterCardFields.add(NameField())
-        characterCardFieldService.characterCardFields.add(ProfileField())
-        characterCardFieldService.characterCardFields.add(GenderField())
-        characterCardFieldService.characterCardFields.add(AgeField())
-        characterCardFieldService.characterCardFields.add(RaceField())
-        characterCardFieldService.characterCardFields.add(DescriptionField())
-        characterCardFieldService.characterCardFields.add(DeadField())
-        characterCardFieldService.characterCardFields.add(HealthField())
-        characterCardFieldService.characterCardFields.add(MaxHealthField())
-        characterCardFieldService.characterCardFields.add(ManaField())
-        characterCardFieldService.characterCardFields.add(MaxManaField())
-        characterCardFieldService.characterCardFields.add(FoodField())
-        characterCardFieldService.characterCardFields.add(MaxFoodField())
-        characterCardFieldService.characterCardFields.add(ThirstField())
-        characterCardFieldService.characterCardFields.add(MaxThirstField())
+        characterCardFieldService.addCharacterCardField(NameField())
+        characterCardFieldService.addCharacterCardField(ProfileField())
+        characterCardFieldService.addCharacterCardField(GenderField())
+        characterCardFieldService.addCharacterCardField(AgeField())
+        characterCardFieldService.addCharacterCardField(RaceField())
+        characterCardFieldService.addCharacterCardField(DescriptionField())
+        characterCardFieldService.addCharacterCardField(DeadField())
+        characterCardFieldService.addCharacterCardField(HealthField())
+        characterCardFieldService.addCharacterCardField(MaxHealthField())
+        characterCardFieldService.addCharacterCardField(ManaField())
+        characterCardFieldService.addCharacterCardField(MaxManaField())
+        characterCardFieldService.addCharacterCardField(FoodField())
+        characterCardFieldService.addCharacterCardField(MaxFoodField())
+        characterCardFieldService.addCharacterCardField(ThirstField())
+        characterCardFieldService.addCharacterCardField(MaxThirstField())
 
         registerCommands()
         registerListeners()
@@ -154,28 +156,37 @@ class RPKCharactersBukkit : RPKBukkitPlugin() {
             config.getConfigurationSection("placeholder-api.fields")
                 ?.getKeys(false)
                 ?.forEach { key ->
-                    characterCardFieldService.characterCardFields.add(
+                    characterCardFieldService.addCharacterCardField(
                         PlaceholderAPIField(
                             this,
                             key,
-                            config.getString("placeholder-api.fields.${key}") ?: "")
+                            config.getString("placeholder-api.fields.${key}") ?: ""
+                        )
                     )
                 }
         }
+
+        if (config.getBoolean("characters.set-player-nameplate")) {
+            if (server.pluginManager.getPlugin("ProtocolLib") != null) {
+                logger.info("Detected ProtocolLib, enabling player nameplates")
+            }
+        }
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("character")?.setExecutor(CharacterCommand(this))
         getCommand("race")?.setExecutor(RaceCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             PlayerJoinListener(this),
             PlayerInteractEntityListener(this),
             AsyncPlayerPreLoginListener(this),
             PlayerEditBookListener(this),
-            PlayerQuitListener()
+            PlayerQuitListener(),
+            RPKMinecraftProfileDeleteListener(this),
+            RPKProfileDeleteListener(this)
         )
         if (config.getBoolean("characters.strict-movement-prevention-when-dead")) {
             registerListeners(PlayerMoveListener(this))

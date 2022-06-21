@@ -16,12 +16,15 @@
 
 package com.rpkit.locks.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.command.toBukkit
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
+import com.rpkit.locks.bukkit.command.CopyKeyCommand
 import com.rpkit.locks.bukkit.command.GetKeyCommand
 import com.rpkit.locks.bukkit.command.KeyringCommand
 import com.rpkit.locks.bukkit.command.UnlockCommand
@@ -41,9 +44,10 @@ import org.bukkit.Material.IRON_INGOT
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ShapedRecipe
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
-class RPKLocksBukkit : RPKBukkitPlugin() {
+class RPKLocksBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: LocksMessages
@@ -114,13 +118,14 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
+        getCommand("copykey")?.setExecutor(CopyKeyCommand(this).toBukkit())
         getCommand("getkey")?.setExecutor(GetKeyCommand(this))
         getCommand("keyring")?.setExecutor(KeyringCommand(this))
         getCommand("unlock")?.setExecutor(UnlockCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             CraftItemListener(this),
             InventoryClickListener(this),
@@ -128,7 +133,9 @@ class RPKLocksBukkit : RPKBukkitPlugin() {
             PlayerInteractListener(this),
             AsyncPlayerPreLoginListener(),
             PlayerQuitListener(),
-            RPKCharacterSwitchListener()
+            RPKCharacterSwitchListener(),
+            RPKCharacterDeleteListener(this),
+            RPKMinecraftProfileDeleteListener(this)
         )
     }
 

@@ -12,7 +12,7 @@ depend:
 - rpk-location-history-lib-bukkit
 - rpk-tracking-lib-bukkit
 - rpk-daily-quote-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
   back:
     description: Teleports to the last location teleported to
@@ -47,6 +47,10 @@ commands:
   inventory:
     description: Opens someone's inventory
     usage: /<command> [player]
+  issue:
+    description: |
+      Creates issues on GitHub
+      /issue submit (user) - Creates a GitHub issue. Uses the given GitHub profile if specified, or the first linked GitHub profile if not. Requires a book to be held with the title as the issue title, and the contents as the issue body.
   item:
     description: Spawns an item
     usage: /<command> [material] (amount)
@@ -142,6 +146,9 @@ permissions:
   rpkit.essentials.command.inventory:
     description: Allows you to open other people's inventories
     default: op
+  rpkit.essentials.command.issue.submit:
+    description: Allows you to submit issues to GitHub
+    default: true
   rpkit.essentials.command.item:
     description: Allows the spawning of items
     default: op

@@ -16,10 +16,11 @@
 
 package com.rpkit.notifications.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.plugin.RPKPlugin
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
-class RPKNotificationLibBukkit : RPKBukkitPlugin() {
+class RPKNotificationLibBukkit : JavaPlugin(), RPKPlugin {
     override fun onEnable() {
         Metrics(this, 13765)
     }

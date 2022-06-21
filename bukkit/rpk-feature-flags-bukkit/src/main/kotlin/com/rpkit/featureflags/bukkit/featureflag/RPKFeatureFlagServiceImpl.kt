@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +23,7 @@ import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagDelet
 import com.rpkit.featureflags.bukkit.event.featureflag.RPKBukkitFeatureFlagSetEvent
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKFeatureFlagServiceImpl(override val plugin: RPKFeatureFlagsBukkit) : RPKFeatureFlagService {
@@ -70,6 +72,9 @@ class RPKFeatureFlagServiceImpl(override val plugin: RPKFeatureFlagsBukkit) : RP
                 profileFeatureFlag.isEnabled = event.enabled
                 profileFeatureFlagTable.update(profileFeatureFlag).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set feature flag", exception)
+            throw exception
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import com.rpkit.essentials.bukkit.database.table.RPKTrackingDisabledTable
 import com.rpkit.tracking.bukkit.tracking.RPKTrackingService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKTrackingServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKTrackingService {
@@ -42,6 +43,9 @@ class RPKTrackingServiceImpl(override val plugin: RPKEssentialsBukkit) : RPKTrac
                     trackingDisabledTable.insert(RPKTrackingDisabled(character)).join()
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set trackable", exception)
+            throw exception
         }
     }
 

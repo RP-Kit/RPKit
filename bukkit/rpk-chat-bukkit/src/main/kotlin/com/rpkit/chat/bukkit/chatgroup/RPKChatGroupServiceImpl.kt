@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,17 +24,18 @@ import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupDeleteEvent
 import com.rpkit.chat.bukkit.event.chatgroup.RPKBukkitChatGroupUpdateEvent
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Chat group service implementation.
  */
 class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroupService {
 
-    override fun getChatGroup(id: RPKChatGroupId): CompletableFuture<RPKChatGroup?> {
+    override fun getChatGroup(id: RPKChatGroupId): CompletableFuture<out RPKChatGroup?> {
         return plugin.database.getTable(RPKChatGroupTable::class.java)[id]
     }
 
-    override fun getChatGroup(name: RPKChatGroupName): CompletableFuture<RPKChatGroup?> {
+    override fun getChatGroup(name: RPKChatGroupName): CompletableFuture<out RPKChatGroup?> {
         return plugin.database.getTable(RPKChatGroupTable::class.java)[name]
     }
 
@@ -43,6 +45,9 @@ class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroup
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKChatGroupTable::class.java).insert(event.chatGroup).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add chat group", exception)
+            throw exception
         }
     }
 
@@ -57,6 +62,9 @@ class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroup
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKChatGroupTable::class.java).delete(event.chatGroup).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove chat group", exception)
+            throw exception
         }
     }
 
@@ -66,6 +74,9 @@ class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroup
             plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) return@runAsync
             plugin.database.getTable(RPKChatGroupTable::class.java).update(event.chatGroup).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update chat group", exception)
+            throw exception
         }
     }
 
@@ -82,8 +93,10 @@ class RPKChatGroupServiceImpl(override val plugin: RPKChatBukkit) : RPKChatGroup
             } else {
                 lastUsedChatGroupTable.insert(RPKLastUsedChatGroup(minecraftProfile = minecraftProfile, chatGroup = chatGroup)).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set last used chat group", exception)
+            throw exception
         }
-
     }
 
 }

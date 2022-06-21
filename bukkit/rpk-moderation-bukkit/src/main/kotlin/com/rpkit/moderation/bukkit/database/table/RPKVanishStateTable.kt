@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +23,11 @@ import com.rpkit.moderation.bukkit.database.create
 import com.rpkit.moderation.bukkit.database.jooq.Tables.RPKIT_VANISHED
 import com.rpkit.moderation.bukkit.vanish.RPKVanishState
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKVanishStateTable(private val database: Database, private val plugin: RPKModerationBukkit) : Table {
@@ -49,6 +54,9 @@ class RPKVanishStateTable(private val database: Database, private val plugin: RP
                 .values(minecraftProfileId.value)
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert vanish state", exception)
+            throw exception
         }
     }
 
@@ -68,6 +76,9 @@ class RPKVanishStateTable(private val database: Database, private val plugin: RP
             )
             cache?.set(minecraftProfileId.value, vanishState)
             return@supplyAsync vanishState
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get vanish state", exception)
+            throw exception
         }
     }
 
@@ -79,7 +90,21 @@ class RPKVanishStateTable(private val database: Database, private val plugin: RP
                 .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete vanish state", exception)
+            throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_VANISHED)
+            .where(RPKIT_VANISHED.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete vanish state for Minecraft profile id", exception)
+        throw exception
     }
 
 }

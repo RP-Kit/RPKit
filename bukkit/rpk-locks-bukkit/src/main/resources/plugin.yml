@@ -7,8 +7,11 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-lock-lib-bukkit
-api-version: '1.18'
+api-version: '1.19'
 commands:
+  copykey:
+    description: Copies the key in your hand, consuming an iron ingot
+    usage: /<command>
   getkey:
     description: Gets a key for a lock
     usage: /<command>
@@ -19,6 +22,9 @@ commands:
     description: Removes the lock from a block
     usage: /<command>
 permissions:
+  rpkit.locks.command.copykey:
+    description: Allows copying keys, given the materials to do so
+    default: true
   rpkit.locks.command.getkey:
     description: Allows the player to get the key to locks
     default: op

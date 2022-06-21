@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +25,10 @@ import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.RPKThinProfileImpl
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKDiscordProfileService {
-    override fun getDiscordProfile(id: RPKDiscordProfileId): CompletableFuture<RPKDiscordProfile?> {
+    override fun getDiscordProfile(id: RPKDiscordProfileId): CompletableFuture<out RPKDiscordProfile?> {
         return plugin.database.getTable(RPKDiscordProfileTable::class.java)[id]
     }
 
@@ -45,6 +47,9 @@ class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKD
                 discordProfileTable.insert(discordProfile).join()
             }
             return@supplyAsync discordProfile
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get Discord profile", exception)
+            throw exception
         }
     }
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,11 +26,12 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarningService {
 
-    override fun getWarning(id: RPKWarningId): CompletableFuture<RPKWarning?> {
+    override fun getWarning(id: RPKWarningId): CompletableFuture<out RPKWarning?> {
         return plugin.database.getTable(RPKWarningTable::class.java)[id]
     }
 
@@ -56,6 +58,9 @@ class RPKWarningServiceImpl(override val plugin: RPKModerationBukkit) : RPKWarni
                     }
                 })
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add warning", exception)
+            throw exception
         }
     }
 

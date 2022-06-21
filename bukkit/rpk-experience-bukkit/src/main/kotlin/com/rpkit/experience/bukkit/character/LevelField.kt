@@ -31,7 +31,7 @@ class LevelField(private val plugin: RPKExperienceBukkit) : CharacterCardField {
     override fun get(character: RPKCharacter): CompletableFuture<String> {
         val experienceService = Services[RPKExperienceService::class.java]
             ?: return CompletableFuture.completedFuture(plugin.messages["no-experience-service"])
-        return CompletableFuture.completedFuture(experienceService.getLevel(character).toString())
+        return experienceService.getLevel(character).thenApply { it.toString() }
     }
 
 }

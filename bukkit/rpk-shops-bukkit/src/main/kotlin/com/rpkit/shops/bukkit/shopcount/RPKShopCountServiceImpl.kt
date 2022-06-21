@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.rpkit.shops.bukkit.RPKShopsBukkit
 import com.rpkit.shops.bukkit.database.table.RPKShopCountTable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 /**
  * Shop count service implementation.
@@ -49,6 +50,9 @@ class RPKShopCountServiceImpl(override val plugin: RPKShopsBukkit) : RPKShopCoun
                     shopCounts[characterId.value] = amount
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set shop count", exception)
+            throw exception
         }
     }
 

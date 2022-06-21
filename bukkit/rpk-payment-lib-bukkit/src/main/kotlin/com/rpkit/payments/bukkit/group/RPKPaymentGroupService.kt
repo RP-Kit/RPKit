@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +39,7 @@ interface RPKPaymentGroupService : Service {
      * @param id The ID of the payment group
      * @return The payment group, or null if no payment group is found with the given ID
      */
-    fun getPaymentGroup(id: RPKPaymentGroupId): CompletableFuture<RPKPaymentGroup?>
+    fun getPaymentGroup(id: RPKPaymentGroupId): CompletableFuture<out RPKPaymentGroup?>
 
     /**
      * Gets a payment group by name.

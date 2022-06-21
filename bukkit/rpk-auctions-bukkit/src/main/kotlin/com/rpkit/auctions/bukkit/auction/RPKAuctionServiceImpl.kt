@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +27,14 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import org.bukkit.Location
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Auction service implementation.
  */
 class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuctionService {
 
-    override fun getAuction(id: RPKAuctionId): CompletableFuture<RPKAuction?> {
+    override fun getAuction(id: RPKAuctionId): CompletableFuture<out RPKAuction?> {
         return plugin.database.getTable(RPKAuctionTable::class.java)[id]
     }
 
@@ -43,6 +45,9 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
             if (event.isCancelled) return@supplyAsync false
             return@supplyAsync plugin.database.getTable(RPKAuctionTable::class.java).insert(event.auction)
                 .thenApply { true }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add auction", exception)
+            throw exception
         }
     }
 
@@ -85,6 +90,9 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
             if (event.isCancelled) return@supplyAsync false
             return@supplyAsync plugin.database.getTable(RPKAuctionTable::class.java).update(event.auction)
                 .thenApply { true }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update auction", exception)
+            throw exception
         }
     }
 
@@ -95,6 +103,9 @@ class RPKAuctionServiceImpl(override val plugin: RPKAuctionsBukkit) : RPKAuction
             if (event.isCancelled) return@supplyAsync false
             return@supplyAsync plugin.database.getTable(RPKAuctionTable::class.java).delete(event.auction)
                 .thenApply { true }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove auction", exception)
+            throw exception
         }
     }
 

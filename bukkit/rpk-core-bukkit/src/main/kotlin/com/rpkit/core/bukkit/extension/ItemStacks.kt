@@ -59,7 +59,7 @@ fun ByteArray.toItemStack(): ItemStack {
  *
  * @return The [ByteArray]
  */
-fun Array<ItemStack>.toByteArray(): ByteArray {
+fun Array<out ItemStack?>.toByteArray(): ByteArray {
     ByteArrayOutputStream().use { byteArrayOutputStream ->
         BukkitObjectOutputStream(byteArrayOutputStream).use { bukkitObjectOutputStream ->
             bukkitObjectOutputStream.writeObject(this)
@@ -73,10 +73,10 @@ fun Array<ItemStack>.toByteArray(): ByteArray {
  *
  * @return The [ItemStack] [Array]
  */
-fun ByteArray.toItemStackArray(): Array<ItemStack> {
+fun ByteArray.toItemStackArray(): Array<ItemStack?> {
     ByteArrayInputStream(this).use { byteArrayInputStream ->
         BukkitObjectInputStream(byteArrayInputStream).use { bukkitObjectInputStream ->
-            return bukkitObjectInputStream.readObject() as Array<ItemStack>
+            return bukkitObjectInputStream.readObject() as Array<ItemStack?>
         }
     }
 }

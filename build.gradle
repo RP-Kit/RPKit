@@ -24,9 +24,9 @@ buildscript {
 
 plugins {
     id "com.github.breadmoirai.github-release" version "2.2.12"
-    id "org.jetbrains.kotlin.jvm" version "1.6.20" apply false
+    id "org.jetbrains.kotlin.jvm" version "1.7.0" apply false
     id "maven-publish"
-    id "org.jetbrains.dokka" version "1.6.20" apply false
+    id "org.jetbrains.dokka" version "1.7.0" apply false
 }
 
 repositories {
@@ -38,13 +38,14 @@ allprojects {
     apply plugin: "maven-publish"
     apply plugin: "org.jetbrains.dokka"
     group = "com.rpkit"
-    version = "2.2.1"
+    version = "2.3.0"
 }
 
 subprojects {
     repositories {
         mavenCentral()
         maven { url "https://hub.spigotmc.org/nexus/content/groups/public/" }
+        maven { url "https://repo.dmulloy2.net/repository/public/" }
         maven { url "https://ci.ender.zone/plugin/repository/everything/" }
         maven { url "https://repo.jenkins-ci.org/public/" }
         maven { url "https://maven.enginehub.org/repo/" }

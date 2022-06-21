@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +17,7 @@
 package com.rpkit.skills.bukkit.database.table
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
@@ -27,6 +29,9 @@ import com.rpkit.skills.bukkit.skills.RPKSkillCooldown
 import com.rpkit.skills.bukkit.skills.RPKSkillName
 import com.rpkit.skills.bukkit.skills.RPKSkillService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 
 class RPKSkillCooldownTable(private val database: Database, private val plugin: RPKSkillsBukkit) : Table {
@@ -65,6 +70,9 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                 )
                 .execute()
             cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert skill cooldown", exception)
+            throw exception
         }
     }
 
@@ -79,6 +87,9 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(skillName.value))
                 .execute()
             cache?.set(CharacterSkillCacheKey(characterId.value, skillName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update skill cooldown", exception)
+            throw exception
         }
     }
 
@@ -103,6 +114,9 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
             )
             cache?.set(cacheKey, skillCooldown)
             return@supplyAsync skillCooldown
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get skill cooldown", exception)
+            throw exception
         }
     }
 
@@ -122,6 +136,9 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                         result.cooldownTimestamp
                     )
                 }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get skill cooldowns", exception)
+            throw exception
         }
     }
 
@@ -135,7 +152,21 @@ class RPKSkillCooldownTable(private val database: Database, private val plugin: 
                 .and(RPKIT_SKILL_COOLDOWN.SKILL_NAME.eq(entity.skill.name.value))
                 .execute()
             cache?.remove(CharacterSkillCacheKey(characterId.value, skillName.value))
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete skill cooldown", exception)
+            throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_SKILL_COOLDOWN)
+            .where(RPKIT_SKILL_COOLDOWN.CHARACTER_ID.eq(characterId.value))
+            .execute()
+        cache?.removeMatching { it.character.id?.value == characterId.value }
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete skill cooldown for character id", exception)
+        throw exception
     }
 
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +24,7 @@ import java.util.concurrent.CompletableFuture
 
 interface RPKIRCProfileService : Service {
 
-    fun getIRCProfile(id: RPKIRCProfileId): CompletableFuture<RPKIRCProfile?>
+    fun getIRCProfile(id: RPKIRCProfileId): CompletableFuture<out RPKIRCProfile?>
     fun getIRCProfile(nick: RPKIRCNick): CompletableFuture<RPKIRCProfile?>
     fun getIRCProfiles(profile: RPKProfile): CompletableFuture<List<RPKIRCProfile>>
     fun addIRCProfile(profile: RPKIRCProfile): CompletableFuture<Void>

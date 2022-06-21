@@ -9,7 +9,7 @@ depend:
 - rpk-permissions-lib-bukkit
 softdepend:
 - PlaceholderAPI
-api-version: '1.18'
+api-version: '1.19'
 commands:
   group:
     description: Group management command

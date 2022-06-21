@@ -17,11 +17,12 @@
 package com.rpkit.statbuilds.bukkit
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.statbuilds.bukkit.command.statattribute.StatAttributeCommand
@@ -29,6 +30,7 @@ import com.rpkit.statbuilds.bukkit.command.statbuild.StatBuildCommand
 import com.rpkit.statbuilds.bukkit.database.table.RPKCharacterStatPointsTable
 import com.rpkit.statbuilds.bukkit.listener.AsyncPlayerPreLoginListener
 import com.rpkit.statbuilds.bukkit.listener.PlayerQuitListener
+import com.rpkit.statbuilds.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.statbuilds.bukkit.listener.RPKCharacterSwitchListener
 import com.rpkit.statbuilds.bukkit.messages.StatBuildsMessages
 import com.rpkit.statbuilds.bukkit.skillpoint.RPKSkillPointServiceImpl
@@ -41,9 +43,10 @@ import com.rpkit.stats.bukkit.stat.RPKStatVariableName
 import com.rpkit.stats.bukkit.stat.RPKStatVariableService
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
-class RPKStatBuildsBukkit : RPKBukkitPlugin() {
+class RPKStatBuildsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: StatBuildsMessages
@@ -128,7 +131,8 @@ class RPKStatBuildsBukkit : RPKBukkitPlugin() {
         registerListeners(
             AsyncPlayerPreLoginListener(),
             PlayerQuitListener(),
-            RPKCharacterSwitchListener()
+            RPKCharacterSwitchListener(),
+            RPKCharacterDeleteListener(this)
         )
     }
 

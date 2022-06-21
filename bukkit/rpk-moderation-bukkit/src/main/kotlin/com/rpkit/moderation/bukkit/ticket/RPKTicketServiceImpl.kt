@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture
 
 class RPKTicketServiceImpl(override val plugin: RPKModerationBukkit) : RPKTicketService {
 
-    override fun getTicket(id: RPKTicketId): CompletableFuture<RPKTicket?> {
+    override fun getTicket(id: RPKTicketId): CompletableFuture<out RPKTicket?> {
         return plugin.database.getTable(RPKTicketTable::class.java)[id]
     }
 

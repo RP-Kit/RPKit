@@ -29,6 +29,7 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.logging.Level
 
 class NotificationViewCommand(private val plugin: RPKNotificationsBukkit) : RPKCommandExecutor {
     override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
@@ -76,6 +77,9 @@ class NotificationViewCommand(private val plugin: RPKNotificationsBukkit) : RPKC
                     .forEach(sender::sendMessage)
                 return@thenApply CommandSuccess
             }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to view notification", exception)
+            throw exception
         }
     }
 }

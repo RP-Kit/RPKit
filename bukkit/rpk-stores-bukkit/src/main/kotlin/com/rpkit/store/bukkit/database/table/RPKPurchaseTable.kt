@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +25,12 @@ import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_PURCHASE
 import com.rpkit.store.bukkit.purchase.RPKPurchase
 import com.rpkit.store.bukkit.purchase.RPKPurchaseId
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKPurchaseTable(
         private val database: Database,
-        plugin: RPKStoresBukkit
+        private val plugin: RPKStoresBukkit
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_purchase.id.enabled")) {
@@ -63,6 +65,9 @@ class RPKPurchaseTable(
             entity.id = RPKPurchaseId(id)
             cache?.set(id, entity)
             return@supplyAsync RPKPurchaseId(id)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert purchase", exception)
+            throw exception
         }
     }
 
@@ -79,6 +84,9 @@ class RPKPurchaseTable(
                 .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update purchase", exception)
+            throw exception
         }
     }
 
@@ -107,6 +115,9 @@ class RPKPurchaseTable(
                 cache?.remove(id.value)
             }
             return@supplyAsync null
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get purchase", exception)
+            throw exception
         }
     }
 
@@ -117,6 +128,9 @@ class RPKPurchaseTable(
                 *database.getTable(RPKPermanentPurchaseTable::class.java).get(profile).join().toTypedArray(),
                 *database.getTable(RPKTimedPurchaseTable::class.java).get(profile).join().toTypedArray()
             )
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get purchases", exception)
+            throw exception
         }
     }
 
@@ -128,6 +142,9 @@ class RPKPurchaseTable(
                 .where(RPKIT_PURCHASE.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete purchase", exception)
+            throw exception
         }
     }
 }

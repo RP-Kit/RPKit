@@ -17,23 +17,26 @@
 package com.rpkit.notifications.bukkit
 
 import com.rpkit.core.bukkit.command.toBukkit
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.notifications.bukkit.command.notification.NotificationCommand
 import com.rpkit.notifications.bukkit.database.table.RPKNotificationTable
 import com.rpkit.notifications.bukkit.listener.PlayerJoinListener
+import com.rpkit.notifications.bukkit.listener.RPKProfileDeleteListener
 import com.rpkit.notifications.bukkit.messages.NotificationsMessages
 import com.rpkit.notifications.bukkit.notification.RPKNotificationService
 import com.rpkit.notifications.bukkit.notification.RPKNotificationServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
-class RPKNotificationsBukkit : RPKBukkitPlugin() {
+class RPKNotificationsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: NotificationsMessages
@@ -85,12 +88,15 @@ class RPKNotificationsBukkit : RPKBukkitPlugin() {
             ),
             classLoader
         )
-        database.addTable(RPKNotificationTable(database))
+        database.addTable(RPKNotificationTable(database, this))
 
         Services[RPKNotificationService::class.java] = RPKNotificationServiceImpl(this, database)
 
         registerCommands()
-        registerListeners(PlayerJoinListener(this))
+        registerListeners(
+            PlayerJoinListener(this),
+            RPKProfileDeleteListener(this)
+        )
     }
 
     private fun registerCommands() {

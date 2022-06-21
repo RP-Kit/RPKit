@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,21 @@
 
 package com.rpkit.chat.bukkit.chatchannel.format.part
 
+import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
+import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture
 
 @SerializableAs("ReceiverPrefixPart")
 class ReceiverPrefixPart(
+    plugin: RPKChatBukkit,
     font: String? = null,
     color: String? = null,
     isBold: Boolean? = null,
@@ -39,6 +42,7 @@ class ReceiverPrefixPart(
     hover: HoverAction? = null,
     click: ClickAction? = null
 ) : GenericTextPart(
+    plugin,
     font,
     color,
     isBold,
@@ -71,6 +75,7 @@ class ReceiverPrefixPart(
     companion object {
         @JvmStatic
         fun deserialize(serialized: Map<String, Any>) = ReceiverPrefixPart(
+            Bukkit.getPluginManager().getPlugin("rpk-chat-bukkit") as RPKChatBukkit,
             serialized["font"] as? String,
             serialized["color"] as? String,
             serialized["bold"] as? Boolean,

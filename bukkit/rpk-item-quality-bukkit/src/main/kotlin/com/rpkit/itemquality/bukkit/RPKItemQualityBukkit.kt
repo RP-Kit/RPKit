@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package com.rpkit.itemquality.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.itemquality.bukkit.command.itemquality.ItemQualityCommand
 import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityService
@@ -24,9 +25,10 @@ import com.rpkit.itemquality.bukkit.itemquality.RPKItemQualityServiceImpl
 import com.rpkit.itemquality.bukkit.listener.PlayerItemDamageListener
 import com.rpkit.itemquality.bukkit.messages.ItemQualityMessages
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
 
-class RPKItemQualityBukkit : RPKBukkitPlugin() {
+class RPKItemQualityBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var messages: ItemQualityMessages
 

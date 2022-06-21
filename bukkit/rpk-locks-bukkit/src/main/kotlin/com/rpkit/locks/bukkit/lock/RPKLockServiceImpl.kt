@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +33,7 @@ import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.logging.Level
 
 
 class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
@@ -79,6 +81,9 @@ class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
                 lockedBlocks.remove(block.toLockedBlockKey())
             }
         }
+    }.exceptionally { exception ->
+        plugin.logger.log(Level.SEVERE, "Failed to set locked", exception)
+        throw exception
     }
 
     private fun loadLockedBlocks() {
@@ -119,6 +124,9 @@ class RPKLockServiceImpl(override val plugin: RPKLocksBukkit) : RPKLockService {
                     minecraftProfile.id?.value?.let { this.unclaiming.remove(it) }
                 }
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set unclaiming", exception)
+            throw exception
         }
     }
 

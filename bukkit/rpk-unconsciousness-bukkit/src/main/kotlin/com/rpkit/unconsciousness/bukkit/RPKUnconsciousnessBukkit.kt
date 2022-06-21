@@ -16,11 +16,12 @@
 
 package com.rpkit.unconsciousness.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.unconsciousness.bukkit.command.WakeCommand
 import com.rpkit.unconsciousness.bukkit.database.table.RPKUnconsciousStateTable
@@ -31,9 +32,10 @@ import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessServic
 import org.bstats.bukkit.Metrics
 import org.bukkit.GameRule.KEEP_INVENTORY
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
-class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
+class RPKUnconsciousnessBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: UnconsciousnessMessages
@@ -100,11 +102,11 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
         registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("wake")?.setExecutor(WakeCommand(this))
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             PlayerDeathListener(),
             PlayerRespawnListener(this),
@@ -118,7 +120,8 @@ class RPKUnconsciousnessBukkit : RPKBukkitPlugin() {
             EntityDamageByEntityListener(),
             AsyncPlayerPreLoginListener(),
             RPKCharacterSwitchListener(),
-            PlayerQuitListener()
+            PlayerQuitListener(),
+            RPKCharacterDeleteListener(this)
         )
     }
 

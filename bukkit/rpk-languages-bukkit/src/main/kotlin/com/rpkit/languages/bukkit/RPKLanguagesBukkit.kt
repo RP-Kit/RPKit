@@ -17,11 +17,12 @@
 package com.rpkit.languages.bukkit
 
 import com.rpkit.core.bukkit.command.toBukkit
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageService
 import com.rpkit.languages.bukkit.characterlanguage.RPKCharacterLanguageServiceImpl
@@ -29,13 +30,14 @@ import com.rpkit.languages.bukkit.command.LanguageCommand
 import com.rpkit.languages.bukkit.database.table.RPKCharacterLanguageTable
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import com.rpkit.languages.bukkit.language.RPKLanguageServiceImpl
-import com.rpkit.languages.bukkit.listener.RPKBukkitCharacterDeleteListener
+import com.rpkit.languages.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.languages.bukkit.messages.LanguageMessages
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
-class RPKLanguagesBukkit : RPKBukkitPlugin() {
+class RPKLanguagesBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: LanguageMessages
@@ -99,7 +101,7 @@ class RPKLanguagesBukkit : RPKBukkitPlugin() {
     }
 
     private fun registerListeners() {
-        registerListeners(RPKBukkitCharacterDeleteListener(this))
+        registerListeners(RPKCharacterDeleteListener(this))
     }
 
     private fun registerCommands() {

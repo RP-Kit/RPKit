@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,13 @@ interface RPKDiscordService : Service {
 
     fun sendMessage(channel: DiscordChannel, message: String, callback: DiscordMessageCallback? = null)
     fun sendMessage(profile: RPKDiscordProfile, message: String, callback: DiscordMessageCallback? = null)
+    fun sendMessage(profile: RPKDiscordProfile, message: String, vararg buttons: DiscordButton)
     fun getUserName(discordId: DiscordUserId): String?
     fun getUserId(discordUserName: String): DiscordUserId?
     fun setMessageAsProfileLinkRequest(messageId: Long, profile: RPKProfile)
     fun setMessageAsProfileLinkRequest(message: DiscordMessage, profile: RPKProfile)
-    fun getMessageProfileLink(messageId: Long): CompletableFuture<RPKProfile?>
-    fun getMessageProfileLink(message: DiscordMessage): CompletableFuture<RPKProfile?>
+    fun getMessageProfileLink(messageId: Long): CompletableFuture<out RPKProfile?>
+    fun getMessageProfileLink(message: DiscordMessage): CompletableFuture<out RPKProfile?>
     fun getDiscordChannel(name: String): DiscordChannel?
     fun disconnect()
 

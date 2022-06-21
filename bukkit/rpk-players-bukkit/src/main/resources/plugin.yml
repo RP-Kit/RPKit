@@ -9,7 +9,7 @@ depend:
 softdepend:
 - rpk-chat-lib-bukkit
 - PlaceholderAPI
-api-version: '1.18'
+api-version: '1.19'
 commands:
   profile:
     description: |
@@ -30,6 +30,9 @@ permissions:
     default: true
   rpkit.players.command.profile.link.minecraft:
     description: Allows linking Minecraft profiles
+    default: true
+  rpkit.players.command.profile.link.github:
+    description: Allows linking Github profiles
     default: true
   rpkit.players.command.profile.view.self:
     description: Allows viewing your own profile

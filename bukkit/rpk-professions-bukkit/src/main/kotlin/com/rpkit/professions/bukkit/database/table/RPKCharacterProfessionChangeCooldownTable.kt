@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.professions.bukkit.database.create
 import com.rpkit.professions.bukkit.database.jooq.Tables.RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN
 import com.rpkit.professions.bukkit.profession.RPKCharacterProfessionChangeCooldown
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class RPKCharacterProfessionChangeCooldownTable(
         private val database: Database,
@@ -55,6 +57,9 @@ class RPKCharacterProfessionChangeCooldownTable(
                 )
                 .execute()
             characterCache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert character profession change cooldown", exception)
+            throw exception
         }
     }
 
@@ -67,6 +72,9 @@ class RPKCharacterProfessionChangeCooldownTable(
                 .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .execute()
             characterCache?.set(characterId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character profession change cooldown", exception)
+            throw exception
         }
     }
 
@@ -87,6 +95,9 @@ class RPKCharacterProfessionChangeCooldownTable(
             )
             characterCache?.set(characterId.value, characterProfessionChangeCooldown)
             return@supplyAsync characterProfessionChangeCooldown
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character profession change cooldown", exception)
+            throw exception
         }
     }
 
@@ -98,6 +109,9 @@ class RPKCharacterProfessionChangeCooldownTable(
                 .where(RPKIT_CHARACTER_PROFESSION_CHANGE_COOLDOWN.CHARACTER_ID.eq(characterId.value))
                 .execute()
             characterCache?.remove(characterId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character profession change cooldown", exception)
+            throw exception
         }
     }
 

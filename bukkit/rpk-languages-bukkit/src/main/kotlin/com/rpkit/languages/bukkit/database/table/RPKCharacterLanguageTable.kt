@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +28,8 @@ import com.rpkit.languages.bukkit.language.RPKLanguage
 import com.rpkit.languages.bukkit.language.RPKLanguageName
 import com.rpkit.languages.bukkit.language.RPKLanguageService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level
 
 class RPKCharacterLanguageTable(
         private val database: Database,
@@ -52,7 +55,7 @@ class RPKCharacterLanguageTable(
     fun insert(entity: RPKCharacterLanguage): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHARACTER_LANGUAGE,
@@ -67,13 +70,16 @@ class RPKCharacterLanguageTable(
                 )
                 .execute()
             cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert character language", exception)
+            throw exception
         }
     }
 
     fun update(entity: RPKCharacterLanguage): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .update(RPKIT_CHARACTER_LANGUAGE)
                 .set(RPKIT_CHARACTER_LANGUAGE.UNDERSTANDING, entity.understanding.toDouble())
@@ -83,6 +89,9 @@ class RPKCharacterLanguageTable(
                 )
                 .execute()
             cache?.set(CharacterLanguageCacheKey(characterId.value, languageName.value), entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character language", exception)
+            throw exception
         }
     }
 
@@ -111,6 +120,9 @@ class RPKCharacterLanguageTable(
             )
             cache?.set(cacheKey, characterLanguage)
             return@supplyAsync characterLanguage
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character language", exception)
+            throw exception
         }
     }
 
@@ -130,19 +142,25 @@ class RPKCharacterLanguageTable(
             }
             CompletableFuture.allOf(*languageFutures.toTypedArray()).join()
             return@supplyAsync languageFutures.mapNotNull(CompletableFuture<RPKCharacterLanguage?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get character languages", exception)
+            throw exception
         }
     }
 
     fun delete(entity: RPKCharacterLanguage): CompletableFuture<Void> {
         val characterId = entity.character.id ?: return CompletableFuture.completedFuture(null)
         val languageName = entity.language.name
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHARACTER_LANGUAGE)
                 .where(RPKIT_CHARACTER_LANGUAGE.CHARACTER_ID.eq(characterId.value))
                 .and(RPKIT_CHARACTER_LANGUAGE.LANGUAGE_NAME.eq(languageName.value))
                 .execute()
             cache?.remove(CharacterLanguageCacheKey(characterId.value, languageName.value))
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete character language", exception)
+            throw exception
         }
     }
 

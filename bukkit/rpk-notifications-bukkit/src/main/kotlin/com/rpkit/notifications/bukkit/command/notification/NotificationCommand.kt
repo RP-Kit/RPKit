@@ -30,7 +30,7 @@ class NotificationCommand(private val plugin: RPKNotificationsBukkit) : RPKComma
     private val notificationViewCommand = NotificationViewCommand(plugin)
     private val notificationDismissCommand = NotificationDismissCommand(plugin)
 
-    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<CommandResult> {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
         if (args.isEmpty()) {
             sender.sendMessage(plugin.messages.notificationUsage)
             return completedFuture(IncorrectUsageFailure())

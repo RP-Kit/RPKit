@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.skills.bukkit.skills.RPKSkillPointService
 import com.rpkit.skills.bukkit.skills.RPKSkillType
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKSkillPointServiceImpl(override val plugin: RPKClassesBukkit) : RPKSkillPointService {
@@ -35,6 +36,9 @@ class RPKSkillPointServiceImpl(override val plugin: RPKClassesBukkit) : RPKSkill
             } else {
                 return@thenApplyAsync 0
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get skill points", exception)
+            throw exception
         }
     }
 

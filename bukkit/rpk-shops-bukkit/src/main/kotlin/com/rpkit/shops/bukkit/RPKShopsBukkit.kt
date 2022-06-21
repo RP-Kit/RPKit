@@ -16,11 +16,12 @@
 
 package com.rpkit.shops.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.shops.bukkit.command.RestockCommand
 import com.rpkit.shops.bukkit.database.table.RPKShopCountTable
@@ -30,12 +31,13 @@ import com.rpkit.shops.bukkit.shopcount.RPKShopCountService
 import com.rpkit.shops.bukkit.shopcount.RPKShopCountServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK shops plugin default implementation.
  */
-class RPKShopsBukkit : RPKBukkitPlugin() {
+class RPKShopsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: ShopsMessages
@@ -105,6 +107,7 @@ class RPKShopsBukkit : RPKBukkitPlugin() {
             InventoryClickListener(this),
             AsyncPlayerPreLoginListener(),
             RPKCharacterSwitchListener(),
+            RPKCharacterDeleteListener(this),
             PlayerQuitListener()
         )
     }

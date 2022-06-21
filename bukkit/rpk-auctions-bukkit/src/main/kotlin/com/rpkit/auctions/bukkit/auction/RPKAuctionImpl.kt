@@ -29,6 +29,7 @@ import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level.SEVERE
 
 /**
  * Auction implementation.
@@ -73,6 +74,9 @@ class RPKAuctionImpl(
             } else {
                 return@supplyAsync false
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to create bid", exception)
+            throw exception
         }
     }
 

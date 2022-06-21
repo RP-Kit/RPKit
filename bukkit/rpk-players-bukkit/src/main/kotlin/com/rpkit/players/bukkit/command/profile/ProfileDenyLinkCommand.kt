@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +27,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandExecutor {
@@ -83,6 +85,9 @@ class ProfileDenyLinkCommand(private val plugin: RPKPlayersBukkit) : RPKCommandE
                             sender.sendMessage(plugin.messages.profileDenyLinkProfileCreated)
                             return@createProfile CommandSuccess
                         }.join()
+                }.exceptionally { exception ->
+                    plugin.logger.log(Level.SEVERE, "Failed to deny minecraft profile link", exception)
+                    throw exception
                 }
             }
             else -> {

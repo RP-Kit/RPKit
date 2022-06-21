@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package com.rpkit.core.bukkit.service
 
 import com.rpkit.core.bukkit.event.service.RPKBukkitServiceReadyEvent
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.service.Service
 import com.rpkit.core.service.ServicesDelegate
 import org.bukkit.Bukkit
+import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.ServicePriority.Normal
 
 class BukkitServicesDelegate : ServicesDelegate {
@@ -30,7 +30,7 @@ class BukkitServicesDelegate : ServicesDelegate {
 
     override fun <T : Service> set(type: Class<T>, service: T) {
         val plugin = service.plugin
-        if (plugin is RPKBukkitPlugin) {
+        if (plugin is Plugin) {
             Bukkit.getServicesManager().register(type, service, plugin, Normal)
             Bukkit.getPluginManager().callEvent(RPKBukkitServiceReadyEvent(service, false))
         }

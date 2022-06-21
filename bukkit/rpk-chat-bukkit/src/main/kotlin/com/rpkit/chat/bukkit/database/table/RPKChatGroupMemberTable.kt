@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +31,8 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the chat group member table.
@@ -61,7 +64,7 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
     fun insert(entity: RPKChatGroupMember): CompletableFuture<Void> {
         val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHAT_GROUP_MEMBER,
@@ -74,6 +77,9 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
                 )
                 .execute()
             cache(entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to insert chat group member", exception)
+            throw exception
         }
     }
 
@@ -108,6 +114,9 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
                 }
                 chatGroupCache?.set(chatGroupId.value, chatGroupMembers.toMutableList())
                 return@supplyAsync chatGroupMembers
+            }.exceptionally { exception ->
+                plugin.logger.log(SEVERE, "Failed to get chat group", exception)
+                throw exception
             }
         }
     }
@@ -141,6 +150,9 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
                 }
                 minecraftProfileCache?.set(minecraftProfileId.value, chatGroupMembers.toMutableList())
                 return@supplyAsync chatGroupMembers
+            }.exceptionally { exception ->
+                plugin.logger.log(SEVERE, "Failed to get chat group members", exception)
+                throw exception
             }
         }
     }
@@ -148,14 +160,31 @@ class RPKChatGroupMemberTable(private val database: Database, private val plugin
     fun delete(entity: RPKChatGroupMember): CompletableFuture<Void> {
         val chatGroupId = entity.chatGroup.id ?: return CompletableFuture.completedFuture(null)
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHAT_GROUP_MEMBER)
                 .where(RPKIT_CHAT_GROUP_MEMBER.CHAT_GROUP_ID.eq(chatGroupId.value))
                 .and(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             uncache(entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to delete chat group member", exception)
+            throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_CHAT_GROUP_MEMBER)
+            .where(RPKIT_CHAT_GROUP_MEMBER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        chatGroupCache?.removeMatching { members ->
+            members.any { member -> member.minecraftProfile.id?.value == minecraftProfileId.value }
+        }
+        minecraftProfileCache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete chat group members for Minecraft profile id", exception)
+        throw exception
     }
 
     private fun cache(chatGroupMember: RPKChatGroupMember) {

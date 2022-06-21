@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,12 @@ import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKTimedStoreItemImpl
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKTimedStoreItemTable(
         private val database: Database,
-        plugin: RPKStoresBukkit
+        private val plugin: RPKStoresBukkit
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_timed_store_item.id.enabled")) {
@@ -61,6 +62,9 @@ class RPKTimedStoreItemTable(
                 .execute()
             entity.id = id
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert timed store item", exception)
+            throw exception
         }
     }
 
@@ -74,10 +78,13 @@ class RPKTimedStoreItemTable(
                 .where(RPKIT_TIMED_STORE_ITEM.STORE_ITEM_ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update timed store item", exception)
+            throw exception
         }
     }
 
-    operator fun get(id: RPKStoreItemId): CompletableFuture<RPKTimedStoreItem?> {
+    operator fun get(id: RPKStoreItemId): CompletableFuture<out RPKTimedStoreItem?> {
         if (cache?.containsKey(id.value) == true) {
             return CompletableFuture.completedFuture(cache[id.value])
         } else {
@@ -107,6 +114,9 @@ class RPKTimedStoreItemTable(
                 )
                 cache?.set(id.value, storeItem)
                 return@supplyAsync storeItem
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to get timed store item", exception)
+                throw exception
             }
         }
     }
@@ -120,6 +130,9 @@ class RPKTimedStoreItemTable(
                 .where(RPKIT_TIMED_STORE_ITEM.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete timed store item", exception)
+            throw exception
         }
     }
 

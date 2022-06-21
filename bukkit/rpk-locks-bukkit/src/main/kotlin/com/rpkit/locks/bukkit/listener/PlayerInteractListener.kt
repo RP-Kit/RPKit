@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
         }
         if (lockService.isClaiming(minecraftProfile)) {
             if (block != null) {
-                event.player.sendMessage(plugin.messages["lock-invalid-already-locked"])
+                event.player.sendMessage(plugin.messages.lockInvalidAlreadyLocked)
                 event.isCancelled = true
                 return
             }
@@ -87,36 +87,36 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
                 event.player.world.dropItem(event.player.location, item)
             }
             event.player.updateInventory()
-            event.player.sendMessage(plugin.messages["lock-successful"])
+            event.player.sendMessage(plugin.messages.lockSuccessful)
             event.isCancelled = true
         } else if (lockService.isUnclaiming(minecraftProfile)) {
             if (block != null) {
                 if (hasKey(character, block)) {
                     lockService.setLocked(block.toRPKBlockLocation(), false).thenRun {
                         plugin.server.scheduler.runTask(plugin, Runnable {
-                            event.player.sendMessage(plugin.messages["unlock-successful"])
+                            event.player.sendMessage(plugin.messages.unlockSuccessful)
                             removeKey(character, block)
                             event.player.inventory.addItem(lockService.lockItem)
                             event.player.updateInventory()
                         })
                     }
                 } else {
-                    event.player.sendMessage(plugin.messages["unlock-invalid-no-key"])
+                    event.player.sendMessage(plugin.messages.unlockInvalidNoKey)
                 }
             } else {
-                event.player.sendMessage(plugin.messages["unlock-invalid-not-locked"])
+                event.player.sendMessage(plugin.messages.unlockInvalidNotLocked)
             }
             lockService.setUnclaiming(minecraftProfile, false)
             event.isCancelled = true
         } else if (lockService.isGettingKey(minecraftProfile)) {
             if (block == null) {
-                event.player.sendMessage(plugin.messages["get-key-invalid-not-locked"])
+                event.player.sendMessage(plugin.messages.getKeyInvalidNotLocked)
             } else {
                 for (item in event.player.inventory.addItem(lockService.getKeyFor(block.toRPKBlockLocation())).values) {
                     event.player.world.dropItem(event.player.location, item)
                 }
                 event.player.updateInventory()
-                event.player.sendMessage(plugin.messages["get-key-successful"])
+                event.player.sendMessage(plugin.messages.getKeySuccessful)
             }
             lockService.setGettingKey(minecraftProfile, false)
             event.isCancelled = true
@@ -124,9 +124,9 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             if (block == null) return
             if (hasKey(character, block)) return
             event.isCancelled = true
-            event.player.sendMessage(plugin.messages["block-locked", mapOf(
-                "block" to block.type.toString().lowercase().replace('_', ' ')
-            )])
+            event.player.sendMessage(plugin.messages.blockLocked.withParameters(
+                blockType = block.type
+            ))
         }
     }
 
@@ -141,7 +141,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
                 val inventory = bukkitPlayer.inventory
                 val inventoryContents = inventory.contents
                 return keyringService.getPreloadedKeyring(character)
-                        ?.any { it.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) } ?: false
+                        ?.any { it?.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) == true } ?: false
                             || inventoryContents
                         .filterNotNull()
                         .any { it.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) }
@@ -158,7 +158,7 @@ class PlayerInteractListener(private val plugin: RPKLocksBukkit) : Listener {
             val iterator = keyring.iterator()
             while (iterator.hasNext()) {
                 val key = iterator.next()
-                if (key.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation()))) {
+                if (key?.isSimilar(lockService.getKeyFor(block.toRPKBlockLocation())) == true) {
                     if (key.amount > 1) {
                         key.amount = key.amount - 1
                     } else {

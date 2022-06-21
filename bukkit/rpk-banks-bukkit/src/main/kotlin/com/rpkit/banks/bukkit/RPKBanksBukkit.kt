@@ -20,22 +20,25 @@ import com.rpkit.banks.bukkit.bank.RPKBankService
 import com.rpkit.banks.bukkit.bank.RPKBankServiceImpl
 import com.rpkit.banks.bukkit.database.table.RPKBankTable
 import com.rpkit.banks.bukkit.listener.PlayerInteractListener
+import com.rpkit.banks.bukkit.listener.RPKCharacterDeleteListener
 import com.rpkit.banks.bukkit.listener.SignChangeListener
 import com.rpkit.banks.bukkit.messages.BanksMessages
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK banks plugin default implementation.
  */
-class RPKBanksBukkit : RPKBukkitPlugin() {
+class RPKBanksBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: BanksMessages
@@ -97,7 +100,11 @@ class RPKBanksBukkit : RPKBukkitPlugin() {
     }
 
     fun registerListeners() {
-        registerListeners(SignChangeListener(this), PlayerInteractListener(this))
+        registerListeners(
+            SignChangeListener(this),
+            PlayerInteractListener(this),
+            RPKCharacterDeleteListener(this)
+        )
     }
 
 }

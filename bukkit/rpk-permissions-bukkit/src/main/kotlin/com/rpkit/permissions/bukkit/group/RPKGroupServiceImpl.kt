@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 /**
  * Group service implementation.
@@ -118,18 +119,19 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                     }
                 }.join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add group", exception)
+            throw exception
         }
     }
 
     override fun addGroup(profile: RPKProfile, group: RPKGroup): CompletableFuture<Void> {
-        return runAsync {
-            addGroup(
-                profile,
-                group,
-                plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).join()
-                    .minByOrNull(RPKProfileGroup::priority)?.priority?.minus(1) ?: 0
-            ).join()
-        }
+        return addGroup(
+            profile,
+            group,
+            plugin.database.getTable(RPKProfileGroupTable::class.java).get(profile).join()
+                .minByOrNull(RPKProfileGroup::priority)?.priority?.minus(1) ?: 0
+        )
     }
 
     override fun removeGroup(profile: RPKProfile, group: RPKGroup): CompletableFuture<Void> {
@@ -157,6 +159,9 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                     })
                 }
             }.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove group", exception)
+            throw exception
         }
     }
 
@@ -210,6 +215,9 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                         })
                     }
                 }?.join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set group priority", exception)
+            throw exception
         }
     }
 
@@ -234,18 +242,19 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                     minecraftProfile.assignPermissions()
                 }
             })
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add character group", exception)
+            throw exception
         }
     }
 
     override fun addGroup(character: RPKCharacter, group: RPKGroup): CompletableFuture<Void> {
-        return runAsync {
-            addGroup(
-                character,
-                group,
-                plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).join()
-                    .minByOrNull(RPKCharacterGroup::priority)?.priority?.minus(1) ?: 0
-            ).join()
-        }
+        return addGroup(
+            character,
+            group,
+            plugin.database.getTable(RPKCharacterGroupTable::class.java).get(character).join()
+                .minByOrNull(RPKCharacterGroup::priority)?.priority?.minus(1) ?: 0
+        )
     }
 
     override fun removeGroup(character: RPKCharacter, group: RPKGroup): CompletableFuture<Void> {
@@ -269,6 +278,9 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                     minecraftProfile.assignPermissions()
                 }
             })
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove character group", exception)
+            throw exception
         }
     }
 
@@ -308,11 +320,13 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
 
     override fun setGroupPriority(character: RPKCharacter, group: RPKGroup, priority: Int): CompletableFuture<Void> {
         val characterGroupTable = plugin.database.getTable(RPKCharacterGroupTable::class.java)
-        return characterGroupTable[character, group].thenAccept { characterGroup ->
-            if (characterGroup == null) return@thenAccept
+        return characterGroupTable[character, group].thenAcceptAsync { characterGroup ->
+            if (characterGroup == null) return@thenAcceptAsync
             characterGroup.priority = priority
-            characterGroupTable.update(characterGroup)
-            character.minecraftProfile?.assignPermissions()
+            characterGroupTable.update(characterGroup).join()
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                character.minecraftProfile?.assignPermissions()
+            })
         }
     }
 
@@ -339,6 +353,9 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
                     unloadGroups(character)
                     loadGroups(character).join()
                 }.join()
+            }.exceptionally { exception ->
+                plugin.logger.log(Level.SEVERE, "Failed to reload minecraft profile groups", exception)
+                throw exception
             })
         }
         return CompletableFuture.allOf(*futures.toTypedArray())

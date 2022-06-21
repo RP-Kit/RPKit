@@ -16,12 +16,15 @@
 
 package com.rpkit.core.caching
 
+import java.util.function.Predicate
+
 interface RPKCache<K, V> {
 
     operator fun get(key: K): V?
     operator fun set(key: K, value: V)
     fun containsKey(key: K): Boolean
     fun remove(key: K)
+    fun removeMatching(predicate: Predicate<V>)
     fun keys(): Set<K>
     fun clear()
 

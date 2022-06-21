@@ -16,16 +16,18 @@
 
 package com.rpkit.store.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.store.bukkit.command.ClaimCommand
 import com.rpkit.store.bukkit.command.PurchaseCommand
 import com.rpkit.store.bukkit.command.PurchasesCommand
 import com.rpkit.store.bukkit.database.table.*
+import com.rpkit.store.bukkit.listener.RPKProfileDeleteListener
 import com.rpkit.store.bukkit.messages.StoresMessages
 import com.rpkit.store.bukkit.purchase.RPKPurchaseService
 import com.rpkit.store.bukkit.purchase.RPKPurchaseServiceImpl
@@ -33,10 +35,11 @@ import com.rpkit.store.bukkit.storeitem.RPKStoreItemService
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-class RPKStoresBukkit : RPKBukkitPlugin() {
+class RPKStoresBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: StoresMessages
@@ -103,12 +106,17 @@ class RPKStoresBukkit : RPKBukkitPlugin() {
         Services[RPKStoreItemService::class.java] = RPKStoreItemServiceImpl(this)
 
         registerCommands()
+        registerListeners()
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("purchase")?.setExecutor(PurchaseCommand(this))
         getCommand("purchases")?.setExecutor(PurchasesCommand(this))
         getCommand("claim")?.setExecutor(ClaimCommand(this))
+    }
+
+    private fun registerListeners() {
+        registerListeners(RPKProfileDeleteListener())
     }
 
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +22,7 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterCreateEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
+import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.characters.bukkit.race.RPKRace
 import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.race.RPKRaceService
@@ -36,6 +38,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
 
 /**
  * Character service implementation.
@@ -49,7 +52,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         return characters[id.value]
     }
 
-    override fun loadCharacter(id: RPKCharacterId): CompletableFuture<RPKCharacter?> {
+    override fun loadCharacter(id: RPKCharacterId): CompletableFuture<out RPKCharacter?> {
         val preloadedCharacter = getPreloadedCharacter(id)
         if (preloadedCharacter != null) return CompletableFuture.completedFuture(preloadedCharacter)
         plugin.logger.info("Loading character ${id.value}...")
@@ -68,7 +71,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         plugin.logger.info("Unloaded character ${id.value}")
     }
 
-    override fun getCharacter(id: RPKCharacterId): CompletableFuture<RPKCharacter?> {
+    override fun getCharacter(id: RPKCharacterId): CompletableFuture<out RPKCharacter?> {
         val preloaded = getPreloadedCharacter(id)
         if (preloaded != null) return CompletableFuture.completedFuture(preloaded)
         return plugin.database.getTable(RPKCharacterTable::class.java)[id]
@@ -165,6 +168,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
                         }
+                        reloadPlayer(bukkitPlayer, newCharacter, plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
                     }
                     newCharacter.minecraftProfile = minecraftProfile
                     updateCharacter(newCharacter)
@@ -180,6 +184,9 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                     }
                 }
             })
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to set active character", exception)
+            throw exception
         }
     }
 
@@ -204,7 +211,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         description: String?,
         isDead: Boolean?,
         location: RPKLocation?,
-        inventoryContents: Array<ItemStack>?,
+        inventoryContents: Array<ItemStack?>?,
         helmet: ItemStack?,
         chestplate: ItemStack?,
         leggings: ItemStack?,
@@ -236,7 +243,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
             location ?: plugin.server.worlds[0].spawnLocation.toRPKLocation(),
             inventoryContents
-                ?: (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack>)
+                ?: (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>)
                     .toTypedArray(),
             helmet ?: plugin.config.getItemStack("characters.defaults.helmet"),
             chestplate ?: plugin.config.getItemStack("characters.defaults.chestplate"),
@@ -270,6 +277,9 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                 }
             }
             plugin.database.getTable(RPKCharacterTable::class.java).delete(event.character).join()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove character", exception)
+            throw exception
         }
     }
 
@@ -294,6 +304,9 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                 plugin.database.getTable(RPKCharacterTable::class.java).update(event.character).join()
                 return@supplyAsync event.character
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update character", exception)
+            throw exception
         }
     }
 

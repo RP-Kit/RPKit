@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
         return mutableListOf()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getBalance(playerName: String): Double {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (getBalance)")
@@ -59,6 +60,7 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getBalance(playerName: String, world: String): Double {
         return getBalance(playerName)
     }
@@ -67,14 +69,17 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
         return "rpk-economy"
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isBankOwner(name: String, playerName: String): EconomyResponse {
         return EconomyResponse(0.0, 0.0, NOT_IMPLEMENTED, "Banks not implemented! Please use rpk-bank-lib.")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun has(playerName: String, amount: Double): Boolean {
         return getBalance(playerName) >= amount
     }
 
+    @Deprecated("Deprecated in Java")
     override fun has(playerName: String, worldName: String, amount: Double): Boolean {
         return has(playerName, amount)
     }
@@ -91,6 +96,7 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
         return EconomyResponse(0.0, 0.0, NOT_IMPLEMENTED, "Banks not implemented! Please use rpk-bank-lib.")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun depositPlayer(playerName: String, amount: Double): EconomyResponse {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (depositPlayer)")
@@ -150,14 +156,17 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun depositPlayer(playerName: String, worldName: String, amount: Double): EconomyResponse {
         return depositPlayer(playerName, amount)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun createBank(name: String, player: String): EconomyResponse {
         return EconomyResponse(0.0, 0.0, NOT_IMPLEMENTED, "Banks not implemented! Please use rpk-bank-lib.")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun hasAccount(playerName: String): Boolean {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (hasAccount)")
@@ -170,22 +179,27 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
         return character != null
     }
 
+    @Deprecated("Deprecated in Java")
     override fun hasAccount(playerName: String, worldName: String): Boolean {
         return hasAccount(playerName)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isBankMember(name: String, playerName: String): EconomyResponse {
         return EconomyResponse(0.0, 0.0, NOT_IMPLEMENTED, "Banks not implemented! Please use rpk-bank-lib.")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun createPlayerAccount(playerName: String): Boolean {
         return false
     }
 
+    @Deprecated("Deprecated in Java")
     override fun createPlayerAccount(playerName: String, worldName: String): Boolean {
         return createPlayerAccount(playerName)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun withdrawPlayer(playerName: String, amount: Double): EconomyResponse {
         if (plugin.server.isPrimaryThread) {
             plugin.logger.warning("Vault is being used from the main thread! This may cause lag! (withdrawPlayer)")
@@ -245,6 +259,7 @@ class RPKEconomyVaultEconomy(private val plugin: RPKEconomyLibBukkit) : Abstract
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun withdrawPlayer(playerName: String, worldName: String, amount: Double): EconomyResponse {
         return withdrawPlayer(playerName, amount)
     }

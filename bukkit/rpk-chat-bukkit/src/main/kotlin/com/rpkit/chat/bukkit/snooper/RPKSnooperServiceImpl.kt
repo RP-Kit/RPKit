@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingBeginEvent
 import com.rpkit.chat.bukkit.event.snooper.RPKBukkitSnoopingEndEvent
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 /**
  * Snooper service implementation.
@@ -39,6 +40,9 @@ class RPKSnooperServiceImpl(override val plugin: RPKChatBukkit) : RPKSnooperServ
                 if (event.isCancelled) return@thenAcceptAsync
                 plugin.database.getTable(RPKSnooperTable::class.java).insert(RPKSnooper(minecraftProfile = minecraftProfile)).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to add snooper", exception)
+            throw exception
         }
     }
 
@@ -51,6 +55,9 @@ class RPKSnooperServiceImpl(override val plugin: RPKChatBukkit) : RPKSnooperServ
                 if (event.isCancelled) return@thenAcceptAsync
                 snooperTable.delete(snooper).join()
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to remove snooper", exception)
+            throw exception
         }
     }
 

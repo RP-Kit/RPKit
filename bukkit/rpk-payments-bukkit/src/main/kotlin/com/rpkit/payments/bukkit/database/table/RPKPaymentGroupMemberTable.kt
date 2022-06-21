@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,17 +21,22 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.service.Services
+import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.database.create
 import com.rpkit.payments.bukkit.database.jooq.Tables.RPKIT_PAYMENT_GROUP_MEMBER
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
 import com.rpkit.payments.bukkit.group.member.RPKPaymentGroupMember
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents payment group member table.
  */
 class RPKPaymentGroupMemberTable(
-        private val database: Database
+        private val database: Database,
+        private val plugin: RPKPaymentsBukkit
 ) : Table {
 
     fun insert(entity: RPKPaymentGroupMember): CompletableFuture<Void> {
@@ -48,6 +54,9 @@ class RPKPaymentGroupMemberTable(
                     characterId.value
                 )
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert payment group member", exception)
+            throw exception
         }
     }
 
@@ -69,6 +78,9 @@ class RPKPaymentGroupMemberTable(
                     character
                 )
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get payment group members", exception)
+            throw exception
         }
     }
 
@@ -81,7 +93,20 @@ class RPKPaymentGroupMemberTable(
                 .where(RPKIT_PAYMENT_GROUP_MEMBER.PAYMENT_GROUP_ID.eq(paymentGroupId.value))
                 .and(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID.eq(characterId.value))
                 .execute()
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete payment group member", exception)
+            throw exception
         }
+    }
+
+    fun delete(characterId: RPKCharacterId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_PAYMENT_GROUP_MEMBER)
+            .where(RPKIT_PAYMENT_GROUP_MEMBER.CHARACTER_ID.eq(characterId.value))
+            .execute()
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete payment group members for character id", exception)
+        throw exception
     }
 
 }

@@ -17,11 +17,12 @@
 package com.rpkit.permissions.bukkit
 
 import com.rpkit.core.bukkit.command.toBukkit
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.command.charactergroup.CharacterGroupCommand
 import com.rpkit.permissions.bukkit.command.group.GroupCommand
@@ -31,10 +32,7 @@ import com.rpkit.permissions.bukkit.database.table.RPKProfileGroupTable
 import com.rpkit.permissions.bukkit.group.RPKGroupImpl
 import com.rpkit.permissions.bukkit.group.RPKGroupService
 import com.rpkit.permissions.bukkit.group.RPKGroupServiceImpl
-import com.rpkit.permissions.bukkit.listener.AsyncPlayerPreLoginListener
-import com.rpkit.permissions.bukkit.listener.PlayerJoinListener
-import com.rpkit.permissions.bukkit.listener.PlayerQuitListener
-import com.rpkit.permissions.bukkit.listener.RPKBukkitCharacterSwitchListener
+import com.rpkit.permissions.bukkit.listener.*
 import com.rpkit.permissions.bukkit.messages.PermissionsMessages
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsService
 import com.rpkit.permissions.bukkit.permissions.RPKPermissionsServiceImpl
@@ -42,12 +40,13 @@ import com.rpkit.permissions.bukkit.placeholder.RPKPermissionsPlaceholderExpansi
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 /**
  * RPK permissions plugin default implementation.
  */
-class RPKPermissionsBukkit : RPKBukkitPlugin() {
+class RPKPermissionsBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: PermissionsMessages
@@ -117,18 +116,20 @@ class RPKPermissionsBukkit : RPKBukkitPlugin() {
         }
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("group")?.setExecutor(GroupCommand(this))
         getCommand("charactergroup")?.setExecutor(CharacterGroupCommand(this))
         getCommand("permissions")?.setExecutor(PermissionsCommand(this).toBukkit())
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
             PlayerJoinListener(),
             PlayerQuitListener(this),
-            RPKBukkitCharacterSwitchListener(this),
-            AsyncPlayerPreLoginListener()
+            RPKCharacterSwitchListener(this),
+            AsyncPlayerPreLoginListener(),
+            RPKCharacterDeleteListener(this),
+            RPKProfileDeleteListener(this)
         )
     }
 }

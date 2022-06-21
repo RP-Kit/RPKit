@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class SnoopCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                 return true
             }
             snooperService.snoopers.thenAccept { snoopers ->
-                if (!snoopers.contains(minecraftProfile)) {
+                if (!snoopers.any { it.id?.value == minecraftProfile.id?.value }) {
                     sender.sendMessage(plugin.messages["snoop-already-disabled"])
                     return@thenAccept
                 }
@@ -94,7 +94,7 @@ class SnoopCommand(private val plugin: RPKChatBukkit) : CommandExecutor {
                 return true
             }
             snooperService.snoopers.thenAccept { snoopers ->
-                if (snoopers.contains(minecraftProfile)) {
+                if (snoopers.any { it.id?.value == minecraftProfile.id?.value }) {
                     sender.sendMessage(plugin.messages["snoop-check-on"])
                 } else {
                     sender.sendMessage(plugin.messages["snoop-check-off"])

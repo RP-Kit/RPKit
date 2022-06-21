@@ -16,11 +16,12 @@
 
 package com.rpkit.monsters.bukkit
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
+import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
 import com.rpkit.core.database.DatabaseMigrationProperties
 import com.rpkit.core.database.UnsupportedDatabaseDialectException
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.monsters.bukkit.command.monsterspawnarea.MonsterSpawnAreaCommand
 import com.rpkit.monsters.bukkit.database.table.RPKMonsterSpawnAreaMonsterTable
@@ -40,10 +41,11 @@ import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatService
 import com.rpkit.monsters.bukkit.monsterstat.RPKMonsterStatServiceImpl
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-class RPKMonstersBukkit : RPKBukkitPlugin() {
+class RPKMonstersBukkit : JavaPlugin(), RPKPlugin {
 
     lateinit var database: Database
     lateinit var messages: MonstersMessages

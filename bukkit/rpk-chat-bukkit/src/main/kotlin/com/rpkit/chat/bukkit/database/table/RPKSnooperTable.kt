@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +27,15 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * Represents the snooper table.
  */
 class RPKSnooperTable(
         private val database: Database,
-        plugin: RPKChatBukkit
+        private val plugin: RPKChatBukkit
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_snooper.minecraft_profile_id.enabled")) {
@@ -57,6 +60,9 @@ class RPKSnooperTable(
                 .values(minecraftProfileId.value)
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to insert snooper", exception)
+            throw exception
         }
     }
 
@@ -69,6 +75,9 @@ class RPKSnooperTable(
                 .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to update snooper", exception)
+            throw exception
         }
     }
 
@@ -95,6 +104,9 @@ class RPKSnooperTable(
                 )
                 cache?.set(minecraftProfileId.value, snooper)
                 return@supplyAsync snooper
+            }.exceptionally { exception ->
+                plugin.logger.log(SEVERE, "Failed to get snooper", exception)
+                throw exception
             }
         }
     }
@@ -118,6 +130,9 @@ class RPKSnooperTable(
                         ?: return@mapNotNull null
                 return@mapNotNull RPKSnooper(minecraftProfile)
             }
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to get all snoopers", exception)
+            throw exception
         }
     }
 
@@ -129,7 +144,21 @@ class RPKSnooperTable(
                 .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to delete snooper", exception)
+            throw exception
         }
+    }
+
+    fun delete(minecraftProfileId: RPKMinecraftProfileId): CompletableFuture<Void> = runAsync {
+        database.create
+            .deleteFrom(RPKIT_SNOOPER)
+            .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+            .execute()
+        cache?.remove(minecraftProfileId.value)
+    }.exceptionally { exception ->
+        plugin.logger.log(SEVERE, "Failed to delete snooper for Minecraft profile id", exception)
+        throw exception
     }
 
 }

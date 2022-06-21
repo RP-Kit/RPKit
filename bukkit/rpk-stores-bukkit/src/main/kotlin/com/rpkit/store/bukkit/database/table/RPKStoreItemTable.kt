@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package com.rpkit.store.bukkit.database.table
 
-import com.rpkit.core.bukkit.plugin.RPKBukkitPlugin
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
+import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.store.bukkit.RPKStoresBukkit
 import com.rpkit.store.bukkit.database.create
 import com.rpkit.store.bukkit.database.jooq.Tables.RPKIT_STORE_ITEM
 import com.rpkit.store.bukkit.storeitem.RPKStoreItem
 import com.rpkit.store.bukkit.storeitem.RPKStoreItemId
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 
 class RPKStoreItemTable(
         private val database: Database,
-        plugin: RPKStoresBukkit
+        private val plugin: RPKStoresBukkit
 ) : Table {
 
     private val cache = if (plugin.config.getBoolean("caching.rpkit_store_item.id.enabled")) {
@@ -64,6 +65,9 @@ class RPKStoreItemTable(
             entity.id = RPKStoreItemId(id)
             cache?.set(id, entity)
             return@supplyAsync RPKStoreItemId(id)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to insert store item", exception)
+            throw exception
         }
     }
 
@@ -79,6 +83,9 @@ class RPKStoreItemTable(
                 .where(RPKIT_STORE_ITEM.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to update store item", exception)
+            throw exception
         }
     }
 
@@ -107,18 +114,24 @@ class RPKStoreItemTable(
                 cache?.remove(id.value)
             }
             return@supplyAsync null
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get store item", exception)
+            throw exception
         }
     }
 
-    fun get(plugin: RPKBukkitPlugin, identifier: String): CompletableFuture<RPKStoreItem?> {
+    fun get(plugin: RPKPlugin, identifier: String): CompletableFuture<RPKStoreItem?> {
         return CompletableFuture.supplyAsync {
             val result = database.create
                 .select(RPKIT_STORE_ITEM.ID)
                 .from(RPKIT_STORE_ITEM)
-                .where(RPKIT_STORE_ITEM.PLUGIN.eq(plugin.name))
+                .where(RPKIT_STORE_ITEM.PLUGIN.eq(plugin.getName()))
                 .and(RPKIT_STORE_ITEM.IDENTIFIER.eq(identifier))
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync get(RPKStoreItemId(result[RPKIT_STORE_ITEM.ID])).join()
+        }.exceptionally { exception ->
+            this.plugin.logger.log(Level.SEVERE, "Failed to get store item", exception)
+            throw exception
         }
     }
 
@@ -131,6 +144,9 @@ class RPKStoreItemTable(
             val storeItemFutures = result.map { row -> get(RPKStoreItemId(row[RPKIT_STORE_ITEM.ID])) }
             CompletableFuture.allOf(*storeItemFutures.toTypedArray()).join()
             return@supplyAsync storeItemFutures.mapNotNull(CompletableFuture<RPKStoreItem?>::join)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get all store items", exception)
+            throw exception
         }
     }
 
@@ -142,6 +158,9 @@ class RPKStoreItemTable(
                 .where(RPKIT_STORE_ITEM.ID.eq(id.value))
                 .execute()
             cache?.remove(id.value)
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to delete store item", exception)
+            throw exception
         }
     }
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import com.rpkit.statbuilds.bukkit.RPKStatBuildsBukkit
 import com.rpkit.statbuilds.bukkit.statattribute.RPKStatAttributeService
 import com.rpkit.statbuilds.bukkit.statbuild.RPKStatBuildService
 import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 
 class RPKSkillPointServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSkillPointService {
     override fun getSkillPoints(character: RPKCharacter, skillType: RPKSkillType): CompletableFuture<Int> {
@@ -44,6 +46,9 @@ class RPKSkillPointServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSk
                     }.toTypedArray()
                 )
             ) ?: 0
+        }.exceptionally { exception ->
+            plugin.logger.log(Level.SEVERE, "Failed to get skill points", exception)
+            throw exception
         }
     }
 }
