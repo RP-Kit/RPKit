@@ -92,7 +92,7 @@ class RPKStatBuildServiceImpl(override val plugin: RPKStatBuildsBukkit) : RPKSta
 
     override fun getMaxStatPoints(character: RPKCharacter, statAttribute: RPKStatAttribute): Int {
         val expressionService = Services[RPKExpressionService::class.java] ?: return 0
-        val expression = expressionService.createExpression(plugin.config.getString("stat-attributes.${statAttribute.name}.max-points") ?: return 0)
+        val expression = expressionService.createExpression(plugin.config.getString("stat-attributes.${statAttribute.name.value}.max-points") ?: return 0)
         return expression.parseInt(
                 mapOf(
                     "level" to (Services[RPKExperienceService::class.java]?.getLevel(character)?.join()?.toDouble() ?: 1.0)

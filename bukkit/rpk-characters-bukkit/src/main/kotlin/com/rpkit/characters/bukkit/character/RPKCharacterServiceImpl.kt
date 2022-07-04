@@ -168,7 +168,13 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
                         }
-                        reloadPlayer(bukkitPlayer, newCharacter, plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
+                        if (plugin.config.getBoolean("characters.set-player-nameplate")
+                            && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
+                            reloadPlayer(
+                                bukkitPlayer,
+                                newCharacter,
+                                plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
+                        }
                     }
                     newCharacter.minecraftProfile = minecraftProfile
                     updateCharacter(newCharacter)
