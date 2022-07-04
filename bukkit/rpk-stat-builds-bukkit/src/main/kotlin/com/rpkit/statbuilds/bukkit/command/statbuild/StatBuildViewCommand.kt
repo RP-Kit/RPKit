@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
 
 class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
@@ -67,17 +69,28 @@ class StatBuildViewCommand(private val plugin: RPKStatBuildsBukkit) : CommandExe
             sender.sendMessage(plugin.messages["no-stat-build-service"])
             return true
         }
-        sender.sendMessage(plugin.messages["stat-build-view-points-assignment-count", mapOf(
-                "total" to statBuildService.getTotalStatPoints(character).toString(),
-                "assigned" to statBuildService.getAssignedStatPoints(character).toString(),
-                "unassigned" to statBuildService.getUnassignedStatPoints(character).toString()
-        )])
-        statAttributeService.statAttributes.forEach { statAttribute ->
-            sender.sendMessage(plugin.messages["stat-build-view-item", mapOf(
-                    "stat_attribute" to statAttribute.name.value,
-                    "points" to statBuildService.getStatPoints(character, statAttribute).toString(),
-                    "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
+        val totalStatPointsFuture = statBuildService.getTotalStatPoints(character)
+        val assignedStatPointsFuture = statBuildService.getAssignedStatPoints(character)
+        val unassignedStatPointsFuture = statBuildService.getUnassignedStatPoints(character)
+        val statAttributePointsFutures = statAttributeService.statAttributes.associateWith { statAttribute -> statBuildService.getStatPoints(character, statAttribute) }
+        CompletableFuture.allOf(
+            totalStatPointsFuture,
+            assignedStatPointsFuture,
+            unassignedStatPointsFuture,
+            CompletableFuture.allOf(*statAttributePointsFutures.values.toTypedArray())
+        ).thenRunAsync {
+            sender.sendMessage(plugin.messages["stat-build-view-points-assignment-count", mapOf(
+                "total" to totalStatPointsFuture.join().toString(),
+                "assigned" to assignedStatPointsFuture.join().toString(),
+                "unassigned" to unassignedStatPointsFuture.join().toString()
             )])
+            statAttributeService.statAttributes.forEach { statAttribute ->
+                sender.sendMessage(plugin.messages["stat-build-view-item", mapOf(
+                    "stat_attribute" to statAttribute.name.value,
+                    "points" to statAttributePointsFutures[statAttribute]?.join().toString(),
+                    "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
+                )])
+            }
         }
         return true
     }

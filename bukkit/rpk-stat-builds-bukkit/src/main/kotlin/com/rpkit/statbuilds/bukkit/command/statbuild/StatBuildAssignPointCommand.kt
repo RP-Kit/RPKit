@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,14 +95,17 @@ class StatBuildAssignPointCommand(private val plugin: RPKStatBuildsBukkit) : Com
                     sender.sendMessage(plugin.messages["stat-build-assign-point-invalid-points-too-many-in-stat"])
                     return@getStatPoints
                 }
-                statBuildService.setStatPoints(character, statAttribute, assignedStatPoints + points)
-                sender.sendMessage(plugin.messages["stat-build-assign-point-valid", mapOf(
-                    "character" to character.name,
-                    "stat_attribute" to statAttribute.name.value,
-                    "points" to points.toString(),
-                    "total_points" to statBuildService.getStatPoints(character, statAttribute).toString(),
-                    "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
-                )])
+                statBuildService.setStatPoints(character, statAttribute, assignedStatPoints + points).thenRunAsync {
+                    sender.sendMessage(
+                        plugin.messages["stat-build-assign-point-valid", mapOf(
+                            "character" to character.name,
+                            "stat_attribute" to statAttribute.name.value,
+                            "points" to points.toString(),
+                            "total_points" to statBuildService.getStatPoints(character, statAttribute).join().toString(),
+                            "max_points" to statBuildService.getMaxStatPoints(character, statAttribute).toString()
+                        )]
+                    )
+                }
             }
 
         }
