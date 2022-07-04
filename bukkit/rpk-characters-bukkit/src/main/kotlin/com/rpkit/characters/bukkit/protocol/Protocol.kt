@@ -18,16 +18,13 @@ package com.rpkit.characters.bukkit.protocol
 
 import com.comphenix.protocol.PacketType.Play.Server.*
 import com.comphenix.protocol.ProtocolLibrary
-import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketContainer
-import com.comphenix.protocol.events.PacketEvent
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction.ADD_PLAYER
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction.REMOVE_PLAYER
 import com.comphenix.protocol.wrappers.PlayerInfoData
 import com.comphenix.protocol.wrappers.WrappedChatComponent
 import com.comphenix.protocol.wrappers.WrappedGameProfile
-import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.chat.ComponentSerializer
@@ -79,7 +76,7 @@ private fun createAddPlayerPacket(
 ): PacketContainer {
     val packet = ProtocolLibrary.getProtocolManager().createPacket(PLAYER_INFO)
     packet.playerInfoAction.write(0, ADD_PLAYER)
-    val profile = WrappedGameProfile.fromPlayer(player).withName(character.name)
+    val profile = WrappedGameProfile.fromPlayer(player).withName(character.name.take(16))
     val tabListTextComponent =
         WrappedChatComponent.fromJson(ComponentSerializer.toString(TextComponent.fromLegacyText(player.playerListName)))
     val playerInfoData = PlayerInfoData(
