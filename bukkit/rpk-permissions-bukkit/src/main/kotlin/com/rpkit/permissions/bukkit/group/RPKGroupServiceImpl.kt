@@ -191,7 +191,7 @@ class RPKGroupServiceImpl(override val plugin: RPKPermissionsBukkit) : RPKGroupS
     override fun unloadGroups(profile: RPKProfile) {
         val profileId = profile.id ?: return
         profileGroups.remove(profileId.value)
-        plugin.logger.info("Unloaded groups for profile ${profile.name + profile.discriminator} (${profile.id})")
+        plugin.logger.info("Unloaded groups for profile ${profile.name + profile.discriminator} (${profile.id?.value})")
     }
 
     override fun getGroupPriority(profile: RPKProfile, group: RPKGroup): CompletableFuture<Int?> {
