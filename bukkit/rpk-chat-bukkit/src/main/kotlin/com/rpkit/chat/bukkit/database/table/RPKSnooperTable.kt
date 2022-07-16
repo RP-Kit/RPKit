@@ -27,7 +27,7 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletableFuture.runAsync
+import java.util.concurrent.CompletableFuture.*
 import java.util.logging.Level.SEVERE
 
 /**
@@ -50,8 +50,8 @@ class RPKSnooperTable(
     }
 
     fun insert(entity: RPKSnooper): CompletableFuture<Void> {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return completedFuture(null)
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_SNOOPER,
@@ -66,21 +66,6 @@ class RPKSnooperTable(
         }
     }
 
-    fun update(entity: RPKSnooper): CompletableFuture<Void> {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
-            database.create
-                .update(RPKIT_SNOOPER)
-                .set(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID, minecraftProfileId.value)
-                .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                .execute()
-            cache?.set(minecraftProfileId.value, entity)
-        }.exceptionally { exception ->
-            plugin.logger.log(SEVERE, "Failed to update snooper", exception)
-            throw exception
-        }
-    }
-
     /**
      * Gets the snooper instance for a Minecraft profile.
      * If the player does not have a snooper entry, null is returned.
@@ -89,13 +74,13 @@ class RPKSnooperTable(
      * @return The snooper instance, or null if none exists
      */
     fun get(minecraftProfile: RPKMinecraftProfile): CompletableFuture<RPKSnooper?> {
-        val minecraftProfileId = minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
+        val minecraftProfileId = minecraftProfile.id ?: return completedFuture(null)
         if (cache?.containsKey(minecraftProfileId.value) == true) {
-            return CompletableFuture.completedFuture(cache[minecraftProfileId.value])
+            return completedFuture(cache[minecraftProfileId.value])
         } else {
-            return CompletableFuture.supplyAsync {
+            return supplyAsync {
                 database.create
-                    .select(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
+                    .selectDistinct(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
                     .from(RPKIT_SNOOPER)
                     .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                     .fetchOne() ?: return@supplyAsync null
@@ -117,9 +102,9 @@ class RPKSnooperTable(
      * @return A list containing all snoopers
      */
     fun getAll(): CompletableFuture<List<RPKSnooper>> {
-        return CompletableFuture.supplyAsync {
+        return supplyAsync {
             val results = database.create
-                .select(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
+                .selectDistinct(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID)
                 .from(RPKIT_SNOOPER)
                 .fetch()
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@supplyAsync emptyList()
@@ -137,8 +122,8 @@ class RPKSnooperTable(
     }
 
     fun delete(entity: RPKSnooper): CompletableFuture<Void> {
-        val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        val minecraftProfileId = entity.minecraftProfile.id ?: return completedFuture(null)
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_SNOOPER)
                 .where(RPKIT_SNOOPER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
