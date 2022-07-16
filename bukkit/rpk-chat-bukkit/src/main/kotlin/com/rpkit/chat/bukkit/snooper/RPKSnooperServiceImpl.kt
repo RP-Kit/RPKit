@@ -34,7 +34,7 @@ class RPKSnooperServiceImpl(override val plugin: RPKChatBukkit) : RPKSnooperServ
 
     override fun addSnooper(minecraftProfile: RPKMinecraftProfile): CompletableFuture<Void> {
         return snoopers.thenAcceptAsync { snoopers ->
-            if (!snoopers.contains(minecraftProfile)) {
+            if (!snoopers.any { it.id?.value == minecraftProfile.id?.value }) {
                 val event = RPKBukkitSnoopingBeginEvent(minecraftProfile, true)
                 plugin.server.pluginManager.callEvent(event)
                 if (event.isCancelled) return@thenAcceptAsync
