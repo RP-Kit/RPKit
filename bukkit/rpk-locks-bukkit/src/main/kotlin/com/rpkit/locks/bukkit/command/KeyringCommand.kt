@@ -65,7 +65,7 @@ class KeyringCommand(private val plugin: RPKLocksBukkit) : CommandExecutor {
         keyringService.getKeyring(character).thenAccept { keyring ->
             plugin.server.scheduler.runTask(plugin, Runnable {
                 val inventory = plugin.server.createInventory(null, 27, "Keyring")
-                inventory.contents = keyring.toTypedArray()
+                inventory.contents = keyring.filterNotNull().toTypedArray()
                 sender.openInventory(inventory)
             })
         }

@@ -115,14 +115,14 @@ class CraftItemListener(private val plugin: RPKProfessionsBukkit) : Listener {
                 } else {
                     event.currentItem = null
                     val matrixItems = event.inventory.matrix
-                    val newMatrixItems = arrayOfNulls<ItemStack>(9)
+                    val newMatrixItems = Array(9) { ItemStack(AIR) }
                     for ((i, matrixItem) in matrixItems.withIndex()) {
-                        if (matrixItem == null) {
+                        if (matrixItem == null || matrixItem.type == AIR) {
                             continue
                         }
                         matrixItem.amount -= amountCrafted
                         if (matrixItem.amount <= 0) {
-                            newMatrixItems[i] = null
+                            newMatrixItems[i] = ItemStack(AIR)
                         } else {
                             newMatrixItems[i] = matrixItem
                         }

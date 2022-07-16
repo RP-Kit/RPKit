@@ -22,9 +22,9 @@ import com.rpkit.notifications.bukkit.notification.RPKNotificationService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -44,7 +44,7 @@ class PlayerJoinListener(private val plugin: RPKNotificationsBukkit) : Listener 
                             .sortedByDescending { notification -> notification.time }
                             .forEach { notification ->
                                 val listItem = TextComponent(plugin.messages.notificationListItem.withParameters(notification))
-                                listItem.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text(plugin.messages.notificationListItemHover))
+                                listItem.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder().appendLegacy(plugin.messages.notificationListItemHover).create())
                                 listItem.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/notification view ${notification.id?.value}")
                                 event.player.spigot().sendMessage(listItem)
                             }

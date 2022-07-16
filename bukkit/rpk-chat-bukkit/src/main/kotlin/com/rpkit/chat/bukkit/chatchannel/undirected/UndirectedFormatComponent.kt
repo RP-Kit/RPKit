@@ -21,6 +21,7 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
 import com.rpkit.chat.bukkit.prefix.RPKPrefixService
+import com.rpkit.core.bukkit.extension.closestChatColor
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import net.md_5.bungee.api.ChatColor
@@ -76,7 +77,7 @@ class UndirectedFormatComponent(
                 formattedMessage = formattedMessage.replace("\$channel", chatChannel.name.value)
             }
             if (formattedMessage.contains("\$color") || formattedMessage.contains("\$colour")) {
-                val chatColorString = ChatColor.of(chatChannel.color).toString()
+                val chatColorString = chatChannel.color.closestChatColor().toString()
                 formattedMessage =
                     formattedMessage.replace("\$color", chatColorString).replace("\$colour", chatColorString)
             }

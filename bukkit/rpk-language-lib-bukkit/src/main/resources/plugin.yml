@@ -2,7 +2,7 @@ name: rpk-language-lib-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.languages.bukkit.RPKLanguageLibBukkit
-api-version: '1.19'
+api-version: '1.15'
 depend:
 - rpk-core-bukkit
 - rpk-character-lib-bukkit

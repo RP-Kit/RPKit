@@ -5,4 +5,4 @@ main: com.rpkit.experience.bukkit.RPKExperienceLibBukkit
 depend:
 - rpk-core-bukkit
 - rpk-character-lib-bukkit
-api-version: '1.19'
+api-version: '1.15'

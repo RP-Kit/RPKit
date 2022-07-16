@@ -118,11 +118,11 @@ class RPKBlockHistoryServiceImpl(override val plugin: RPKBlockLoggingBukkit) : R
         }
     }
 
-    override fun getBlockInventoryAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Array<ItemStack>> {
+    override fun getBlockInventoryAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Array<out ItemStack?>> {
         val bukkitBlock = block.toBukkitBlock()
         return CompletableFuture.supplyAsync {
             val history = getBlockHistory(block).join()
-            var inventoryContents = (bukkitBlock?.state as? InventoryHolder)?.inventory?.contents ?: emptyArray<ItemStack>()
+            var inventoryContents: Array<out ItemStack?> = (bukkitBlock?.state as? InventoryHolder)?.inventory?.contents ?: emptyArray()
             history.inventoryChanges
                 .join()
                 .asReversed()

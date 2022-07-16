@@ -23,7 +23,7 @@ import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingAction.CRAFT
 import com.rpkit.craftingskill.bukkit.craftingskill.RPKCraftingSkillService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.GameMode
-import org.bukkit.Material
+import org.bukkit.Material.AIR
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -103,14 +103,14 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
             } else {
                 event.currentItem = null
                 val matrixItems = event.inventory.matrix
-                val newMatrixItems = arrayOfNulls<ItemStack>(9)
+                val newMatrixItems = Array(9) { ItemStack(AIR) }
                 for ((i, matrixItem) in matrixItems.withIndex()) {
-                    if (matrixItem == null) {
+                    if (matrixItem == null || matrixItem.type == AIR) {
                         continue
                     }
                     matrixItem.amount -= amountCrafted
                     if (matrixItem.amount <= 0) {
-                        newMatrixItems[i] = null
+                        newMatrixItems[i] = ItemStack(AIR)
                     } else {
                         newMatrixItems[i] = matrixItem
                     }
@@ -134,7 +134,7 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
 
     private fun getAmountCrafted(event: CraftItemEvent): Int {
         val currentItem = event.currentItem
-        if (currentItem == null || currentItem.type == Material.AIR) {
+        if (currentItem == null || currentItem.type == AIR) {
             return 0
         }
         val cursor = event.cursor
@@ -143,14 +143,14 @@ class CraftItemListener(private val plugin: RPKCraftingSkillBukkit) : Listener {
             var max = event.inventory.maxStackSize
             val matrix = event.inventory.matrix
             matrix.asSequence()
-                    .filter { it != null && it.type != Material.AIR }
+                    .filter { it != null && it.type != AIR }
                     .map { it.amount }
                     .filter { it in 1 until max }
                     .forEach { max = it }
             amount *= max
         } else {
             if (cursor != null) {
-                if (cursor.type != Material.AIR) {
+                if (cursor.type != AIR) {
                     return 0
                 }
             }

@@ -21,7 +21,6 @@ import com.rpkit.chat.bukkit.chatchannel.format.FormatPart
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
-import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
@@ -33,7 +32,7 @@ class ShowTextHoverAction(private val plugin: RPKChatBukkit, val text: List<Form
     override fun toHoverEvent(context: DirectedPreFormatMessageContext) = supplyAsync {
         HoverEvent(
             SHOW_TEXT,
-            Text(text.flatMap { it.toChatComponents(context).join().toList() }.toTypedArray())
+            text.flatMap { it.toChatComponents(context).join().toList() }.toTypedArray()
         )
     }.exceptionally { exception ->
         plugin.logger.log(Level.SEVERE, "Failed to convert show text hover action to hover event", exception)

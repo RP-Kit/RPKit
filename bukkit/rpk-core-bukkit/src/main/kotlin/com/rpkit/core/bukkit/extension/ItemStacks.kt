@@ -209,24 +209,29 @@ fun ItemStack.toNbtJson(): String? {
 }
 
 fun ItemStack.tagToNbtJson(): String? {
-    // ItemStack methods to get a net.minecraft.server.ItemStack object for serialization
-    val craftItemStackClazz: Class<*> = ReflectionUtil.getOBCClass("inventory.CraftItemStack") ?: return null
-    val asNMSCopyMethod: Method = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack::class.java) ?: return null
-
-    // NMS Method to serialize a net.minecraft.server.ItemStack to a valid Json string
-    val nmsItemStackClazz: Class<*> = ReflectionUtil.getNMSClass("world.item.ItemStack") ?: return null
-    val nbtTagCompoundClazz: Class<*> = ReflectionUtil.getNMSClass("nbt.NBTTagCompound") ?: return null
-    val nmsGetTagMethod: Method = ReflectionUtil.getMethod(nmsItemStackClazz, "t") ?: return null
-    val nmsItemStackObj: Any? // This is the net.minecraft.server.ItemStack object received from the asNMSCopy method
-    val itemTagAsJsonObject: Any? // This is the net.minecraft.server.ItemStack after being put through saveNmsItem method
     try {
-        nmsItemStackObj = asNMSCopyMethod(null, this)
-        itemTagAsJsonObject = nmsGetTagMethod(nmsItemStackObj) ?: nbtTagCompoundClazz.getDeclaredConstructor().newInstance()
+        val version = Bukkit.getServer().javaClass.packageName.split(".")[3]
+        val nbtTag: Class<*> = Class.forName("net.minecraft.server.$version.NBTTagCompound")
+        val itemClass: Class<*> = Class.forName("net.minecraft.server.$version.ItemStack")
+        val craftItemClass: Class<*> = Class.forName("org.bukkit.craftbukkit.$version.inventory.CraftItemStack")
+        val nmsNbtTagCompoundObj = nbtTag.getConstructor().newInstance()
+        val saveMethod: Method? = itemClass.declaredMethods.firstOrNull {
+            it.parameterTypes.size == 1
+                    && it.parameterTypes[0] == nbtTag
+                    && it.returnType == nbtTag
+        }
+        return if (saveMethod == null) {
+            val nmsItemStackObj =
+                craftItemClass.getMethod("asNMSCopy", ItemStack::class.java).invoke(null, this)
+            nmsItemStackObj.javaClass.getMethod("save", nbtTag)
+                .invoke(nmsItemStackObj, nmsNbtTagCompoundObj).toString()
+        } else {
+            val nmsItemStackObj =
+                craftItemClass.getMethod("asNMSCopy", ItemStack::class.java).invoke(null, this)
+            saveMethod.invoke(nmsItemStackObj, nmsNbtTagCompoundObj).toString()
+        }
     } catch (t: Throwable) {
         Bukkit.getLogger().log(SEVERE, "failed to serialize itemstack to nms item", t)
         return null
     }
-
-    // Return a string representation of the serialized object
-    return itemTagAsJsonObject.toString()
 }

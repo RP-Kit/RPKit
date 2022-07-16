@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class WandCommand(private val plugin: RPKSelectionBukkit) : CommandExecutor {
             sender.sendMessage(plugin.messages["not-from-console"])
             return true
         }
-        sender.inventory.addItem(plugin.config.getItemStack("wand-item"))
+        plugin.config.getItemStack("wand-item")?.let { sender.inventory.addItem(it) }
         sender.sendMessage(plugin.messages["wand-valid"])
         return true
     }

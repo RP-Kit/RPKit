@@ -9,7 +9,7 @@ depend:
 - rpk-economy-lib-bukkit
 softdepend:
 - rpk-food-lib-bukkit
-api-version: '1.19'
+api-version: '1.15'
 permissions:
   rpkit.trade.sign.trader.buy:
     description: Allows buying from trader signs
