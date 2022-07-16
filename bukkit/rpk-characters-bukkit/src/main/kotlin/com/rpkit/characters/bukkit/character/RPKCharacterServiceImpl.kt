@@ -152,7 +152,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                     val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
                     val bukkitPlayer = offlineBukkitPlayer.player
                     if (bukkitPlayer != null) {
-                        bukkitPlayer.inventory.contents = newCharacter.inventoryContents
+                        bukkitPlayer.inventory.contents = newCharacter.inventoryContents.filterNotNull().toTypedArray()
                         bukkitPlayer.inventory.helmet = newCharacter.helmet
                         bukkitPlayer.inventory.chestplate = newCharacter.chestplate
                         bukkitPlayer.inventory.leggings = newCharacter.leggings

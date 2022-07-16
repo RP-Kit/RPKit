@@ -19,7 +19,6 @@ package com.rpkit.food.bukkit.expiry
 import com.rpkit.food.bukkit.RPKFoodBukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataType
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -41,7 +40,6 @@ class RPKExpiryServiceImpl(override val plugin: RPKFoodBukkit) : RPKExpiryServic
         lore.removeAll(lore.filter { it.startsWith("Expires: ") })
         lore.add("Expires: ${dateFormat.format(expiryDate)}")
         itemMeta.lore = lore
-        itemMeta.persistentDataContainer.set(expiryKey, PersistentDataType.STRING, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(expiryDate))
         item.itemMeta = itemMeta
     }
 
@@ -53,8 +51,15 @@ class RPKExpiryServiceImpl(override val plugin: RPKFoodBukkit) : RPKExpiryServic
     override fun getExpiry(item: ItemStack): OffsetDateTime? {
         if (!item.type.isEdible) return null
         val itemMeta = item.itemMeta ?: plugin.server.itemFactory.getItemMeta(item.type) ?: return null
-        val expiryPersistentData = itemMeta.persistentDataContainer.get(expiryKey, PersistentDataType.STRING) ?: return null
-        return OffsetDateTime.parse(expiryPersistentData, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val lore = itemMeta.lore
+        if (lore != null) {
+            val expiryLore = lore.firstOrNull { it.startsWith("Expires: ") }
+            if (expiryLore != null) {
+                val expiryDateString = expiryLore.drop("Expires: ".length)
+                return OffsetDateTime.parse(expiryDateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            }
+        }
+        return null
     }
 
     override fun isExpired(item: ItemStack): Boolean {

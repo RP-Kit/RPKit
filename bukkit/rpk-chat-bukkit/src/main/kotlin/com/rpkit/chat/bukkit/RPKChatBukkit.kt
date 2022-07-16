@@ -24,7 +24,10 @@ import com.rpkit.chat.bukkit.chatchannel.directed.preformat.DrunkenSlurComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.GarbleComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.LanguageComponent
 import com.rpkit.chat.bukkit.chatchannel.directed.preformat.RadiusFilterComponent
-import com.rpkit.chat.bukkit.chatchannel.format.click.*
+import com.rpkit.chat.bukkit.chatchannel.format.click.OpenFileClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.OpenURLClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.RunCommandClickAction
+import com.rpkit.chat.bukkit.chatchannel.format.click.SuggestCommandClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.ShowTextHoverAction
 import com.rpkit.chat.bukkit.chatchannel.format.part.*
 import com.rpkit.chat.bukkit.chatchannel.undirected.*
@@ -102,7 +105,6 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         ConfigurationSerialization.registerClass(ShowTextHoverAction::class.java, "ShowTextHoverAction")
 
         // Click actions
-        ConfigurationSerialization.registerClass(CopyToClipboardClickAction::class.java, "CopyToClipboardClickAction")
         ConfigurationSerialization.registerClass(OpenFileClickAction::class.java, "OpenFileClickAction")
         ConfigurationSerialization.registerClass(OpenURLClickAction::class.java, "OpenURLClickAction")
         ConfigurationSerialization.registerClass(RunCommandClickAction::class.java, "RunCommandClickAction")

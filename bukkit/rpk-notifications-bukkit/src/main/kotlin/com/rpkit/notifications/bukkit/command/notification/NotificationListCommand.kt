@@ -31,10 +31,10 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND
+import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
 import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.chat.hover.content.Text
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.logging.Level
@@ -65,7 +65,7 @@ class NotificationListCommand(private val plugin: RPKNotificationsBukkit) : RPKC
                 .sortedByDescending { notification -> notification.time }
                 .forEach { notification ->
                     val listItem = TextComponent(plugin.messages.notificationListItem.withParameters(notification))
-                    listItem.hoverEvent = HoverEvent(SHOW_TEXT, Text(plugin.messages.notificationListItemHover))
+                    listItem.hoverEvent = HoverEvent(SHOW_TEXT, ComponentBuilder(plugin.messages.notificationListItemHover).create())
                     listItem.clickEvent = ClickEvent(RUN_COMMAND, "/notification view ${notification.id?.value}")
                     sender.sendMessage(listItem)
                 }

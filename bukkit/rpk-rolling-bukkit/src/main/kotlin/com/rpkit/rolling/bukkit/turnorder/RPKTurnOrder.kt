@@ -34,7 +34,7 @@ class RPKTurnOrder(
     init {
         val scoreboardManager = plugin.server.scoreboardManager
         scoreboard = scoreboardManager?.newScoreboard ?: throw IllegalStateException("Cannot create a turn order before the first world has loaded")
-        objective = scoreboard.registerNewObjective("Turn order", "dummy", "Turn order")
+        objective = scoreboard.registerNewObjective("Turn order", "dummy")
         objective.displaySlot = SIDEBAR
         renderScoreboard()
     }

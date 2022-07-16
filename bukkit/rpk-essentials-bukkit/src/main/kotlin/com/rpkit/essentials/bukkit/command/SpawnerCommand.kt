@@ -17,7 +17,7 @@ class SpawnerCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                 if (sender is Player) {
                     val transparent: Set<Material>? = null
                     val block = sender.getTargetBlock(transparent, 32)
-                    if (block.type == Material.SPAWNER) {
+                    if (block.type == Material.MOB_SPAWNER) {
                         val spawner = block.state as CreatureSpawner
                         try {
                             val entityType = EntityType.valueOf(args[0].uppercase())

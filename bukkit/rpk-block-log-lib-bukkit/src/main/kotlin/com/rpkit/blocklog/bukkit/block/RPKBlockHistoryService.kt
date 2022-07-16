@@ -40,6 +40,6 @@ interface RPKBlockHistoryService : Service {
     fun removeBlockInventoryChange(blockInventoryChange: RPKBlockInventoryChange): CompletableFuture<Void>
     fun getBlockHistory(block: RPKBlockLocation): CompletableFuture<RPKBlockHistory>
     fun getBlockTypeAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Material>
-    fun getBlockInventoryAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Array<ItemStack>>
+    fun getBlockInventoryAtTime(block: RPKBlockLocation, time: LocalDateTime): CompletableFuture<Array<out ItemStack?>>
 
 }

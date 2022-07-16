@@ -58,7 +58,7 @@ private fun createRemovePlayerPacket(player: Player): PacketContainer {
     val profile = WrappedGameProfile.fromPlayer(player)
     val chatComponent = WrappedChatComponent.fromText(profile.name)
     val playerInfoData =
-        PlayerInfoData(profile, player.ping, EnumWrappers.NativeGameMode.fromBukkit(player.gameMode), chatComponent)
+        PlayerInfoData(profile, 0, EnumWrappers.NativeGameMode.fromBukkit(player.gameMode), chatComponent)
     packet.playerInfoDataLists.write(0, listOf(playerInfoData))
     return packet
 }
@@ -78,10 +78,10 @@ private fun createAddPlayerPacket(
     packet.playerInfoAction.write(0, ADD_PLAYER)
     val profile = WrappedGameProfile.fromPlayer(player).withName(character.name.take(16))
     val tabListTextComponent =
-        WrappedChatComponent.fromJson(ComponentSerializer.toString(TextComponent.fromLegacyText(player.playerListName)))
+        WrappedChatComponent.fromJson(ComponentSerializer.toString(TextComponent(player.playerListName)))
     val playerInfoData = PlayerInfoData(
         profile,
-        player.ping,
+        0,
         EnumWrappers.NativeGameMode.fromBukkit(player.gameMode),
         tabListTextComponent
     )

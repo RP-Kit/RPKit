@@ -23,11 +23,7 @@ import com.rpkit.core.message.to
 import com.rpkit.economy.bukkit.currency.RPKCurrency
 import com.rpkit.payments.bukkit.RPKPaymentsBukkit
 import com.rpkit.payments.bukkit.group.RPKPaymentGroup
-import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.chat.hover.content.Text
+import net.md_5.bungee.api.chat.*
 import org.bukkit.ChatColor
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -317,7 +313,7 @@ class PaymentsMessages(plugin: RPKPaymentsBukkit) : BukkitMessages(plugin) {
                                 )
                                 textComponent.hoverEvent = HoverEvent(
                                     HoverEvent.Action.SHOW_TEXT,
-                                    Text("Click here to change the payment group name")
+                                    ComponentBuilder("Click here to change the payment group name").create()
                                 )
                                 if (chatColor != null) {
                                     textComponent.color = chatColor.asBungee()
@@ -349,7 +345,7 @@ class PaymentsMessages(plugin: RPKPaymentsBukkit) : BukkitMessages(plugin) {
                                     )
                                     textComponent.hoverEvent = HoverEvent(
                                         HoverEvent.Action.SHOW_TEXT,
-                                        Text("Click here to change the payment group amount")
+                                        ComponentBuilder("Click here to change the payment group amount").create()
                                     )
                                     if (chatColor != null) {
                                         textComponent.color = chatColor.asBungee()
@@ -382,7 +378,7 @@ class PaymentsMessages(plugin: RPKPaymentsBukkit) : BukkitMessages(plugin) {
                                     )
                                     textComponent.hoverEvent = HoverEvent(
                                         HoverEvent.Action.SHOW_TEXT,
-                                        Text("Click here to change the payment group currency")
+                                        ComponentBuilder("Click here to change the payment group currency").create()
                                     )
                                     if (chatColor != null) {
                                         textComponent.color = chatColor.asBungee()
@@ -415,7 +411,7 @@ class PaymentsMessages(plugin: RPKPaymentsBukkit) : BukkitMessages(plugin) {
                                     )
                                     textComponent.hoverEvent = HoverEvent(
                                         HoverEvent.Action.SHOW_TEXT,
-                                        Text("Click here to change the payment group interval")
+                                        ComponentBuilder("Click here to change the payment group interval").create()
                                     )
                                     if (chatColor != null) {
                                         textComponent.color = chatColor.asBungee()

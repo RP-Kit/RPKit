@@ -29,7 +29,7 @@ class GetSignCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender.hasPermission("rpkit.essentials.command.getsign")) {
             if (sender is Player) {
-                sender.inventory.addItem(ItemStack(Material.OAK_SIGN))
+                sender.inventory.addItem(ItemStack(Material.SIGN))
                 sender.updateInventory()
                 sender.sendMessage(plugin.messages["get-sign-valid"])
             } else {

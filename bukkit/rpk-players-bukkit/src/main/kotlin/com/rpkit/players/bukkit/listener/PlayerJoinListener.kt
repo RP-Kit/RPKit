@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.md_5.bungee.api.ChatColor.GREEN
 import net.md_5.bungee.api.ChatColor.RED
 import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -47,11 +47,11 @@ class PlayerJoinListener(private val plugin: RPKPlayersBukkit) : Listener {
                 val yesComponent = TextComponent(plugin.messages.yes)
                 yesComponent.color = GREEN
                 yesComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/profile confirmlink minecraft ${it.profile.id}")
-                yesComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to link account to ${it.profile.name}"))
+                yesComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("Click to link account to ${it.profile.name}").create())
                 val noComponent = TextComponent(plugin.messages.no)
                 noComponent.color = RED
                 noComponent.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/profile denylink minecraft ${it.profile.id}")
-                noComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text("Click to cancel linking to ${it.profile.name}"))
+                noComponent.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder("Click to cancel linking to ${it.profile.name}").create())
                 event.player.spigot().sendMessage(*messageComponent)
                 event.player.spigot().sendMessage(yesComponent)
                 event.player.spigot().sendMessage(noComponent)

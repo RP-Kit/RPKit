@@ -9,7 +9,7 @@ depend:
 - rpk-stat-lib-bukkit
 softdepend:
 - PlaceholderAPI
-api-version: '1.19'
+api-version: '1.12'
 commands:
   stats:
     description: Shows your stats

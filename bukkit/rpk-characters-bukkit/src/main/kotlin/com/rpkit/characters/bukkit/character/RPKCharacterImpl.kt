@@ -27,11 +27,7 @@ import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
-import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.chat.hover.content.Text
+import net.md_5.bungee.api.chat.*
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.inventory.ItemStack
@@ -54,7 +50,7 @@ class RPKCharacterImpl(
     description: String = plugin.config.getString("characters.defaults.description") ?: "",
     dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
     override var location: RPKLocation = Bukkit.getWorlds()[0].spawnLocation.toRPKLocation(),
-    override var inventoryContents: Array<ItemStack?> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>).toTypedArray(),
+    override var inventoryContents: Array<out ItemStack?> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>).toTypedArray(),
     override var helmet: ItemStack? = plugin.config.getItemStack("characters.defaults.helmet"),
     override var chestplate: ItemStack? = plugin.config.getItemStack("characters.defaults.chestplate"),
     override var leggings: ItemStack? = plugin.config.getItemStack("characters.defaults.leggings"),
@@ -174,7 +170,7 @@ class RPKCharacterImpl(
                                             ClickEvent(ClickEvent.Action.RUN_COMMAND, "/character set ${field.name}")
                                         editComponent.hoverEvent = HoverEvent(
                                             HoverEvent.Action.SHOW_TEXT,
-                                            Text("Click to change your character's ${field.name}")
+                                            ComponentBuilder("Click to change your character's ${field.name}").create()
                                         )
                                         if (chatColor != null) {
                                             editComponent.color = chatColor.asBungee()
@@ -212,7 +208,7 @@ class RPKCharacterImpl(
                                                 )
                                                 unhideComponent.hoverEvent = HoverEvent(
                                                     HoverEvent.Action.SHOW_TEXT,
-                                                    Text("Click to unhide your character's ${field.name}")
+                                                    ComponentBuilder("Click to unhide your character's ${field.name}").create()
                                                 )
                                                 messageComponents.add(unhideComponent)
                                             } else {
@@ -223,7 +219,7 @@ class RPKCharacterImpl(
                                                 )
                                                 hideComponent.hoverEvent = HoverEvent(
                                                     HoverEvent.Action.SHOW_TEXT,
-                                                    Text("Click to hide your character's ${field.name}")
+                                                    ComponentBuilder("Click to hide your character's ${field.name}").create()
                                                 )
                                                 messageComponents.add(hideComponent)
                                             }

@@ -6,4 +6,4 @@ depend:
 - rpk-core-bukkit
 - rpk-character-lib-bukkit
 - rpk-economy-lib-bukkit
-api-version: '1.19'
+api-version: '1.12'

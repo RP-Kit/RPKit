@@ -36,7 +36,7 @@ class PlayerFishListener : Listener {
                 val item = caught.itemStack
                 val expiryService = Services[RPKExpiryServiceImpl::class.java] ?: return
                 expiryService.setExpiry(item)
-                caught.itemStack = item
+                caught.setItemStack(item)
             }
         }
     }

@@ -31,7 +31,7 @@ class UnsignCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
             if (sender is Player) {
                 if (sender.inventory.itemInMainHand.type == Material.WRITTEN_BOOK) {
                     val meta = sender.inventory.itemInMainHand.itemMeta as BookMeta
-                    sender.inventory.itemInMainHand.type = Material.WRITABLE_BOOK
+                    sender.inventory.itemInMainHand.type = Material.WRITTEN_BOOK
                     sender.inventory.itemInMainHand.itemMeta = meta
                     sender.sendMessage(plugin.messages["unsign-valid"])
                 } else {

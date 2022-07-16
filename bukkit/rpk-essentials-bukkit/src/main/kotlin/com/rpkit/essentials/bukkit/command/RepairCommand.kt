@@ -17,12 +17,10 @@
 package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.inventory.meta.Damageable
 
 class RepairCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
 
@@ -30,11 +28,7 @@ class RepairCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor {
         if (sender.hasPermission("rpkit.essentials.command.repair")) {
             if (sender is Player) {
                 val item = sender.inventory.itemInMainHand
-                val meta = item.itemMeta ?: Bukkit.getItemFactory().getItemMeta(item.type)
-                if (meta is Damageable) {
-                    meta.damage = 0
-                }
-                item.itemMeta = meta
+                item.durability = 0.toShort()
                 sender.sendMessage(plugin.messages["repair-valid"])
             } else {
                 sender.sendMessage(plugin.messages["not-from-console"])

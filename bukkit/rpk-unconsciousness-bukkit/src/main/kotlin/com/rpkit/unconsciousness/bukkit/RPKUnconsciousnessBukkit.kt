@@ -30,7 +30,6 @@ import com.rpkit.unconsciousness.bukkit.messages.UnconsciousnessMessages
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessService
 import com.rpkit.unconsciousness.bukkit.unconsciousness.RPKUnconsciousnessServiceImpl
 import org.bstats.bukkit.Metrics
-import org.bukkit.GameRule.KEEP_INVENTORY
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
@@ -95,7 +94,7 @@ class RPKUnconsciousnessBukkit : JavaPlugin(), RPKPlugin {
 
         WakeTask(this).runTaskTimer(this, 200L, 200L)
         server.worlds.forEach { world ->
-            world.setGameRule(KEEP_INVENTORY, true)
+            world.setGameRuleValue("keepInventory", "true")
         }
 
         registerCommands()

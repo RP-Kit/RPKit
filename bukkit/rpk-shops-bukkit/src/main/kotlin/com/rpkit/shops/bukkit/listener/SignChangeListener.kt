@@ -120,14 +120,13 @@ class SignChangeListener(private val plugin: RPKShopsBukkit) : Listener {
             chestBlock.type = CHEST
             val chest = chestBlock.state
             if (chest is Chest) {
-                val chestData = chest.blockData
-                if (chestData is org.bukkit.block.data.type.Chest) {
+                val chestData = chest.data
+                if (chestData is org.bukkit.material.Chest) {
                     val sign = event.block.state
                     if (sign is Sign) {
-                        val signData = sign.blockData
-                        if (signData is org.bukkit.block.data.type.WallSign) {
-                            chestData.facing = signData.facing
-                            chest.blockData = chestData
+                        val signData = sign.data
+                        if (signData is org.bukkit.material.Sign) {
+                            chestData.setFacingDirection(signData.facing)
                             chest.update()
                         }
                     }

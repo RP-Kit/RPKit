@@ -105,7 +105,7 @@ interface RPKCharacter {
      * contents of the character last time they were switched to. In this situation you may wish to use the inventory
      * contents of the player currently playing the character instead.
      */
-    var inventoryContents: Array<ItemStack?>
+    var inventoryContents: Array<out ItemStack?>
 
     /**
      * The helmet of the character.

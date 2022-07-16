@@ -83,17 +83,6 @@ class ItemMetaCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor
                 ))
                 meta.lore = lore
             }
-            "custommodeldata" -> {
-                val customModelData = args[1].toIntOrNull()
-                if (customModelData == null) {
-                    sender.sendMessage(plugin.messages.itemMetaCustomModelDataInvalidCustomModelData)
-                    return true
-                }
-                meta.setCustomModelData(customModelData)
-                sender.sendMessage(plugin.messages.itemMetaCustomModelDataValid.withParameters(
-                    customModelData = customModelData
-                ))
-            }
             else -> {
                 sender.sendMessage(plugin.messages.itemMetaUsage)
             }

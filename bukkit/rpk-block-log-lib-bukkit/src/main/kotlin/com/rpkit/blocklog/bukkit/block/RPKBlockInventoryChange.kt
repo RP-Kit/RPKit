@@ -31,8 +31,8 @@ interface RPKBlockInventoryChange {
     val profile: RPKProfile?
     val minecraftProfile: RPKMinecraftProfile?
     val character: RPKCharacter?
-    val from: Array<ItemStack?>
-    val to: Array<ItemStack?>
+    val from: Array<out ItemStack?>
+    val to: Array<out ItemStack?>
     val reason: String
 
 }

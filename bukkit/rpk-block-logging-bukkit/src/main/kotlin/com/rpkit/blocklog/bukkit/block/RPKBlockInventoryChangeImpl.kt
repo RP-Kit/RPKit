@@ -24,13 +24,13 @@ import java.time.LocalDateTime
 
 
 class RPKBlockInventoryChangeImpl(
-        override var id: RPKBlockInventoryChangeId? = null,
-        override val blockHistory: RPKBlockHistory,
-        override val time: LocalDateTime,
-        override val profile: RPKProfile?,
-        override val minecraftProfile: RPKMinecraftProfile?,
-        override val character: RPKCharacter?,
-        override val from: Array<ItemStack?>,
-        override val to: Array<ItemStack?>,
-        override val reason: String
+    override var id: RPKBlockInventoryChangeId? = null,
+    override val blockHistory: RPKBlockHistory,
+    override val time: LocalDateTime,
+    override val profile: RPKProfile?,
+    override val minecraftProfile: RPKMinecraftProfile?,
+    override val character: RPKCharacter?,
+    override val from: Array<out ItemStack?>,
+    override val to: Array<out ItemStack?>,
+    override val reason: String
 ) : RPKBlockInventoryChange

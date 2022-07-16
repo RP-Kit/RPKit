@@ -43,7 +43,6 @@ import com.rpkit.kit.bukkit.kit.RPKKitService
 import com.rpkit.locationhistory.bukkit.locationhistory.RPKLocationHistoryService
 import com.rpkit.tracking.bukkit.tracking.RPKTrackingService
 import org.bstats.bukkit.Metrics
-import org.bukkit.GameRule.DO_DAYLIGHT_CYCLE
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.plugin.java.JavaPlugin
@@ -130,7 +129,7 @@ class RPKEssentialsBukkit : JavaPlugin(), RPKPlugin {
 
         if (config.getBoolean("time.change-speed-enabled")) {
             server.worlds.forEach { world ->
-                world.setGameRule(DO_DAYLIGHT_CYCLE, false)
+                world.setGameRuleValue("doDaylightCycle", "false")
             }
             val dayDuration = Duration.parse(config.getString("time.day-duration"))
             val nightDuration = Duration.parse(config.getString("time.night-duration"))
@@ -148,7 +147,7 @@ class RPKEssentialsBukkit : JavaPlugin(), RPKPlugin {
             ).runTaskTimer(this, tickInterval.toLong(), tickInterval.toLong())
         } else {
             server.worlds.forEach { world ->
-                world.setGameRule(DO_DAYLIGHT_CYCLE, true)
+                world.setGameRuleValue("doDaylightCycle", "true")
             }
         }
 

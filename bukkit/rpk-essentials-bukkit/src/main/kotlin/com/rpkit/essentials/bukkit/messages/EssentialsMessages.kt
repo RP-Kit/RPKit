@@ -35,7 +35,7 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
     class DistanceInvalidItemMessage(private val message: ParameterizedMessage) {
         fun withParameters(requiredItem: ItemStack) = message.withParameters(
             "amount" to requiredItem.amount.toString(),
-            "type" to requiredItem.type.key.key.lowercase().replace('_', ' ')
+            "type" to requiredItem.type.name.lowercase().replace('_', ' ')
         )
     }
 
@@ -69,8 +69,8 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
             level: Int
         ) = message.withParameters(
             "amount" to item.amount.toString(),
-            "type" to item.type.key.key.lowercase().replace('_', ' '),
-            "enchantment" to enchantment.key.key.lowercase().replace('_', ' '),
+            "type" to item.type.name.lowercase().replace('_', ' '),
+            "enchantment" to enchantment.name.lowercase().replace('_', ' '),
             "level" to level.toString()
         )
     }
@@ -128,7 +128,7 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
             item: ItemStack
         ) = message.withParameters(
             "amount" to item.amount.toString(),
-            "type" to item.type.key.key.lowercase().replace('_', ' ')
+            "type" to item.type.name.lowercase().replace('_', ' ')
         )
     }
 
@@ -136,7 +136,7 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
         fun withParameters(
             item: ItemStack
         ) = message.withParameters(
-            "type" to item.type.key.key.lowercase().replace('_', ' ')
+            "type" to item.type.name.lowercase().replace('_', ' ')
         )
     }
 
@@ -306,7 +306,7 @@ class EssentialsMessages(plugin: RPKEssentialsBukkit) : BukkitMessages(plugin) {
 
     class TrackInvalidItemMessage(private val message: ParameterizedMessage) {
         fun withParameters(requiredItem: ItemStack) = message.withParameters(
-            "type" to requiredItem.type.key.key.lowercase().replace('_', ' '),
+            "type" to requiredItem.type.name.lowercase().replace('_', ' '),
             "amount" to requiredItem.amount.toString()
         )
     }

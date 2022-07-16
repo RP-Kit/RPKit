@@ -1,7 +1,25 @@
+/*
+ * Copyright 2022 Ren Binden
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rpkit.permissions.bukkit.command.charactergroup
 
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.bukkit.extension.closestChatColor
 import com.rpkit.core.bukkit.extension.levenshtein
+import com.rpkit.core.bukkit.extension.toColor
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.RPKPermissionsBukkit
 import com.rpkit.permissions.bukkit.group.RPKGroupService
@@ -11,16 +29,13 @@ import com.rpkit.players.bukkit.profile.RPKProfileName
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ChatColor.COLOR_CHAR
-import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.*
 import net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND
-import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
-import net.md_5.bungee.api.chat.TextComponent
-import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import java.awt.Color
 
 class CharacterGroupPrepareSwitchPriorityCommand(private val plugin: RPKPermissionsBukkit) : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
@@ -82,15 +97,15 @@ class CharacterGroupPrepareSwitchPriorityCommand(private val plugin: RPKPermissi
                                 messageBuffer = StringBuilder()
                                 if (message[i + 1] == 'x') {
                                     chatColor =
-                                        ChatColor.of("#${message[i + 2]}${message[i + 4]}${message[i + 6]}${message[i + 8]}${message[i + 10]}${message[i + 12]}")
+                                        Color.decode("#${message[i + 2]}${message[i + 4]}${message[i + 6]}${message[i + 8]}${message[i + 10]}${message[i + 12]}").closestChatColor()
                                     i += 13
                                 } else {
                                     val colorOrFormat = ChatColor.getByChar(message[i + 1])
-                                    if (colorOrFormat?.color != null) {
+                                    if (colorOrFormat?.toColor() != null) {
                                         chatColor = colorOrFormat
                                         chatFormat = null
                                     }
-                                    if (colorOrFormat?.color == null) {
+                                    if (colorOrFormat?.toColor() == null) {
                                         chatFormat = colorOrFormat
                                     }
                                     if (colorOrFormat == ChatColor.RESET) {
@@ -119,7 +134,7 @@ class CharacterGroupPrepareSwitchPriorityCommand(private val plugin: RPKPermissi
                                 reorderButton.hoverEvent =
                                     HoverEvent(
                                         SHOW_TEXT,
-                                        listOf(Text("Click to switch $group1 with ${group.name.value}"))
+                                        ComponentBuilder("Click to switch $group1 with ${group.name.value}").create()
                                     )
                                 reorderButton.clickEvent = ClickEvent(
                                     RUN_COMMAND,

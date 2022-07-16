@@ -20,16 +20,13 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
-import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
+import com.rpkit.core.bukkit.extension.closestChatColor
+import net.md_5.bungee.api.chat.*
 import net.md_5.bungee.api.chat.TextComponent.fromLegacyText
-import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
+import java.awt.Color
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.CompletableFuture.supplyAsync
@@ -93,8 +90,7 @@ class MessagePart(
             if (!link.contains("://")) link = "https://$link"
             components.add(
                 TextComponent(linkText).apply {
-                    if (linkFont != null) font = linkFont
-                    if (linkColor != null) color = ChatColor.of(linkColor)
+                    if (linkColor != null) color = Color.decode(linkColor).closestChatColor()
                     if (linkBold != null) isBold = linkBold
                     if (linkItalic != null) isItalic = linkItalic
                     if (linkUnderlined != null) isUnderlined = linkUnderlined
@@ -102,7 +98,7 @@ class MessagePart(
                     if (linkObfuscated != null) isObfuscated = linkObfuscated
                     if (linkInsertion != null) insertion = linkInsertion
                     clickEvent = ClickEvent(ClickEvent.Action.OPEN_URL, link)
-                    hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text(link))
+                    hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(link).create())
                 }
             )
             index = endIndex
@@ -115,8 +111,7 @@ class MessagePart(
 
     private fun Array<BaseComponent>.applyFormatting(context: DirectedPreFormatMessageContext) = apply {
         for (component in this) {
-            if (font != null) component.font = font
-            if (color != null) component.color = ChatColor.of(color)
+            if (color != null) component.color = Color.decode(color).closestChatColor()
             if (isBold != null) component.isBold = isBold
             if (isItalic != null) component.isItalic = isItalic
             if (isUnderlined != null) component.isUnderlined = isUnderlined

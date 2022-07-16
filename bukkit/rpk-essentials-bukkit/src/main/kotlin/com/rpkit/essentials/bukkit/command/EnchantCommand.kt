@@ -18,7 +18,6 @@ package com.rpkit.essentials.bukkit.command
 
 import com.rpkit.essentials.bukkit.RPKEssentialsBukkit
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -46,7 +45,7 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
         }
         if (sender.hasPermission("rpkit.essentials.command.enchant.unsafe")) {
             val enchantment = try {
-                Enchantment.getByKey(NamespacedKey.minecraft(args[0].lowercase()))
+                Enchantment.getByName(args[0].uppercase())
             } catch (exception: Exception) {
                 null
             }
@@ -60,7 +59,7 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                 sender.sendMessage(plugin.messages["enchant-valid", mapOf(
                         "amount" to sender.inventory.itemInMainHand.amount.toString(),
                         "type" to sender.inventory.itemInMainHand.type.toString().lowercase().replace('_', ' '),
-                        "enchantment" to enchantment.key.key,
+                        "enchantment" to enchantment.name,
                         "level" to level.toString()
                 )])
             } catch (exception: NumberFormatException) {
@@ -68,7 +67,7 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
             }
         } else {
             val enchantment = try {
-                Enchantment.getByKey(NamespacedKey.minecraft(args[0].lowercase()))
+                Enchantment.getByName(args[0].uppercase())
             } catch (exception: IllegalArgumentException) {
                 null
             }
@@ -82,7 +81,7 @@ class EnchantCommand(private val plugin: RPKEssentialsBukkit) : CommandExecutor 
                 sender.sendMessage(plugin.messages["enchant-valid", mapOf(
                         "amount" to sender.inventory.itemInMainHand.amount.toString(),
                         "type" to sender.inventory.itemInMainHand.type.toString().lowercase().replace('_', ' '),
-                        "enchantment" to enchantment.key.key,
+                        "enchantment" to enchantment.name,
                         "level" to level.toString()
                 )])
             } catch (exception: NumberFormatException) {
