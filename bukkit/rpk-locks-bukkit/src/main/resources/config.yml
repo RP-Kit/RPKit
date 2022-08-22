@@ -1,6 +1,6 @@
 lock-item:
   ==: org.bukkit.inventory.ItemStack
-  v: 3105
+  v: 2975
   type: IRON_INGOT
   meta:
     ==: ItemMeta
@@ -10,7 +10,7 @@ lock-item:
       - '{"extra":[{"text":"Used for locking chests"}],"text":""}'
 key-item:
   ==: org.bukkit.inventory.ItemStack
-  v: 3105
+  v: 2975
   type: IRON_INGOT
   meta:
     ==: ItemMeta

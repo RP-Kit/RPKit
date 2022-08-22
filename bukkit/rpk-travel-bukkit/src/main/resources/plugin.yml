@@ -6,7 +6,7 @@ depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
 - rpk-warp-lib-bukkit
-api-version: '1.19'
+api-version: '1.18'
 commands:
   deletewarp:
     description: Deletes a warp

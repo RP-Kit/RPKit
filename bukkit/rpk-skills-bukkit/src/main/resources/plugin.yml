@@ -7,7 +7,7 @@ depend:
 - rpk-player-lib-bukkit
 - rpk-character-lib-bukkit
 - rpk-skill-lib-bukkit
-api-version: '1.19'
+api-version: '1.18'
 commands:
   skill:
     description: Uses a skill

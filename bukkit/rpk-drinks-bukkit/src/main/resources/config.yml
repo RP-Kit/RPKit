@@ -2,7 +2,7 @@ drinks:
   beer:
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 3105
+      v: 2975
       type: POTION
       meta:
         ==: ItemMeta
@@ -19,7 +19,7 @@ drinks:
   wine:
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 3105
+      v: 2975
       type: POTION
       meta:
         ==: ItemMeta
@@ -34,7 +34,7 @@ drinks:
   vodka:
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 3105
+      v: 2975
       type: POTION
       meta:
         ==: ItemMeta
@@ -49,7 +49,7 @@ drinks:
   whisky:
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 3105
+      v: 2975
       type: POTION
       meta:
         ==: ItemMeta
@@ -64,7 +64,7 @@ drinks:
   rum:
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 3105
+      v: 2975
       type: POTION
       meta:
         ==: ItemMeta
@@ -80,7 +80,7 @@ drinks:
   cider:
     item:
       ==: org.bukkit.inventory.ItemStack
-      v: 3105
+      v: 2975
       type: POTION
       meta:
         ==: ItemMeta

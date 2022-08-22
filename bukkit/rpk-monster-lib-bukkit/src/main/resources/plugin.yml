@@ -2,7 +2,7 @@ name: rpk-monster-lib-bukkit
 author: alyphen
 version: @version@
 main: com.rpkit.monsters.bukkit.RPKMonsterLibBukkit
-api-version: '1.19'
+api-version: '1.18'
 depend:
 - rpk-core-bukkit
 - rpk-character-lib-bukkit
