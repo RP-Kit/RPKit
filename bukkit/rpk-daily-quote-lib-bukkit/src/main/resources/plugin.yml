@@ -5,4 +5,4 @@ main: com.rpkit.dailyquote.bukkit.RPKDailyQuoteLibBukkit
 depend:
 - rpk-core-bukkit
 - rpk-player-lib-bukkit
-api-version: '1.19'
+api-version: '1.18'
