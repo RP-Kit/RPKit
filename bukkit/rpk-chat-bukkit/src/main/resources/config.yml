@@ -323,6 +323,9 @@ match-patterns:
   '\"([^\"]+)\"':
     groups:
       '1': say
+message-continuation:
+  enabled: true
+  suffix: '--'
 irc:
   enabled: false
   name: 'rpkit'
