@@ -29,7 +29,6 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
-import java.util.logging.Level
 import java.util.logging.Level.SEVERE
 
 /**
@@ -50,7 +49,7 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
 
     fun insert(entity: RPKChatChannelSpeaker): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .insertInto(
                     RPKIT_CHAT_CHANNEL_SPEAKER,
@@ -64,7 +63,7 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
                 .execute()
             cache?.set(minecraftProfileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert chat channel speaker", exception)
+            plugin.logger.log(SEVERE, "Failed to insert chat channel speaker", exception)
             throw exception
         }
     }
@@ -81,6 +80,7 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
                 )
                 .from(RPKIT_CHAT_CHANNEL_SPEAKER)
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .groupBy(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID)
                 .fetchOne() ?: return@supplyAsync null
             val chatChannelService = Services[RPKChatChannelService::class.java] ?: return@supplyAsync null
             val chatChannel =
@@ -93,36 +93,40 @@ class RPKChatChannelSpeakerTable(private val database: Database, private val plu
             cache?.set(minecraftProfileId.value, chatChannelSpeaker)
             return@supplyAsync chatChannelSpeaker
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get chat channel speaker", exception)
+            plugin.logger.log(SEVERE, "Failed to get chat channel speaker", exception)
             throw exception
         }
     }
 
     fun update(entity: RPKChatChannelSpeaker): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
-            database.create
-                    .update(RPKIT_CHAT_CHANNEL_SPEAKER)
-                    .set(RPKIT_CHAT_CHANNEL_SPEAKER.CHAT_CHANNEL_NAME, entity.chatChannel.name.value)
-                    .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
-                    .execute()
+        return runAsync {
+            database.create.deleteFrom(RPKIT_CHAT_CHANNEL_SPEAKER)
+                .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
+                .execute()
+            database.create.insertInto(RPKIT_CHAT_CHANNEL_SPEAKER)
+                .values(
+                    minecraftProfileId.value,
+                    entity.chatChannel.name.value
+                )
+                .execute()
             cache?.set(minecraftProfileId.value, entity)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update chat channel speaker", exception)
+            plugin.logger.log(SEVERE, "Failed to update chat channel speaker", exception)
             throw exception
         }
     }
 
     fun delete(entity: RPKChatChannelSpeaker): CompletableFuture<Void> {
         val minecraftProfileId = entity.minecraftProfile.id ?: return CompletableFuture.completedFuture(null)
-        return CompletableFuture.runAsync {
+        return runAsync {
             database.create
                 .deleteFrom(RPKIT_CHAT_CHANNEL_SPEAKER)
                 .where(RPKIT_CHAT_CHANNEL_SPEAKER.MINECRAFT_PROFILE_ID.eq(minecraftProfileId.value))
                 .execute()
             cache?.remove(minecraftProfileId.value)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete chat channel speaker", exception)
+            plugin.logger.log(SEVERE, "Failed to delete chat channel speaker", exception)
             throw exception
         }
     }
