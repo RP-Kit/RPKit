@@ -131,6 +131,51 @@ class ChatMessages(plugin: RPKChatBukkit) : BukkitMessages(plugin) {
         )
     }
 
+    class PluginVersionMessage(private val message: ParameterizedMessage) {
+        fun withParameters(name: String, version: String) = message.withParameters(
+            "name" to name,
+            "version" to version
+        )
+    }
+
+    class PluginDescriptionMessage(private val message: ParameterizedMessage) {
+        fun withParameters(description: String) = message.withParameters(
+            "description" to description
+        )
+    }
+
+    class PluginWebsiteMessage(private val message: ParameterizedMessage) {
+        fun withParameters(website: String) = message.withParameters(
+            "website" to website
+        )
+    }
+
+    class PluginAuthorMessage(private val message: ParameterizedMessage) {
+        fun withParameters(author: String) = message.withParameters(
+            "author" to author
+        )
+    }
+
+    class PluginAuthorsMessage(private val message: ParameterizedMessage) {
+        fun withParameters(authors: List<String>) = message.withParameters(
+            "authors" to authors.joinToString()
+        )
+    }
+
+    class PluginContributorsMessage(private val message: ParameterizedMessage) {
+        fun withParameters(contributors: List<String>) = message.withParameters(
+            "contributors" to contributors.joinToString()
+        )
+    }
+
+    class ServerVersionMessage(private val message: ParameterizedMessage) {
+        fun withParameters(name: String, version: String, apiVersion: String) = message.withParameters(
+            "name" to name,
+            "version" to version,
+            "api_version" to apiVersion
+        )
+    }
+
     val chatChannelValid = getParameterized("chatchannel-valid").let(::ChatChannelValidMessage)
     val chatChannelInvalidChatChannel = get("chatchannel-invalid-chatchannel")
     val chatChannelUsage = get("chatchannel-usage")
@@ -225,4 +270,12 @@ class ChatMessages(plugin: RPKChatBukkit) : BukkitMessages(plugin) {
     val ircNoIrcService = get("irc-no-irc-service")
     val operationCancelled = get("operation-cancelled")
     val continueWriting = get("continue-writing")
+    val versionInvalidPlugin = get("version-invalid-plugin")
+    val pluginVersion = getParameterized("plugin-version").let(::PluginVersionMessage)
+    val pluginDescription = getParameterized("plugin-description").let(::PluginDescriptionMessage)
+    val pluginWebsite = getParameterized("plugin-website").let(::PluginWebsiteMessage)
+    val pluginAuthor = getParameterized("plugin-author").let(::PluginAuthorMessage)
+    val pluginAuthors = getParameterized("plugin-authors").let(::PluginAuthorsMessage)
+    val pluginContributors = getParameterized("plugin-contributors").let(::PluginContributorsMessage)
+    val serverVersion = getParameterized("server-version").let(::ServerVersionMessage)
 }
