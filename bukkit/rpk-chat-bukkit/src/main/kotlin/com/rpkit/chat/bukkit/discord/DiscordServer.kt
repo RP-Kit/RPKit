@@ -19,8 +19,8 @@ package com.rpkit.chat.bukkit.discord
 import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.chatchannel.undirected.DiscordComponent
-import com.rpkit.chat.bukkit.discord.command.DiscordCommand
 import com.rpkit.chat.bukkit.discord.command.DiscordListCommand
+import com.rpkit.chat.bukkit.discord.command.DiscordVersionCommand
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
@@ -33,6 +33,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.requests.GatewayIntent.*
 import org.bukkit.ChatColor
 import java.util.concurrent.ConcurrentHashMap
@@ -57,8 +58,9 @@ class DiscordServer(
 
     private var ready = false
 
-    private val commands = mapOf<String, DiscordCommand>(
-            "list" to DiscordListCommand(plugin)
+    private val commands = mapOf(
+        "list" to DiscordListCommand(plugin),
+        "version" to DiscordVersionCommand(plugin)
     )
 
     private val buttonListeners = ConcurrentHashMap<String, DiscordButtonClickListener>()
@@ -66,7 +68,9 @@ class DiscordServer(
     init {
         jda.addEventListener(this)
         commands.forEach { (name, command) ->
-            jda.upsertCommand(name, command.description).queue()
+            val jdaCommand = Commands.slash(name, command.description)
+                .addOptions(command.options.toList())
+            jda.upsertCommand(jdaCommand).queue()
         }
     }
 
