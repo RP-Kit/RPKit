@@ -16,6 +16,7 @@
 
 package com.rpkit.travel.bukkit
 
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -25,12 +26,14 @@ import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import com.rpkit.travel.bukkit.command.DeleteWarpCommand
 import com.rpkit.travel.bukkit.command.SetWarpCommand
+import com.rpkit.travel.bukkit.command.UntameCommand
 import com.rpkit.travel.bukkit.command.WarpCommand
+import com.rpkit.travel.bukkit.database.table.RPKUntamerTable
 import com.rpkit.travel.bukkit.database.table.RPKWarpTable
-import com.rpkit.travel.bukkit.listener.PlayerInteractListener
-import com.rpkit.travel.bukkit.listener.SignChangeListener
+import com.rpkit.travel.bukkit.listener.*
 import com.rpkit.travel.bukkit.messages.TravelMessages
 import com.rpkit.travel.bukkit.permissions.TravelPermissions
+import com.rpkit.travel.bukkit.untamer.RPKUntamerService
 import com.rpkit.travel.bukkit.warp.RPKWarpServiceImpl
 import com.rpkit.warp.bukkit.warp.RPKWarpService
 import org.bstats.bukkit.Metrics
@@ -96,24 +99,30 @@ class RPKTravelBukkit : JavaPlugin(), RPKPlugin {
                 classLoader
         )
         database.addTable(RPKWarpTable(database, this))
+        database.addTable(RPKUntamerTable(database))
 
         Services[RPKWarpService::class.java] = RPKWarpServiceImpl(this)
+        Services[RPKUntamerService::class.java] = RPKUntamerService(this)
 
         registerListeners()
         registerCommands()
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         registerListeners(
-                PlayerInteractListener(this),
-                SignChangeListener(this)
+            AsyncPlayerPreLoginListener(this),
+            PlayerInteractEntityListener(this),
+            PlayerInteractListener(this),
+            PlayerQuitListener(),
+            SignChangeListener(this)
         )
     }
 
-    fun registerCommands() {
+    private fun registerCommands() {
         getCommand("deletewarp")?.setExecutor(DeleteWarpCommand(this))
         getCommand("setwarp")?.setExecutor(SetWarpCommand(this))
         getCommand("warp")?.setExecutor(WarpCommand(this))
+        getCommand("untame")?.setExecutor(UntameCommand(this).toBukkit())
     }
 
 }

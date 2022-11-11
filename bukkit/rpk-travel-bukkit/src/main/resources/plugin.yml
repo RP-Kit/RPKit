@@ -17,6 +17,9 @@ commands:
   warp:
     description: Warps to a location
     usage: /<command> [warp]
+  untame:
+    description: Untames an animal
+    usage: /<command>
 permissions:
   rpkit.travel.command.deletewarp:
     description: Allows you to delete a warp

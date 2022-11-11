@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,12 +65,16 @@ class TravelMessages(plugin: RPKTravelBukkit) : BukkitMessages(plugin) {
     val warpListInvalidEmpty = get("warp-list-invalid-empty")
     val warpSignInvalidWarp = get("warp-sign-invalid-warp")
     val warpSignValid = get("warp-sign-valid")
+    val untameSelectCreatureToUntame = get("untame-select-creature-to-untame")
+    val untameValid = get("untame-valid")
     val noPermissionDeleteWarp = get("no-permission-delete-warp")
     val noPermissionSetWarp = get("no-permission-set-warp")
     val noPermissionWarpSignCreate = get("no-permission-warp-sign-create")
     val noPermissionWarp = get("no-permission-warp")
+    val noPermissionUntame = get("no-permission-untame")
     val noWarpService = get("no-warp-service")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
+    val noUntamerService = get("no-untamer-service")
     val notFromConsole = get("not-from-console")
 
 }
