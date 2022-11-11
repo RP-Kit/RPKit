@@ -28,11 +28,13 @@ import com.rpkit.travel.bukkit.command.DeleteWarpCommand
 import com.rpkit.travel.bukkit.command.SetWarpCommand
 import com.rpkit.travel.bukkit.command.UntameCommand
 import com.rpkit.travel.bukkit.command.WarpCommand
+import com.rpkit.travel.bukkit.database.table.RPKTamedCreatureTable
 import com.rpkit.travel.bukkit.database.table.RPKUntamerTable
 import com.rpkit.travel.bukkit.database.table.RPKWarpTable
 import com.rpkit.travel.bukkit.listener.*
 import com.rpkit.travel.bukkit.messages.TravelMessages
 import com.rpkit.travel.bukkit.permissions.TravelPermissions
+import com.rpkit.travel.bukkit.tamedcreature.RPKTamedCreatureService
 import com.rpkit.travel.bukkit.untamer.RPKUntamerService
 import com.rpkit.travel.bukkit.warp.RPKWarpServiceImpl
 import com.rpkit.warp.bukkit.warp.RPKWarpService
@@ -100,9 +102,11 @@ class RPKTravelBukkit : JavaPlugin(), RPKPlugin {
         )
         database.addTable(RPKWarpTable(database, this))
         database.addTable(RPKUntamerTable(database))
+        database.addTable(RPKTamedCreatureTable(database))
 
         Services[RPKWarpService::class.java] = RPKWarpServiceImpl(this)
         Services[RPKUntamerService::class.java] = RPKUntamerService(this)
+        Services[RPKTamedCreatureService::class.java] = RPKTamedCreatureService(this)
 
         registerListeners()
         registerCommands()
@@ -111,6 +115,8 @@ class RPKTravelBukkit : JavaPlugin(), RPKPlugin {
     private fun registerListeners() {
         registerListeners(
             AsyncPlayerPreLoginListener(this),
+            EntityDeathListener(),
+            EntityTameListener(),
             PlayerInteractEntityListener(this),
             PlayerInteractListener(this),
             PlayerQuitListener(),

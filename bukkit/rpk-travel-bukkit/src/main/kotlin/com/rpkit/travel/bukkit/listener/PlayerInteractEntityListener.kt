@@ -16,9 +16,11 @@
 
 package com.rpkit.travel.bukkit.listener
 
+import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import com.rpkit.travel.bukkit.RPKTravelBukkit
+import com.rpkit.travel.bukkit.tamedcreature.RPKTamedCreatureService
 import com.rpkit.travel.bukkit.untamer.RPKUntamerService
 import org.bukkit.entity.Tameable
 import org.bukkit.event.EventHandler
@@ -30,16 +32,31 @@ class PlayerInteractEntityListener(private val plugin: RPKTravelBukkit) : Listen
     @EventHandler
     fun onPlayerInteractEntity(event: PlayerInteractEntityEvent) {
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfileId = minecraftProfileService.getPreloadedMinecraftProfile(event.player)?.id ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
+        val minecraftProfileId = minecraftProfile.id ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
         val untamerService = Services[RPKUntamerService::class.java] ?: return
+        val entity = event.rightClicked
+        if (entity !is Tameable) return
+        if (entity.owner == null) return
+        val tamedCreatureService = Services[RPKTamedCreatureService::class.java] ?: return
+        val ownerCharacterId = tamedCreatureService.getOwner(entity)
+        val playerCharacter = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        if (ownerCharacterId?.value != null && playerCharacter?.id?.value != ownerCharacterId.value) {
+            event.isCancelled = true
+            characterService.getCharacter(ownerCharacterId).thenAccept { ownerCharacter ->
+                if (ownerCharacter != null) {
+                    event.player.sendMessage(plugin.messages.tamedBy.withParameters(entity = entity, character = ownerCharacter))
+                }
+            }
+            return
+        }
         if (!untamerService.isUntaming(minecraftProfileId)) return
-        val creature = event.rightClicked
-        if (creature !is Tameable) return
-        if (creature.owner != event.player) return
-        creature.isTamed = false
+        entity.isTamed = false
         untamerService.setUntaming(minecraftProfileId, false)
         event.player.sendMessage(plugin.messages.untameValid)
         event.isCancelled = true
+        tamedCreatureService.setOwner(entity, null)
     }
 
 }

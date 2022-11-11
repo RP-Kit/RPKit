@@ -53,8 +53,14 @@ class UntameCommand(private val plugin: RPKTravelBukkit) : RPKCommandExecutor {
             return completedFuture(NoMinecraftProfileSelfFailure())
         }
         return supplyAsync {
-            untamerService.setUntaming(minecraftProfileId, true).thenRun {
-                sender.sendMessage(plugin.messages.untameSelectCreatureToUntame)
+            if (!untamerService.isUntaming(minecraftProfileId)) {
+                untamerService.setUntaming(minecraftProfileId, true).thenRun {
+                    sender.sendMessage(plugin.messages.untameSelectCreatureToUntame)
+                }
+            } else {
+                untamerService.setUntaming(minecraftProfileId, false).thenRun {
+                    sender.sendMessage(plugin.messages.untameCancelled)
+                }
             }
             CommandSuccess
         }
