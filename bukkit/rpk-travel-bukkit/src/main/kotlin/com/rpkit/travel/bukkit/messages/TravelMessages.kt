@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package com.rpkit.travel.bukkit.messages
 
+import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.message.ParameterizedMessage
 import com.rpkit.core.message.to
 import com.rpkit.travel.bukkit.RPKTravelBukkit
 import com.rpkit.warp.bukkit.warp.RPKWarp
 import org.bukkit.World
+import org.bukkit.entity.LivingEntity
 
 class TravelMessages(plugin: RPKTravelBukkit) : BukkitMessages(plugin) {
 
@@ -51,6 +53,13 @@ class TravelMessages(plugin: RPKTravelBukkit) : BukkitMessages(plugin) {
         )
     }
 
+    class TamedByMessage(private val message: ParameterizedMessage) {
+        fun withParameters(entity: LivingEntity, character: RPKCharacter) = message.withParameters(
+            "entity" to entity.type.name.lowercase().replace('_', ' '),
+            "character" to character.name
+        )
+    }
+
     val noMinecraftProfile = get("no-minecraft-profile")
     val deleteWarpValid = getParameterized("delete-warp-valid").let(::DeleteWarpValidMessage)
     val deleteWarpUsage = get("delete-warp-usage")
@@ -65,12 +74,18 @@ class TravelMessages(plugin: RPKTravelBukkit) : BukkitMessages(plugin) {
     val warpListInvalidEmpty = get("warp-list-invalid-empty")
     val warpSignInvalidWarp = get("warp-sign-invalid-warp")
     val warpSignValid = get("warp-sign-valid")
+    val untameSelectCreatureToUntame = get("untame-select-creature-to-untame")
+    val untameValid = get("untame-valid")
+    val untameCancelled = get("untame-cancelled")
     val noPermissionDeleteWarp = get("no-permission-delete-warp")
     val noPermissionSetWarp = get("no-permission-set-warp")
     val noPermissionWarpSignCreate = get("no-permission-warp-sign-create")
     val noPermissionWarp = get("no-permission-warp")
+    val noPermissionUntame = get("no-permission-untame")
     val noWarpService = get("no-warp-service")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
+    val noUntamerService = get("no-untamer-service")
     val notFromConsole = get("not-from-console")
+    val tamedBy = getParameterized("tamed-by").let(::TamedByMessage)
 
 }
