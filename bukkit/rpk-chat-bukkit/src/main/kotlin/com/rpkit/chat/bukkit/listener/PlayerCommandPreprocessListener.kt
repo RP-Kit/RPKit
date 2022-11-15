@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +17,6 @@
 package com.rpkit.chat.bukkit.listener
 
 import com.rpkit.chat.bukkit.RPKChatBukkit
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelName
-import com.rpkit.chat.bukkit.chatchannel.RPKChatChannelService
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
@@ -36,50 +35,21 @@ class PlayerCommandPreprocessListener(private val plugin: RPKChatBukkit) : Liste
 
     @EventHandler
     fun onPlayerCommandPreProcess(event: PlayerCommandPreprocessEvent) {
-        handleQuickChannelSwitch(event)
         handleSnooping(event)
     }
 
     private fun handleSnooping(event: PlayerCommandPreprocessEvent) {
         val snooperService = Services[RPKSnooperService::class.java] ?: return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val senderMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
         snooperService.snoopers.thenAccept { snoopers ->
             snoopers.filter(RPKMinecraftProfile::isOnline)
             .forEach { minecraftProfile ->
-                minecraftProfile.sendMessage(plugin.messages["command-snoop", mapOf(
-                    "sender_player" to event.player.name,
-                    "command" to event.message
-                )])
+                minecraftProfile.sendMessage(plugin.messages.commandSnoop.withParameters(
+                    sender = senderMinecraftProfile,
+                    command = event.message
+                ))
             }
-        }
-
-    }
-
-    private fun handleQuickChannelSwitch(event: PlayerCommandPreprocessEvent) {
-        val chatChannelName = event.message.split(Regex("\\s+"))[0].drop(1).lowercase()
-        val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
-        val chatChannel = chatChannelService.getChatChannel(RPKChatChannelName(chatChannelName)) ?: return
-        if (!event.player.hasPermission("rpkit.chat.command.chatchannel.${chatChannel.name.value}")) {
-            event.isCancelled = true
-            event.player.sendMessage(plugin.messages["no-permission-chatchannel", mapOf(
-                "channel" to chatChannel.name.value
-            )])
-            return
-        }
-        event.isCancelled = true
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
-        if (minecraftProfile == null) {
-            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
-            return
-        }
-        val profile = minecraftProfile.profile
-        if (event.message.lowercase().startsWith("/$chatChannelName ")) {
-            chatChannel.sendMessage(profile, minecraftProfile, event.message.split(Regex("\\s+")).drop(1).joinToString(" "))
-        } else if (event.message.lowercase().startsWith("/$chatChannelName")) {
-            chatChannel.addSpeaker(minecraftProfile)
-            event.player.sendMessage(plugin.messages["chatchannel-valid", mapOf(
-                "channel" to chatChannel.name.value
-            )])
         }
     }
 
