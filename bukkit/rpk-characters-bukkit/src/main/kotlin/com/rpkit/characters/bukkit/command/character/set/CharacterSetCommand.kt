@@ -31,7 +31,7 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit) : CommandExec
     private val characterSetNameCommand = CharacterSetNameCommand(plugin)
     private val characterSetGenderCommand = CharacterSetGenderCommand(plugin)
     private val characterSetAgeCommand = CharacterSetAgeCommand(plugin)
-    private val characterSetRaceCommand = CharacterSetRaceCommand(plugin)
+    private val characterSetSpeciesCommand = CharacterSetSpeciesCommand(plugin)
     private val characterSetDescriptionCommand = CharacterSetDescriptionCommand(plugin)
     private val characterSetDeadCommand = CharacterSetDeadCommand(plugin)
 
@@ -46,8 +46,8 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit) : CommandExec
                 return characterSetGenderCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("age", ignoreCase = true)) {
                 return characterSetAgeCommand.onCommand(sender, command, label, newArgs)
-            } else if (args[0].equals("race", ignoreCase = true)) {
-                return characterSetRaceCommand.onCommand(sender, command, label, newArgs)
+            } else if (args[0].equals("species", ignoreCase = true) || args[0].equals("race", ignoreCase = true)) {
+                return characterSetSpeciesCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("description", ignoreCase = true) || args[0].equals("desc", ignoreCase = true)) {
                 return characterSetDescriptionCommand.onCommand(sender, command, label, newArgs)
             } else if (args[0].equals("dead", ignoreCase = true)) {

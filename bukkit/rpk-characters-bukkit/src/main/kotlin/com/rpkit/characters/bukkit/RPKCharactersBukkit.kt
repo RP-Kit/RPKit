@@ -20,15 +20,15 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.character.RPKCharacterServiceImpl
 import com.rpkit.characters.bukkit.character.field.*
 import com.rpkit.characters.bukkit.command.character.CharacterCommand
-import com.rpkit.characters.bukkit.command.race.RaceCommand
+import com.rpkit.characters.bukkit.command.species.SpeciesCommand
 import com.rpkit.characters.bukkit.database.table.RPKCharacterTable
 import com.rpkit.characters.bukkit.database.table.RPKNewCharacterCooldownTable
 import com.rpkit.characters.bukkit.listener.*
 import com.rpkit.characters.bukkit.messages.CharactersMessages
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownService
 import com.rpkit.characters.bukkit.placeholder.RPKCharactersPlaceholderExpansion
-import com.rpkit.characters.bukkit.race.RPKRaceService
-import com.rpkit.characters.bukkit.race.RPKRaceServiceImpl
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
+import com.rpkit.characters.bukkit.species.RPKSpeciesServiceImpl
 import com.rpkit.characters.bukkit.web.CharactersWebAPI
 import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
@@ -57,7 +57,7 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
     lateinit var messages: CharactersMessages
 
     private lateinit var characterService: RPKCharacterService
-    private lateinit var raceService: RPKRaceService
+    private lateinit var speciesService: RPKSpeciesService
     private lateinit var characterCardFieldService: RPKCharacterCardFieldService
     private lateinit var newCharacterCooldownService: RPKNewCharacterCooldownService
 
@@ -67,6 +67,25 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
 
         Metrics(this, 4382)
         saveDefaultConfig()
+        var configUpdated = false
+        if (config.contains("races")) {
+            config.set("species", config.get("races"))
+            config.set("races", null)
+            configUpdated = true
+        }
+        if (config.contains("characters.defaults.race")) {
+            config.set("characters.defaults.species", config.get("characters.defaults.race"))
+            config.set("characters.defaults.race", null)
+            configUpdated = true
+        }
+        if (config.contains("characters.defaults.race-hidden")) {
+            config.set("characters.defaults.species-hidden", config.get("characters.defaults.race-hidden"))
+            config.set("characters.defaults.race-hidden", null)
+            configUpdated = true
+        }
+        if (configUpdated) {
+            saveConfig()
+        }
 
         messages = CharactersMessages(this)
 
@@ -114,12 +133,12 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
         database.addTable(RPKNewCharacterCooldownTable(database, this))
 
         characterService = RPKCharacterServiceImpl(this)
-        raceService = RPKRaceServiceImpl(this)
+        speciesService = RPKSpeciesServiceImpl(this)
         characterCardFieldService = RPKCharacterCardFieldServiceImpl(this)
         newCharacterCooldownService = RPKNewCharacterCooldownService(this)
 
         Services[RPKCharacterService::class.java] = characterService
-        Services[RPKRaceService::class.java] = raceService
+        Services[RPKSpeciesService::class.java] = speciesService
         Services[RPKCharacterCardFieldService::class.java] = characterCardFieldService
         Services[RPKNewCharacterCooldownService::class.java] = newCharacterCooldownService
 
@@ -127,7 +146,7 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
         characterCardFieldService.addCharacterCardField(ProfileField())
         characterCardFieldService.addCharacterCardField(GenderField())
         characterCardFieldService.addCharacterCardField(AgeField())
-        characterCardFieldService.addCharacterCardField(RaceField())
+        characterCardFieldService.addCharacterCardField(SpeciesField())
         characterCardFieldService.addCharacterCardField(DescriptionField())
         characterCardFieldService.addCharacterCardField(DeadField())
         characterCardFieldService.addCharacterCardField(HealthField())
@@ -175,7 +194,7 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
 
     private fun registerCommands() {
         getCommand("character")?.setExecutor(CharacterCommand(this))
-        getCommand("race")?.setExecutor(RaceCommand(this))
+        getCommand("species")?.setExecutor(SpeciesCommand(this))
     }
 
     private fun registerListeners() {

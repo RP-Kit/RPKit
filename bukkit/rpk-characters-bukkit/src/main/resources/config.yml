@@ -5,7 +5,7 @@ characters:
     name: 'unset'
     gender: null
     age: 20
-    race: null
+    species: null
     description: 'unset'
     dead: false
     inventory-contents: []
@@ -23,7 +23,7 @@ characters:
     name-hidden: false
     gender-hidden: false
     age-hidden: false
-    race-hidden: false
+    species-hidden: false
     description-hidden: false
   view-card-requires-sneak: true
   kill-character-on-death: false
@@ -32,7 +32,7 @@ characters:
   set-player-display-name: false
   set-player-nameplate: true
   new-character-cooldown: 604800000
-races:
+species:
   Human:
     min-age: 0
     max-age: 130

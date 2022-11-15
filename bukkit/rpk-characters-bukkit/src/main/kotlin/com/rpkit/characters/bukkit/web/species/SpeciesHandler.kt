@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-package com.rpkit.characters.bukkit.web.race
+package com.rpkit.characters.bukkit.web.species
 
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.characters.bukkit.web.ErrorResponse
 import com.rpkit.core.service.Services
 import org.http4k.core.Body
@@ -26,17 +26,17 @@ import org.http4k.core.Status.Companion.OK
 import org.http4k.core.with
 import org.http4k.format.Gson.auto
 
-class RaceHandler {
+class SpeciesHandler {
 
     val responseLens = Body.auto<List<String>>().toLens()
 
     fun list(request: Request): Response {
-        val raceService = Services[RPKRaceService::class.java]
+        val speciesService = Services[RPKSpeciesService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
-                .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
-        val races = raceService.races
+                .with(ErrorResponse.lens of ErrorResponse("Species service not found"))
+        val speciesList = speciesService.species
         return Response(OK)
-            .with(responseLens of races.map { race -> race.name.value })
+            .with(responseLens of speciesList.map { species -> species.name.value })
     }
 
 }

@@ -16,7 +16,7 @@
 
 package com.rpkit.characters.bukkit.character
 
-import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.species.RPKSpecies
 import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -129,7 +129,7 @@ interface RPKCharacterService : Service {
      * @param name The name
      * @param gender The gender
      * @param age The age
-     * @param race The race
+     * @param species The species
      * @param description The description
      * @param isDead Whether the character is dead
      * @param location The location
@@ -148,7 +148,7 @@ interface RPKCharacterService : Service {
      * @param isNameHidden Whether the name is hidden
      * @param isGenderHidden Whether the gender is hidden
      * @param isAgeHidden Whether the age is hidden
-     * @param isRaceHidden Whether the race is hidden
+     * @param isSpeciesHidden Whether the species is hidden
      * @param isDescriptionHidden Whether the description is hidden
      */
     fun createCharacter(
@@ -156,7 +156,7 @@ interface RPKCharacterService : Service {
         name: String? = null,
         gender: String? = null,
         age: Int? = null,
-        race: RPKRace? = null,
+        species: RPKSpecies? = null,
         description: String? = null,
         isDead: Boolean? = null,
         location: RPKLocation? = null,
@@ -175,7 +175,7 @@ interface RPKCharacterService : Service {
         isNameHidden: Boolean? = null,
         isGenderHidden: Boolean? = null,
         isAgeHidden: Boolean? = null,
-        isRaceHidden: Boolean? = null,
+        isSpeciesHidden: Boolean? = null,
         isDescriptionHidden: Boolean? = null
     ): CompletableFuture<RPKCharacter>
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.rpkit.characters.bukkit.command.race
+package com.rpkit.characters.bukkit.command.species
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import org.bukkit.command.Command
@@ -21,10 +21,10 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 /**
- * Race command.
- * Parent for all race management commands.
+ * Species command.
+ * Parent for all species management commands.
  */
-class RaceCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
+class SpeciesCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     private val raceListCommand = RaceListCommand(plugin)
 
@@ -34,10 +34,10 @@ class RaceCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
             if (args[0].equals("list", ignoreCase = true)) {
                 return raceListCommand.onCommand(sender, command, label, newArgs)
             } else {
-                sender.sendMessage(plugin.messages["race-usage"])
+                sender.sendMessage(plugin.messages.speciesUsage)
             }
         } else {
-            sender.sendMessage(plugin.messages["race-usage"])
+            sender.sendMessage(plugin.messages.speciesUsage)
         }
         return true
     }

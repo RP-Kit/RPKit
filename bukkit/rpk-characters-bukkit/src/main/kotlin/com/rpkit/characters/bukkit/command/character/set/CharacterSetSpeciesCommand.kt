@@ -18,8 +18,8 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.characters.bukkit.race.RPKRaceName
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.command.Command
@@ -29,10 +29,10 @@ import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 
 /**
- * Character set race command.
- * Sets character's race.
+ * Character set species command.
+ * Sets character's species.
  */
-class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
+class CharacterSetSpeciesCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -56,8 +56,8 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
-        if (!sender.hasPermission("rpkit.characters.command.character.set.race")) {
-            sender.sendMessage(plugin.messages.noPermissionCharacterSetRace)
+        if (!sender.hasPermission("rpkit.characters.command.character.set.species")) {
+            sender.sendMessage(plugin.messages.noPermissionCharacterSetSpecies)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
@@ -84,24 +84,24 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
             conversationFactory.buildConversation(sender).begin()
             return true
         }
-        val raceBuilder = StringBuilder()
+        val speciesBuilder = StringBuilder()
         for (i in 0 until args.size - 1) {
-            raceBuilder.append(args[i]).append(" ")
+            speciesBuilder.append(args[i]).append(" ")
         }
-        raceBuilder.append(args[args.size - 1])
-        val raceService = Services[RPKRaceService::class.java]
-        if (raceService == null) {
-            sender.sendMessage(plugin.messages.noRaceService)
+        speciesBuilder.append(args[args.size - 1])
+        val speciesService = Services[RPKSpeciesService::class.java]
+        if (speciesService == null) {
+            sender.sendMessage(plugin.messages.noSpeciesService)
             return true
         }
-        val race = raceService.getRace(RPKRaceName(raceBuilder.toString()))
-        if (race == null) {
-            sender.sendMessage(plugin.messages.characterSetRaceInvalidRace)
+        val species = speciesService.getSpecies(RPKSpeciesName(speciesBuilder.toString()))
+        if (species == null) {
+            sender.sendMessage(plugin.messages.characterSetSpeciesInvalidSpecies)
             return true
         }
-        character.race = race
+        character.species = species
         characterService.updateCharacter(character).thenAccept { updatedCharacter ->
-            sender.sendMessage(plugin.messages.characterSetRaceValid)
+            sender.sendMessage(plugin.messages.characterSetSpeciesValid)
             updatedCharacter?.showCharacterCard(minecraftProfile)
         }
         return true
@@ -110,38 +110,38 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
     private inner class RacePrompt : ValidatingPrompt() {
 
         override fun isInputValid(context: ConversationContext, input: String): Boolean {
-            return Services[RPKRaceService::class.java]?.getRace(RPKRaceName(input)) != null
+            return Services[RPKSpeciesService::class.java]?.getSpecies(RPKSpeciesName(input)) != null
         }
 
         override fun acceptValidatedInput(context: ConversationContext, input: String): Prompt {
             val conversable = context.forWhom
-            if (conversable !is Player) return RaceSetPrompt()
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return RaceSetPrompt()
-            val characterService = Services[RPKCharacterService::class.java] ?: return RaceSetPrompt()
-            val raceService = Services[RPKRaceService::class.java] ?: return RaceSetPrompt()
-            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable) ?: return RaceSetPrompt()
-            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return RaceSetPrompt()
-            character.race = raceService.getRace(RPKRaceName(input))!!
+            if (conversable !is Player) return SpeciesSetPrompt()
+            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return SpeciesSetPrompt()
+            val characterService = Services[RPKCharacterService::class.java] ?: return SpeciesSetPrompt()
+            val speciesService = Services[RPKSpeciesService::class.java] ?: return SpeciesSetPrompt()
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(conversable) ?: return SpeciesSetPrompt()
+            val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return SpeciesSetPrompt()
+            character.species = speciesService.getSpecies(RPKSpeciesName(input))!!
             characterService.updateCharacter(character)
-            return RaceSetPrompt()
+            return SpeciesSetPrompt()
         }
 
         override fun getFailedValidationText(context: ConversationContext, invalidInput: String): String {
-            return plugin.messages.characterSetRaceInvalidRace
+            return plugin.messages.characterSetSpeciesInvalidSpecies
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            val raceService = Services[RPKRaceService::class.java] ?: return plugin.messages.noRaceService
+            val speciesService = Services[RPKSpeciesService::class.java] ?: return plugin.messages.noSpeciesService
             val raceListBuilder = StringBuilder()
-            for (race in raceService.races) {
-                raceListBuilder.append(plugin.messages.raceListItem.withParameters(race)).append('\n')
+            for (species in speciesService.species) {
+                raceListBuilder.append(plugin.messages.speciesListItem.withParameters(species)).append('\n')
             }
-            return plugin.messages.characterSetRacePrompt + "\n" + raceListBuilder.toString()
+            return plugin.messages.characterSetSpeciesPrompt + "\n" + raceListBuilder.toString()
         }
 
     }
 
-    private inner class RaceSetPrompt : MessagePrompt() {
+    private inner class SpeciesSetPrompt : MessagePrompt() {
 
         override fun getNextPrompt(context: ConversationContext): Prompt? {
             val conversable = context.forWhom
@@ -156,9 +156,9 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
                     conversable.sendMessage(plugin.messages.noCharacterService)
                     return END_OF_CONVERSATION
                 }
-                val raceService = Services[RPKRaceService::class.java]
+                val raceService = Services[RPKSpeciesService::class.java]
                 if (raceService == null) {
-                    conversable.sendMessage(plugin.messages.noRaceService)
+                    conversable.sendMessage(plugin.messages.noSpeciesService)
                     return END_OF_CONVERSATION
                 }
                 val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
@@ -170,7 +170,7 @@ class CharacterSetRaceCommand(private val plugin: RPKCharactersBukkit) : Command
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages.characterSetRaceValid
+            return plugin.messages.characterSetSpeciesValid
         }
 
     }

@@ -23,9 +23,9 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
 import com.rpkit.characters.bukkit.protocol.reloadPlayer
-import com.rpkit.characters.bukkit.race.RPKRace
-import com.rpkit.characters.bukkit.race.RPKRaceName
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpecies
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.bukkit.location.toBukkitLocation
 import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.location.RPKLocation
@@ -213,7 +213,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         name: String?,
         gender: String?,
         age: Int?,
-        race: RPKRace?,
+        species: RPKSpecies?,
         description: String?,
         isDead: Boolean?,
         location: RPKLocation?,
@@ -232,7 +232,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         isNameHidden: Boolean?,
         isGenderHidden: Boolean?,
         isAgeHidden: Boolean?,
-        isRaceHidden: Boolean?,
+        isSpeciesHidden: Boolean?,
         isDescriptionHidden: Boolean?
     ): CompletableFuture<RPKCharacter> {
         val character = RPKCharacterImpl(
@@ -243,8 +243,8 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             name ?: plugin.config.getString("characters.defaults.name") ?: "",
             gender ?: plugin.config.getString("characters.defaults.gender"),
             age ?: plugin.config.getInt("characters.defaults.age"),
-            race ?: plugin.config.getString("characters.defaults.race")
-                ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
+            species ?: plugin.config.getString("characters.defaults.species")
+                ?.let { Services[RPKSpeciesService::class.java]?.getSpecies(RPKSpeciesName(it)) },
             description ?: plugin.config.getString("characters.defaults.description") ?: "",
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
             location ?: plugin.server.worlds[0].spawnLocation.toRPKLocation(),
@@ -265,7 +265,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             isNameHidden ?: plugin.config.getBoolean("characters.defaults.name-hidden"),
             isGenderHidden ?: plugin.config.getBoolean("characters.defaults.gender-hidden"),
             isAgeHidden ?: plugin.config.getBoolean("characters.defaults.age-hidden"),
-            isRaceHidden ?: plugin.config.getBoolean("characters.defaults.race-hidden"),
+            isSpeciesHidden ?: plugin.config.getBoolean("characters.defaults.species-hidden"),
             isDescriptionHidden ?: plugin.config.getBoolean("characters.defaults.description-hidden")
         )
         return addCharacter(character).thenApply { character }

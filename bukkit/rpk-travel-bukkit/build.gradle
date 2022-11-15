@@ -66,7 +66,7 @@ jooq {
                         properties {
                             property {
                                 key = "scripts"
-                                value = "src/main/resources/com/rpkit/travel/migrations/mysql"
+                                value = "src/main/resources/com/rpkit/travel/migrations/sqlite"
                             }
                             property {
                                 key = "sort"

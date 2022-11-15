@@ -18,7 +18,7 @@ package com.rpkit.characters.bukkit.web
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.web.character.CharacterHandler
-import com.rpkit.characters.bukkit.web.race.RaceHandler
+import com.rpkit.characters.bukkit.web.species.SpeciesHandler
 import org.http4k.core.Method.*
 import org.http4k.core.then
 import org.http4k.filter.CorsPolicy
@@ -31,7 +31,7 @@ import org.http4k.server.asServer
 class CharactersWebAPI(plugin: RPKCharactersBukkit) {
 
     private val characterHandler = CharacterHandler(plugin)
-    private val raceHandler = RaceHandler()
+    private val speciesHandler = SpeciesHandler()
     private val app = ServerFilters.CatchAll()
         .then(ServerFilters.Cors(CorsPolicy.UnsafeGlobalPermissive))
         .then(routes(
@@ -47,7 +47,10 @@ class CharactersWebAPI(plugin: RPKCharactersBukkit) {
                             "/" bind GET to characterHandler::list
                         ),
                         "/race" bind routes(
-                            "/" bind GET to raceHandler::list
+                            "/" bind GET to speciesHandler::list
+                        ),
+                        "/species" bind routes(
+                            "/" bind GET to speciesHandler::list
                         )
                     )
                 )

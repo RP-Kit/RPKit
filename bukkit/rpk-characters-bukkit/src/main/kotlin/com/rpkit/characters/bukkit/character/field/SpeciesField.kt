@@ -24,17 +24,17 @@ import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
 
 /**
- * Character card field for race.
+ * Character card field for species.
  */
-class RaceField : HideableCharacterCardField {
+class SpeciesField : HideableCharacterCardField {
 
-    override val name = "race"
+    override val name = "species"
     override fun get(character: RPKCharacter): CompletableFuture<String> {
         return isHidden(character).thenApply { hidden ->
             if (hidden) {
                 "[HIDDEN]"
             } else {
-                character.race?.name?.value ?: "unset"
+                character.species?.name?.value ?: "unset"
             }
         }
     }
@@ -42,7 +42,7 @@ class RaceField : HideableCharacterCardField {
     override fun get(character: RPKCharacter, viewer: RPKProfile): CompletableFuture<String> {
         return isHidden(character).thenApplyAsync { hidden ->
             if (viewer.hasPermission("rpkit.characters.command.character.card.bypasshidden").join() || !hidden) {
-                return@thenApplyAsync character.race?.name?.value ?: "unset"
+                return@thenApplyAsync character.species?.name?.value ?: "unset"
             } else {
                 return@thenApplyAsync "[HIDDEN]"
             }
@@ -50,11 +50,11 @@ class RaceField : HideableCharacterCardField {
     }
 
     override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
-        return CompletableFuture.completedFuture(character.isRaceHidden)
+        return CompletableFuture.completedFuture(character.isSpeciesHidden)
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
-        character.isRaceHidden = hidden
+        character.isSpeciesHidden = hidden
         return Services[RPKCharacterService::class.java]?.updateCharacter(character)
             ?.thenApply { null }
             ?: CompletableFuture.completedFuture(null)

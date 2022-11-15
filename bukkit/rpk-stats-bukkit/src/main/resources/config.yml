@@ -4,7 +4,7 @@
 # minecraftLevel: The player's level in Minecraft (Integer)
 # characterGender: The character's gender from the character implementation (String)
 # characterAge: The character's age from the character implementation (Integer)
-# characterRace: The character's race from the character implementation (RPKRace)
+# characterSpecies: The character's species from the character implementation (RPKSpecies)
 # characterHelmet: The character's helmet from the character implementation (ItemStack)
 # characterChestplate: The character's chestplate from the character implementation (ItemStack)
 # characterLeggings: The character's leggings from the character implementation (ItemStack)

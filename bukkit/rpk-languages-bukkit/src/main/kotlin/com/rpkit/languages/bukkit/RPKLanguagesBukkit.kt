@@ -48,6 +48,17 @@ class RPKLanguagesBukkit : JavaPlugin(), RPKPlugin {
 
         Metrics(this, 6764)
         saveDefaultConfig()
+        var configUpdated = false
+        for (languageName in config.getConfigurationSection("languages")?.getKeys(false) ?: emptySet()) {
+            if (config.contains("languages.${languageName}.default-race-understanding")) {
+                config.set("languages.${languageName}.default-species-understanding", config.get("languages.${languageName}.default-race-understanding"))
+                config.set("languages.${languageName}.default-race-understanding", null)
+                configUpdated = true
+            }
+        }
+        if (configUpdated) {
+            saveConfig()
+        }
 
         messages = LanguageMessages(this)
 

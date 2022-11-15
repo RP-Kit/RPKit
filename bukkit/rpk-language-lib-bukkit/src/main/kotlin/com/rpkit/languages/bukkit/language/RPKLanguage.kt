@@ -15,44 +15,44 @@
 
 package com.rpkit.languages.bukkit.language
 
-import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.species.RPKSpecies
 
 interface RPKLanguage {
 
     val name: RPKLanguageName
 
     /**
-     * Gets the base understanding for a character of a given race of this language
+     * Gets the base understanding for a character of a given species of this language
      *
-     * @param race The character's race
-     * @return The base understanding of a new character of the given race
+     * @param species The character's species
+     * @return The base understanding of a new character of the given species
      */
-    fun getBaseUnderstanding(race: RPKRace): Float
+    fun getBaseUnderstanding(species: RPKSpecies): Float
 
     /**
-     * Gets the minimum understanding increment for a character of the given race
+     * Gets the minimum understanding increment for a character of the given species
      *
-     * @param race The character's race
+     * @param species The character's species
      * @return The minimum increment of the character's understanding upon hearing a message of this language
      */
-    fun getMinimumUnderstandingIncrement(race: RPKRace): Float
+    fun getMinimumUnderstandingIncrement(species: RPKSpecies): Float
 
     /**
-     * Gets the maximum understanding increment for a character of the given race
+     * Gets the maximum understanding increment for a character of the given species
      *
-     * @param race The character's race
+     * @param species The character's species
      * @return The maximum increment of the character's understanding upon hearing a message of this language
      */
-    fun getMaximumUnderstandingIncrement(race: RPKRace): Float
+    fun getMaximumUnderstandingIncrement(species: RPKSpecies): Float
 
     /**
      * Generates a random understanding increment between the minimum and maximum understanding increments for
-     * a character of the given race
+     * a character of the given species
      *
-     * @param race The character's race
-     * @return A random understanding increment between the minimum and maximum understanding increments for the race
+     * @param species The character's species
+     * @return A random understanding increment between the minimum and maximum understanding increments for the species
      */
-    fun randomUnderstandingIncrement(race: RPKRace): Float
+    fun randomUnderstandingIncrement(species: RPKSpecies): Float
 
     /**
      * Applies the language to a message, given a sender and a receiver's understanding of the language.

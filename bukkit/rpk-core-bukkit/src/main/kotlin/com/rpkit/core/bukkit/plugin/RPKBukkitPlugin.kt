@@ -28,7 +28,7 @@ import org.bukkit.plugin.java.JavaPlugin
 @Deprecated("Extend JavaPlugin as normal and implement RPKPlugin where necessary. This class is no longer required.")
 abstract class RPKBukkitPlugin : JavaPlugin(), RPKPlugin {
 
-    @Deprecated(message = "Replace with extension, stop extending from RPKBukkitPlugin", replaceWith = ReplaceWith("registerListeners", "com.rpkit.core.bukkit.listener.registerListeners"))
+    @Deprecated(message = "Replace with extension, stop extending from RPKBukkitPlugin", ReplaceWith("registerListeners", "com.rpkit.core.bukkit.listener.registerListeners"))
     fun registerListeners(vararg listeners: Listener) {
         for (listener in listeners) {
             server.pluginManager.registerEvents(listener, this)

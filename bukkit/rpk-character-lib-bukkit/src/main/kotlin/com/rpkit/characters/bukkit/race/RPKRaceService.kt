@@ -16,6 +16,8 @@
 
 package com.rpkit.characters.bukkit.race
 
+import com.rpkit.characters.bukkit.species.RPKSpecies
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
 import com.rpkit.core.service.Service
 
 /**
@@ -27,7 +29,11 @@ interface RPKRaceService : Service {
      * A collection of races currently managed by this race service.
      * This is immutable.
      */
+    @Deprecated("Use species", ReplaceWith("species"))
     val races: Collection<RPKRace>
+
+    val species: Collection<RPKSpecies>
+        get() = races
 
     /**
      * Gets a race by name.
@@ -36,6 +42,16 @@ interface RPKRaceService : Service {
      * @param name The name of the race
      * @return The race, or null if no race is found with the given name
      */
+    @Deprecated("Use getSpecies", ReplaceWith("getSpecies(name)"))
     fun getRace(name: RPKRaceName): RPKRace?
+
+    /**
+     * Gets a species by name.
+     * If there is no species with the given name, null is returned.
+     *
+     * @param name The name of the species
+     * @return The species, or null if no species is found with the given name
+     */
+    fun getSpecies(name: RPKSpeciesName): RPKSpecies? = getRace(name)
 
 }

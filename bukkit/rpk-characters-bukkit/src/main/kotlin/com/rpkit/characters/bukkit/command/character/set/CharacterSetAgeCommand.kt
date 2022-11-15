@@ -88,8 +88,8 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
         }
         try {
             val age = args[0].toInt()
-            val minAge = max(plugin.config.getInt("characters.min-age"), character.race?.minAge ?: Int.MIN_VALUE)
-            val maxAge = min(plugin.config.getInt("characters.max-age"), character.race?.maxAge ?: Int.MAX_VALUE)
+            val minAge = max(plugin.config.getInt("characters.min-age"), character.species?.minAge ?: Int.MIN_VALUE)
+            val maxAge = min(plugin.config.getInt("characters.max-age"), character.species?.maxAge ?: Int.MAX_VALUE)
             if (age in minAge..maxAge) {
                 character.age = age
                 characterService.updateCharacter(character).thenAccept { updatedCharacter ->
@@ -126,8 +126,8 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             if (minecraftProfile == null) return false
             val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
             context.setSessionData("character", character)
-            val minAge = max(plugin.config.getInt("characters.min-age"), character?.race?.minAge ?: Int.MIN_VALUE)
-            val maxAge = min(plugin.config.getInt("characters.max-age"), character?.race?.maxAge ?: Int.MAX_VALUE)
+            val minAge = max(plugin.config.getInt("characters.min-age"), character?.species?.minAge ?: Int.MIN_VALUE)
+            val maxAge = min(plugin.config.getInt("characters.max-age"), character?.species?.maxAge ?: Int.MAX_VALUE)
             return input.toInt() in minAge..maxAge
         }
 
@@ -136,8 +136,8 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
             if (context.getSessionData("characterService") == null) return plugin.messages.noCharacterService
             if (context.getSessionData("minecraftProfile") == null) return plugin.messages.noMinecraftProfile
             val character = context.getSessionData("character") as? RPKCharacter ?: return plugin.messages.noCharacter
-            val minAge = max(plugin.config.getInt("characters.min-age"), character.race?.minAge ?: Int.MIN_VALUE)
-            val maxAge = min(plugin.config.getInt("characters.max-age"), character.race?.maxAge ?: Int.MAX_VALUE)
+            val minAge = max(plugin.config.getInt("characters.min-age"), character.species?.minAge ?: Int.MIN_VALUE)
+            val maxAge = min(plugin.config.getInt("characters.max-age"), character.species?.maxAge ?: Int.MAX_VALUE)
             return plugin.messages.characterSetAgeInvalidValidation.withParameters(
                 minAge = minAge,
                 maxAge = maxAge

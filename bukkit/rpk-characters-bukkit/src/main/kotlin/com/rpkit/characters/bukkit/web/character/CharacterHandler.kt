@@ -22,7 +22,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.characters.bukkit.race.RPKRaceName
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.characters.bukkit.web.ErrorResponse
 import com.rpkit.characters.bukkit.web.authenticatedProfile
 import com.rpkit.core.service.Services
@@ -64,9 +65,9 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val raceService = Services[RPKRaceService::class.java]
+        val speciesService = Services[RPKSpeciesService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
-                .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
+                .with(ErrorResponse.lens of ErrorResponse("Species service not found"))
         val character = characterService.getCharacter(RPKCharacterId(id)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
@@ -77,14 +78,14 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.name = characterPutRequest.name
         character.gender = characterPutRequest.gender
         character.age = characterPutRequest.age
-        character.race = characterPutRequest.race?.let(::RPKRaceName)?.let(raceService::getRace)
+        character.species = characterPutRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies) ?: characterPutRequest.race?.let(::RPKRaceName)?.let(speciesService::getRace)
         character.description = characterPutRequest.description
         character.isDead = characterPutRequest.isDead
         character.isProfileHidden = characterPutRequest.isProfileHidden
         character.isNameHidden = characterPutRequest.isNameHidden
         character.isGenderHidden = characterPutRequest.isGenderHidden
         character.isAgeHidden = characterPutRequest.isAgeHidden
-        character.isRaceHidden = characterPutRequest.isRaceHidden
+        character.isSpeciesHidden = characterPutRequest.isSpeciesHidden ?: characterPutRequest.isRaceHidden ?: plugin.config.getBoolean("characters.defaults.species-hidden")
         character.isDescriptionHidden = characterPutRequest.isDescriptionHidden
         characterService.updateCharacter(character).join()
         if (plugin.config.getBoolean("characters.set-player-nameplate")
@@ -106,9 +107,9 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val raceService = Services[RPKRaceService::class.java]
+        val speciesService = Services[RPKSpeciesService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
-                .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
+                .with(ErrorResponse.lens of ErrorResponse("Species service not found"))
         val character = characterService.getCharacter(RPKCharacterId(id)).join()
             ?: return Response(NOT_FOUND)
                 .with(ErrorResponse.lens of ErrorResponse("Character not found"))
@@ -119,14 +120,14 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.name = characterPatchRequest.name ?: character.name
         character.gender = characterPatchRequest.gender ?: character.gender
         character.age = characterPatchRequest.age ?: character.age
-        character.race = characterPatchRequest.race?.let(::RPKRaceName)?.let(raceService::getRace) ?: character.race
+        character.species = characterPatchRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies) ?: character.species
         character.description = characterPatchRequest.description ?: character.description
         character.isDead = characterPatchRequest.isDead ?: character.isDead
         character.isProfileHidden = characterPatchRequest.isProfileHidden ?: character.isProfileHidden
         character.isNameHidden = characterPatchRequest.isNameHidden ?: character.isNameHidden
         character.isGenderHidden = characterPatchRequest.isGenderHidden ?: character.isGenderHidden
         character.isAgeHidden = characterPatchRequest.isAgeHidden ?: character.isAgeHidden
-        character.isRaceHidden = characterPatchRequest.isRaceHidden ?: character.isRaceHidden
+        character.isSpeciesHidden = characterPatchRequest.isSpeciesHidden ?: characterPatchRequest.isRaceHidden ?: character.isSpeciesHidden
         character.isDescriptionHidden = characterPatchRequest.isDescriptionHidden ?: character.isDescriptionHidden
         characterService.updateCharacter(character).join()
         if (plugin.config.getBoolean("characters.set-player-nameplate")
@@ -163,15 +164,16 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         val characterService = Services[RPKCharacterService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
                 .with(ErrorResponse.lens of ErrorResponse("Character service not found"))
-        val raceService = Services[RPKRaceService::class.java]
+        val speciesService = Services[RPKSpeciesService::class.java]
             ?: return Response(INTERNAL_SERVER_ERROR)
-                .with(ErrorResponse.lens of ErrorResponse("Race service not found"))
+                .with(ErrorResponse.lens of ErrorResponse("Species service not found"))
         val character = characterService.createCharacter(
             request.authenticatedProfile,
             characterPostRequest.name,
             characterPostRequest.gender,
             characterPostRequest.age,
-            characterPostRequest.race?.let(::RPKRaceName)?.let(raceService::getRace),
+            characterPostRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies)
+                ?: characterPostRequest.race?.let(::RPKRaceName)?.let(speciesService::getRace),
             characterPostRequest.description,
             characterPostRequest.isDead,
             null,
