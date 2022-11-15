@@ -173,7 +173,8 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                             reloadPlayer(
                                 bukkitPlayer,
                                 newCharacter,
-                                plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
+                                plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId }
+                            )
                         }
                     }
                     newCharacter.minecraftProfile = minecraftProfile
@@ -186,6 +187,23 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                         if (minecraftProfileId != null) {
                             activeCharacters[minecraftProfileId.value] = characterId.value
                             plugin.logger.info("Character ${newCharacter.name} (${characterId.value}) loaded for Minecraft user ${minecraftProfile.minecraftUsername.value} (${minecraftProfile.minecraftUUID})")
+                        }
+                    }
+                } else {
+                    val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+                    val bukkitPlayer = offlineBukkitPlayer.player
+                    if (bukkitPlayer != null) {
+                        bukkitPlayer.inventory.contents = emptyArray()
+                        bukkitPlayer.inventory.helmet = null
+                        bukkitPlayer.inventory.chestplate = null
+                        bukkitPlayer.inventory.leggings = null
+                        bukkitPlayer.inventory.boots = null
+                        bukkitPlayer.teleport(plugin.server.worlds.first().spawnLocation)
+                        bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.baseValue = 20.0
+                        bukkitPlayer.health = 20.0
+                        bukkitPlayer.foodLevel = 20
+                        if (plugin.config.getBoolean("characters.set-player-display-name")) {
+                            bukkitPlayer.setDisplayName(bukkitPlayer.name)
                         }
                     }
                 }

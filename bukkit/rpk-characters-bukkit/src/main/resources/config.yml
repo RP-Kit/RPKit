@@ -32,6 +32,7 @@ characters:
   set-player-display-name: false
   set-player-nameplate: true
   new-character-cooldown: 604800000
+  create-character-on-join: true
 species:
   Human:
     min-age: 0

@@ -18,12 +18,18 @@ package com.rpkit.characters.bukkit.listener
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownService
 import com.rpkit.characters.bukkit.protocol.reloadPlayer
+import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.ItemStack
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 /**
  * Player join listener for display names.
@@ -34,9 +40,47 @@ class PlayerJoinListener(val plugin: RPKCharactersBukkit) : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
+        createCharacterIfNotPresent(event)
         setPlayerDisplayName(event)
         setPlayerNameplate(event)
         showOtherPlayerNameplates(event)
+    }
+
+    private fun createCharacterIfNotPresent(event: PlayerJoinEvent) {
+        if (!plugin.config.getBoolean("characters.create-character-on-join")) return
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
+        val characterService = Services[RPKCharacterService::class.java] ?: return
+        val newCharacterCooldownService = Services[RPKNewCharacterCooldownService::class.java] ?: return
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
+        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        val profile = minecraftProfile.profile as? RPKProfile ?: return
+        if (character == null) {
+            characterService.createCharacter(
+                profile = profile,
+                inventoryContents = event.player.inventory.contents + (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>).toTypedArray(),
+                helmet = event.player.inventory.helmet,
+                chestplate = event.player.inventory.chestplate,
+                leggings = event.player.inventory.leggings,
+                boots = event.player.inventory.boots,
+                location = event.player.location.toRPKLocation()
+            ).thenAccept { newCharacter ->
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    characterService.setActiveCharacter(minecraftProfile, newCharacter).thenRun {
+                        plugin.server.scheduler.runTask(plugin, Runnable {
+                            newCharacterCooldownService.setNewCharacterCooldown(
+                                profile,
+                                Duration.of(plugin.config.getLong("characters.new-character-cooldown"),
+                                    ChronoUnit.MILLIS
+                                )
+                            ).thenRun {
+                                event.player.sendMessage(plugin.messages.characterNewValid)
+                                newCharacter?.showCharacterCard(minecraftProfile)
+                            }
+                        })
+                    }
+                })
+            }
+        }
     }
 
     private fun setPlayerDisplayName(event: PlayerJoinEvent) {
