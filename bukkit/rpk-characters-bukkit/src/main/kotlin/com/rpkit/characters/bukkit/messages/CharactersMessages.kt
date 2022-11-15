@@ -19,11 +19,16 @@ package com.rpkit.characters.bukkit.messages
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.characters.bukkit.species.RPKSpecies
 import com.rpkit.core.bukkit.message.BukkitMessages
+import com.rpkit.core.message.MessageParameter
 import com.rpkit.core.message.ParameterizedMessage
 import com.rpkit.core.message.to
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
+import java.util.logging.Level.SEVERE
 
 class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
 
@@ -125,10 +130,22 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
         }
     }
 
-    class CharacterListItem(private val message: ParameterizedMessage) {
-        fun withParameters(character: RPKCharacter) = message.withParameters(
-            "character" to character.name
-        )
+    class CharacterListItemMessage(private val plugin: RPKCharactersBukkit, private val message: ParameterizedMessage) {
+        fun withParameters(character: RPKCharacter): CompletableFuture<String> {
+            val characterCardFieldService = Services[RPKCharacterCardFieldService::class.java]
+            val fieldParameterFutures = characterCardFieldService?.characterCardFields?.map { field ->
+                field.get(character).exceptionally { exception ->
+                    plugin.logger.log(SEVERE, "Failed to get character card field ${field.name} for character ${character.name} (${character.id?.value})", exception)
+                    throw exception
+                }.thenApply { field.name to it }
+            } ?: emptyList<CompletableFuture<MessageParameter>>()
+            return CompletableFuture.allOf(*fieldParameterFutures.toTypedArray()).thenApply {
+                return@thenApply message.withParameters(
+                    "character" to character.name,
+                    *fieldParameterFutures.map(CompletableFuture<MessageParameter>::join).toTypedArray()
+                )
+            }
+        }
     }
 
     class SpeciesListItem(private val message: ParameterizedMessage) {
@@ -182,7 +199,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterCardOwner = getParameterizedList("character-card-owner").let(::CharacterCardOwnerMessage)
     val characterCardNotOwner = getParameterizedList("character-card-not-owner").let(::CharacterCardNotOwnerMessage)
     val characterListTitle = get("character-list-title")
-    val characterListItem = getParameterized("character-list-item").let(::CharacterListItem)
+    val characterListItem = CharacterListItemMessage(plugin, getParameterized("character-list-item"))
     val characterSwitchPrompt = get("character-switch-prompt")
     val characterSwitchInvalidCharacter = get("character-switch-invalid-character")
     val characterSwitchInvalidCharacterOtherAccount = get("character-switch-invalid-character-other-account")
