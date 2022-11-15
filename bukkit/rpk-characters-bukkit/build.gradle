@@ -14,6 +14,7 @@
  */
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "nu.studer.jooq" version "7.1.1"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -46,12 +47,51 @@ dependencies {
     implementation project(":bukkit:rpk-player-lib-bukkit")
     implementation project(":bukkit:rpk-character-lib-bukkit")
     implementation project(":bukkit:rpk-permissions-lib-bukkit")
+    jooqGenerator "org.jooq:jooq-meta-extensions:3.17.4"
 }
 
 processResources {
     filter ReplaceTokens, tokens: [
             "version": version
     ]
+}
+
+import org.jooq.meta.jaxb.Logging
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                logging = Logging.WARN
+                generator {
+                    name = "org.jooq.codegen.DefaultGenerator"
+                    database {
+                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                        inputSchema = "PUBLIC"
+                        includes = ".*"
+                        excludes = ""
+                        properties {
+                            property {
+                                key = "scripts"
+                                value = "src/main/resources/com/rpkit/characters/migrations/sqlite"
+                            }
+                            property {
+                                key = "sort"
+                                value = "semantic"
+                            }
+                            property {
+                                key = "defaultNameCase"
+                                value = "lower"
+                            }
+                        }
+                    }
+                    target {
+                        packageName = "com.rpkit.characters.bukkit.database.jooq"
+                    }
+                }
+            }
+        }
+    }
 }
 
 shadowJar {

@@ -40,7 +40,7 @@ class LanguageComponent(private val plugin: RPKChatBukkit) : DirectedPreFormatPi
         var message = context.message
         val senderCharacter = characterService.getPreloadedActiveCharacter(senderMinecraftProfile) ?: return CompletableFuture.completedFuture(context)
         val receiverCharacter = characterService.getPreloadedActiveCharacter(receiverMinecraftProfile) ?: return CompletableFuture.completedFuture(context)
-        val receiverRace = receiverCharacter.race
+        val receiverSpecies = receiverCharacter.species
         if (!message.startsWith("[") || !message.contains("]")) return CompletableFuture.completedFuture(context)
         val languageName = Regex("\\[([^]]+)]").find(message)?.groupValues?.get(1) ?: return CompletableFuture.completedFuture(context)
         val languageService = Services[RPKLanguageService::class.java] ?: return CompletableFuture.completedFuture(context)
@@ -53,11 +53,11 @@ class LanguageComponent(private val plugin: RPKChatBukkit) : DirectedPreFormatPi
         return characterLanguageService.getCharacterLanguageUnderstanding(senderCharacter, language)
             .thenCombineAsync(characterLanguageService.getCharacterLanguageUnderstanding(receiverCharacter, language)) { senderUnderstanding, receiverUnderstanding ->
                 context.message = "[${language.name.value}] ${language.apply(message, senderUnderstanding, receiverUnderstanding)}"
-                if (receiverRace != null) {
+                if (receiverSpecies != null) {
                     characterLanguageService.setCharacterLanguageUnderstanding(
                         receiverCharacter,
                         language,
-                        receiverUnderstanding + language.randomUnderstandingIncrement(receiverRace)
+                        receiverUnderstanding + language.randomUnderstandingIncrement(receiverSpecies)
                     ).join()
                 }
                 return@thenCombineAsync context

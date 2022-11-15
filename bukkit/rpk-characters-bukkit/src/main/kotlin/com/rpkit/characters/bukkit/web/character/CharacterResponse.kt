@@ -27,7 +27,9 @@ data class CharacterResponse(
     val name: String,
     val gender: String?,
     val age: Int,
+    @Deprecated("Use species", ReplaceWith("species"))
     val race: String?,
+    val species: String?,
     val description: String,
     val isDead: Boolean,
     val world: String?,
@@ -52,6 +54,7 @@ data class CharacterResponse(
     val isGenderHidden: Boolean,
     val isAgeHidden: Boolean,
     val isRaceHidden: Boolean,
+    val isSpeciesHidden: Boolean,
     val isDescriptionHidden: Boolean
 ) {
     companion object {
@@ -67,7 +70,8 @@ fun RPKCharacter.toCharacterResponse() = CharacterResponse(
     name,
     gender,
     age,
-    race?.name?.value,
+    species?.name?.value ?: race?.name?.value,
+    species?.name?.value,
     description,
     isDead,
     location.world,
@@ -92,5 +96,6 @@ fun RPKCharacter.toCharacterResponse() = CharacterResponse(
     isGenderHidden,
     isAgeHidden,
     isRaceHidden,
+    isSpeciesHidden,
     isDescriptionHidden
 )

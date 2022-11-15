@@ -4,7 +4,7 @@ languages:
       a: i
       b: c
       c: ll
-    default-race-understanding:
+    default-species-understanding:
       Elf: 100
       Human: 0
       Half-Elf: 75

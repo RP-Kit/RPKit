@@ -40,7 +40,7 @@ class RPKCharactersPlaceholderExpansion(private val plugin: RPKCharactersBukkit)
             "charactername" -> character?.name
             "charactergender" -> character?.gender
             "characterage" -> character?.age?.toString()
-            "characterrace" -> character?.race?.toString()
+            "characterspecies" -> character?.species?.toString()
             "characterdescription" -> character?.description
             "charactermana" -> character?.mana?.toString()
             "charactermaxmana" -> character?.maxMana?.toString()

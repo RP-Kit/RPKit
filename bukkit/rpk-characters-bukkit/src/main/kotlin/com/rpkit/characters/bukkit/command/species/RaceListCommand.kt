@@ -13,36 +13,34 @@
  * limitations under the License.
  */
 
-package com.rpkit.characters.bukkit.command.race
+package com.rpkit.characters.bukkit.command.species
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.service.Services
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 
 /**
- * Race list command.
+ * Species list command.
  * Lists all currently available races.
  */
 class RaceListCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (!sender.hasPermission("rpkit.characters.command.race.list")) {
-            sender.sendMessage(plugin.messages["no-permission-race-list"])
+        if (!sender.hasPermission("rpkit.characters.command.species.list")) {
+            sender.sendMessage(plugin.messages.noPermissionSpeciesList)
             return true
         }
-        val raceService = Services[RPKRaceService::class.java]
-        if (raceService == null) {
-            sender.sendMessage(plugin.messages["no-race-service"])
+        val speciesService = Services[RPKSpeciesService::class.java]
+        if (speciesService == null) {
+            sender.sendMessage(plugin.messages.noSpeciesService)
             return true
         }
-        sender.sendMessage(plugin.messages["race-list-title"])
-        for (race in raceService.races) {
-            sender.sendMessage(plugin.messages["race-list-item", mapOf(
-                "race" to race.name.value
-            )])
+        sender.sendMessage(plugin.messages.speciesListTitle)
+        for (species in speciesService.species) {
+            sender.sendMessage(plugin.messages.speciesListItem.withParameters(species = species))
         }
         return true
     }

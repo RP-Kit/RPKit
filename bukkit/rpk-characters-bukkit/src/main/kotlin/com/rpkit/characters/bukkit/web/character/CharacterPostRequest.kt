@@ -22,7 +22,9 @@ data class CharacterPostRequest(
     val name: String,
     val gender: String?,
     val age: Int,
+    @Deprecated("Use species", ReplaceWith("species"))
     val race: String?,
+    val species: String?,
     val description: String,
     val isDead: Boolean,
     val isProfileHidden: Boolean,

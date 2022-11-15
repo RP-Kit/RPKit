@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package com.rpkit.characters.bukkit.race
+package com.rpkit.characters.bukkit.species
 
-/**
- * Race implementation.
- */
-class RPKRaceImpl(
-    override val name: RPKRaceName,
-    override val minAge: Int,
-    override val maxAge: Int
-) : RPKRace
+import com.rpkit.characters.bukkit.race.RPKRaceName
+
+typealias RPKSpeciesName = RPKRaceName

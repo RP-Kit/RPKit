@@ -22,14 +22,17 @@ data class CharacterPutRequest(
     val name: String,
     val gender: String?,
     val age: Int,
+    @Deprecated("Use species", ReplaceWith("species"))
     val race: String?,
+    val species: String?,
     val description: String,
     val isDead: Boolean,
     val isProfileHidden: Boolean,
     val isNameHidden: Boolean,
     val isGenderHidden: Boolean,
     val isAgeHidden: Boolean,
-    val isRaceHidden: Boolean,
+    val isRaceHidden: Boolean?,
+    val isSpeciesHidden: Boolean?,
     val isDescriptionHidden: Boolean
 ) {
     companion object {
