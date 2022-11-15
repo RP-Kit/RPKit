@@ -75,8 +75,7 @@ class NotificationDismissCommand(private val plugin: RPKNotificationsBukkit) : R
                 sender.sendMessage(plugin.messages.notificationDismissInvalidRecipient)
                 return@thenApplyAsync InvalidNotificationRecipientFailure()
             }
-            notification.read = true
-            return@thenApplyAsync notificationService.updateNotification(notification).thenApply {
+            return@thenApplyAsync notificationService.removeNotification(notification).thenApply {
                 sender.sendMessage(plugin.messages.notificationDismissValid)
                 return@thenApply CommandSuccess
             }.join()

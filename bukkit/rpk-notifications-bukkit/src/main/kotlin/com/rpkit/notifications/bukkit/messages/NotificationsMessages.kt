@@ -58,6 +58,12 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
         }
     }
 
+    class NewNotificationsMessage(private val message: ParameterizedMessage) {
+        fun withParameters(amount: Int) = message.withParameters(
+            "amount" to amount.toString()
+        )
+    }
+
     val notificationUsage = get("notification-usage")
     val notificationDismissUsage = get("notification-dismiss-usage")
     val notificationDismissInvalidNotificationIdNotANumber = get("notification-dismiss-invalid-notification-id-not-a-number")
@@ -78,5 +84,7 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
     val noPermissionNotificationDismiss = get("no-permission-notification-dismiss")
     val noPermissionNotificationList = get("no-permission-notification-list")
     val noPermissionNotificationView = get("no-permission-notification-view")
+    val newNotifications = getParameterized("new-notifications").let(::NewNotificationsMessage)
+    val newNotificationsHover = get("new-notifications-hover")
 
 }

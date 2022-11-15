@@ -61,13 +61,22 @@ class NotificationListCommand(private val plugin: RPKNotificationsBukkit) : RPKC
         }
         return notificationService.getNotifications(profile).thenApply { notifications ->
             sender.sendMessage(plugin.messages.notificationListTitle)
-            notifications.filter { notification -> !notification.read }
-                .sortedByDescending { notification -> notification.time }
+            notifications
+                .sortedWith { a, b ->
+                    val readComparison = a.read.compareTo(b.read)
+                    if (readComparison != 0) return@sortedWith readComparison
+                    return@sortedWith b.time.compareTo(a.time)
+                }
                 .forEach { notification ->
-                    val listItem = TextComponent(plugin.messages.notificationListItem.withParameters(notification))
-                    listItem.hoverEvent = HoverEvent(SHOW_TEXT, Text(plugin.messages.notificationListItemHover))
-                    listItem.clickEvent = ClickEvent(RUN_COMMAND, "/notification view ${notification.id?.value}")
-                    sender.sendMessage(listItem)
+                    val listItem = TextComponent.fromLegacyText(plugin.messages.notificationListItem.withParameters(notification))
+                    listItem.forEach { component ->
+                        component.hoverEvent = HoverEvent(SHOW_TEXT, Text(plugin.messages.notificationListItemHover))
+                        component.clickEvent = ClickEvent(RUN_COMMAND, "/notification view ${notification.id?.value}")
+                        if (!notification.read) {
+                            component.isBold = true
+                        }
+                    }
+                    sender.sendMessage(*listItem)
                 }
             return@thenApply CommandSuccess
         }.exceptionally { exception ->
