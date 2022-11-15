@@ -26,6 +26,7 @@ import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -73,6 +74,9 @@ class DiscordServer(
             jda.upsertCommand(jdaCommand).queue()
         }
     }
+
+    val guild: Guild
+        get() = jda.getGuildsByName(guildName, false).first()
 
     override fun onReady(event: ReadyEvent) {
         ready = true
