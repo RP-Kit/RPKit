@@ -14,6 +14,7 @@
  */
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "nu.studer.jooq" version "7.1.1"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -39,6 +40,7 @@ dependencies {
         exclude module: "opus-java"
     }
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha7"
+    implementation group: "me.clip", name: "placeholderapi", version: "2.11.1"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
@@ -47,12 +49,51 @@ dependencies {
     implementation project(":bukkit:rpk-drink-lib-bukkit")
     implementation project(":bukkit:rpk-language-lib-bukkit")
     implementation project(":bukkit:rpk-chat-lib-bukkit")
+    jooqGenerator "org.jooq:jooq-meta-extensions:3.17.4"
 }
 
 processResources {
     filter ReplaceTokens, tokens: [
             "version": version
     ]
+}
+
+import org.jooq.meta.jaxb.Logging
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                logging = Logging.WARN
+                generator {
+                    name = "org.jooq.codegen.DefaultGenerator"
+                    database {
+                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                        inputSchema = "PUBLIC"
+                        includes = ".*"
+                        excludes = ""
+                        properties {
+                            property {
+                                key = "scripts"
+                                value = "src/main/resources/com/rpkit/chat/migrations/sqlite"
+                            }
+                            property {
+                                key = "sort"
+                                value = "semantic"
+                            }
+                            property {
+                                key = "defaultNameCase"
+                                value = "lower"
+                            }
+                        }
+                    }
+                    target {
+                        packageName = "com.rpkit.chat.bukkit.database.jooq"
+                    }
+                }
+            }
+        }
+    }
 }
 
 shadowJar {

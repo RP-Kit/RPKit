@@ -37,6 +37,7 @@ import com.rpkit.economy.bukkit.economy.RPKEconomyService
 import com.rpkit.economy.bukkit.economy.RPKEconomyServiceImpl
 import com.rpkit.economy.bukkit.listener.*
 import com.rpkit.economy.bukkit.messages.EconomyMessages
+import com.rpkit.economy.bukkit.placeholder.RPKEconomyPlaceholderExpansion
 import org.bstats.bukkit.Metrics
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
@@ -116,6 +117,10 @@ class RPKEconomyBukkit : JavaPlugin(), RPKPlugin {
 
         registerCommands()
         registerListeners()
+
+        if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            RPKEconomyPlaceholderExpansion(this).register()
+        }
     }
 
     private fun registerCommands() {
