@@ -22,7 +22,9 @@ import com.rpkit.notifications.bukkit.notification.RPKNotificationService
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND
 import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.chat.hover.content.Text
 import org.bukkit.event.EventHandler
@@ -39,15 +41,15 @@ class PlayerJoinListener(private val plugin: RPKNotificationsBukkit) : Listener 
                 val profile = minecraftProfile.profile
                 if (profile is RPKProfile) {
                     notificationService.getNotifications(profile).thenAccept { notifications ->
-                        event.player.sendMessage(plugin.messages.notificationListTitle)
-                        notifications.filter { notification -> !notification.read }
-                            .sortedByDescending { notification -> notification.time }
-                            .forEach { notification ->
-                                val listItem = TextComponent(plugin.messages.notificationListItem.withParameters(notification))
-                                listItem.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text(plugin.messages.notificationListItemHover))
-                                listItem.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/notification view ${notification.id?.value}")
-                                event.player.spigot().sendMessage(listItem)
-                            }
+                        val unreadNotifications = notifications.filter { notification -> !notification.read }
+                        if (unreadNotifications.isNotEmpty()) {
+                            event.player.spigot().sendMessage(
+                                TextComponent(plugin.messages.newNotifications.withParameters(amount = unreadNotifications.size)).apply {
+                                    hoverEvent = HoverEvent(SHOW_TEXT, Text(plugin.messages.newNotificationsHover))
+                                    clickEvent = ClickEvent(RUN_COMMAND, "/notification list")
+                                }
+                            )
+                        }
                     }
                 }
             }
