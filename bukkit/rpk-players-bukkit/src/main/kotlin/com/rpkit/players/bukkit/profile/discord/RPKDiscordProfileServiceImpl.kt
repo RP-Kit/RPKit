@@ -36,15 +36,22 @@ class RPKDiscordProfileServiceImpl(override val plugin: RPKPlayersBukkit) : RPKD
         return CompletableFuture.supplyAsync {
             val discordProfileTable = plugin.database.getTable(RPKDiscordProfileTable::class.java)
             var discordProfile = discordProfileTable.get(discordUserId).join()
+            val discordService = Services[RPKDiscordService::class.java]
+            val displayName = discordService?.getDisplayName(discordUserId)
             if (discordProfile == null) {
-                val discordService = Services[RPKDiscordService::class.java]
-                val userName = discordService?.getUserName(discordUserId)
                 discordProfile = RPKDiscordProfileImpl(
                     discordId = discordUserId, profile = RPKThinProfileImpl(
-                        RPKProfileName(userName ?: "Unknown Discord User")
+                        RPKProfileName(displayName ?: "Unknown Discord User")
                     )
                 )
                 discordProfileTable.insert(discordProfile).join()
+            } else if (displayName != null && discordProfile.profile.name.value != displayName) {
+                val profile = discordProfile.profile
+                if (profile !is RPKProfile) {
+                    discordProfile.profile = RPKThinProfileImpl(
+                        RPKProfileName(displayName)
+                    )
+                }
             }
             return@supplyAsync discordProfile
         }.exceptionally { exception ->

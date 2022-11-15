@@ -80,6 +80,10 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
         return discordServer?.getUser(discordId)?.name
     }
 
+    override fun getDisplayName(discordId: DiscordUserId): String? {
+        return discordServer?.guild?.getMemberById(discordId.value)?.effectiveName
+    }
+
     override fun getUserId(discordUserName: String): DiscordUserId? {
         return discordServer?.getUser(discordUserName)?.idLong?.let(::DiscordUserId)
     }
