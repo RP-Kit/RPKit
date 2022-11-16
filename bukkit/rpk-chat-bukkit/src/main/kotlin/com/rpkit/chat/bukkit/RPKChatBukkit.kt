@@ -46,6 +46,7 @@ import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.chat.bukkit.irc.RPKIRCServiceImpl
 import com.rpkit.chat.bukkit.listener.AsyncPlayerChatListener
 import com.rpkit.chat.bukkit.listener.PlayerCommandPreprocessListener
+import com.rpkit.chat.bukkit.listener.PlayerJoinListener
 import com.rpkit.chat.bukkit.listener.RPKMinecraftProfileDeleteListener
 import com.rpkit.chat.bukkit.messages.ChatMessages
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
@@ -241,6 +242,7 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         registerListeners(
             AsyncPlayerChatListener(this),
             PlayerCommandPreprocessListener(this),
+            PlayerJoinListener(),
             RPKMinecraftProfileDeleteListener(this)
         )
     }
