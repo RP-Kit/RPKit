@@ -76,6 +76,19 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
         )
     }
 
+    class NotificationReceivedMessage(private val message: ParameterizedMessage) {
+        fun withParameters(notification: RPKNotification) = message.withParameters(
+            "id" to notification.id?.value.toString(),
+            "recipient" to notification.recipient.name.value,
+            "title" to notification.title,
+            "content" to notification.content,
+            "time" to DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                .withZone(ZoneId.systemDefault())
+                .format(notification.time),
+            "read" to notification.read.toString()
+        )
+    }
+
     val notificationUsage = get("notification-usage")
     val notificationDismissUsage = get("notification-dismiss-usage")
     val notificationDismissInvalidNotificationIdNotANumber = get("notification-dismiss-invalid-notification-id-not-a-number")
@@ -108,5 +121,6 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
     val nextPageHover = get("next-page-hover")
     val page = getParameterized("page").let(::PageMessage)
     val invalidPage = getParameterized("invalid-page").let(::InvalidPageMessage)
+    val notificationReceived = getParameterized("notification-received").let(::NotificationReceivedMessage)
 
 }

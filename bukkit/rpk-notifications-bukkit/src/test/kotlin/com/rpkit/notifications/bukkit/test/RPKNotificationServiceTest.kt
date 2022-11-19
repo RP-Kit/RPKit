@@ -17,12 +17,14 @@
 package com.rpkit.notifications.bukkit.test
 
 import com.rpkit.core.database.Database
+import com.rpkit.core.service.Services
 import com.rpkit.notifications.bukkit.RPKNotificationsBukkit
 import com.rpkit.notifications.bukkit.database.table.RPKNotificationTable
 import com.rpkit.notifications.bukkit.notification.RPKNotification
 import com.rpkit.notifications.bukkit.notification.RPKNotificationId
 import com.rpkit.notifications.bukkit.notification.RPKNotificationServiceImpl
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -57,6 +59,13 @@ class RPKNotificationServiceTest : WordSpec({
             verify { notificationTable.delete(notification) }
         }
         "create notification" {
+            Services.delegate = mockk {
+                every { get(RPKMinecraftProfileService::class.java) } returns mockk {
+                    every { getMinecraftProfiles(any()) } returns completedFuture(listOf(
+                        mockk()
+                    ))
+                }
+            }
             every { notificationTable.insert(any()) } returns completedFuture(null)
             notificationService.createNotification(
                 recipient,
