@@ -94,17 +94,13 @@ class PaymentInviteCommand(private val plugin: RPKPaymentsBukkit) : CommandExecu
                     group = paymentGroup,
                     date = now.atZone(ZoneId.systemDefault())
                 )
-                if (minecraftProfile.isOnline) { // If online
-                    minecraftProfile.sendMessage(notificationMessage)
-                } else { // If offline
-                    val profile = character.profile
-                    if (profile != null) {
-                        notificationService.createNotification(
-                            profile,
-                            notificationTitle,
-                            notificationMessage
-                        )
-                    }
+                val profile = character.profile
+                if (profile != null) {
+                    notificationService.createNotification(
+                        profile,
+                        notificationTitle,
+                        notificationMessage
+                    )
                 }
             }
         }

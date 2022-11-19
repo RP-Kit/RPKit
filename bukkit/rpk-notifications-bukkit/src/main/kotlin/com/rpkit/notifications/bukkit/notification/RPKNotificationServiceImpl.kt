@@ -17,13 +17,19 @@
 package com.rpkit.notifications.bukkit.notification
 
 import com.rpkit.core.database.Database
-import com.rpkit.core.plugin.RPKPlugin
+import com.rpkit.core.service.Services
+import com.rpkit.notifications.bukkit.RPKNotificationsBukkit
 import com.rpkit.notifications.bukkit.database.table.RPKNotificationTable
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.api.chat.hover.content.Text
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
 
-class RPKNotificationServiceImpl(override val plugin: RPKPlugin, private val database: Database) : RPKNotificationService {
+class RPKNotificationServiceImpl(override val plugin: RPKNotificationsBukkit, private val database: Database) : RPKNotificationService {
     override fun getNotifications(recipient: RPKProfile): CompletableFuture<out List<RPKNotification>> {
         return database.getTable(RPKNotificationTable::class.java).get(recipient)
     }
@@ -49,7 +55,26 @@ class RPKNotificationServiceImpl(override val plugin: RPKPlugin, private val dat
             Instant.now(),
             false
         )
-        return addNotification(notification).thenApply { notification }
+        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
+        return addNotification(notification).thenApply {
+            minecraftProfileService?.getMinecraftProfiles(recipient)?.thenAccept { minecraftProfiles ->
+                minecraftProfiles.filter { it.isOnline }.forEach { minecraftProfile ->
+                    minecraftProfile.sendMessage(plugin.messages.notificationReceived.withParameters(notification = notification))
+                    getNotifications(recipient).thenAccept { notifications ->
+                        val unreadNotifications = notifications.filter { notification -> !notification.read }
+                        if (unreadNotifications.isNotEmpty()) {
+                            minecraftProfile.sendMessage(
+                                TextComponent(plugin.messages.newNotifications.withParameters(amount = unreadNotifications.size)).apply {
+                                    hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text(plugin.messages.newNotificationsHover))
+                                    clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/notification list")
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            notification
+        }
     }
 
     override fun updateNotification(notification: RPKNotification): CompletableFuture<Void> {
