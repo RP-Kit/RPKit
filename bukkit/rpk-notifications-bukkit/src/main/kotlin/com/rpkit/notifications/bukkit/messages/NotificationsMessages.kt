@@ -64,6 +64,18 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
         )
     }
 
+    class PageMessage(private val message: ParameterizedMessage) {
+        fun withParameters(pageNumber: Int) = message.withParameters(
+            "page_number" to pageNumber.toString()
+        )
+    }
+
+    class InvalidPageMessage(private val message: ParameterizedMessage) {
+        fun withParameters(pageNumber: Int) = message.withParameters(
+            "page_number" to pageNumber.toString()
+        )
+    }
+
     val notificationUsage = get("notification-usage")
     val notificationDismissUsage = get("notification-dismiss-usage")
     val notificationDismissInvalidNotificationIdNotANumber = get("notification-dismiss-invalid-notification-id-not-a-number")
@@ -74,6 +86,10 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
     val notificationViewInvalidNotification = get("notification-view-invalid-notification")
     val notificationViewValid = getParameterizedList("notification-view-valid")
         .let(::NotificationViewValidMessage)
+    val notificationViewViewList = get("notification-view-view-list")
+    val notificationViewViewListHover = get("notification-view-view-list-hover")
+    val notificationViewDismiss = get("notification-view-dismiss")
+    val notificationViewDismissHover = get("notification-view-dismiss-hover")
     val notificationListTitle = get("notification-list-title")
     val notificationListItem = getParameterized("notification-list-item")
         .let(::NotificationListItemMessage)
@@ -86,5 +102,11 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
     val noPermissionNotificationView = get("no-permission-notification-view")
     val newNotifications = getParameterized("new-notifications").let(::NewNotificationsMessage)
     val newNotificationsHover = get("new-notifications-hover")
+    val previousPage = get("previous-page")
+    val previousPageHover = get("previous-page-hover")
+    val nextPage = get("next-page")
+    val nextPageHover = get("next-page-hover")
+    val page = getParameterized("page").let(::PageMessage)
+    val invalidPage = getParameterized("invalid-page").let(::InvalidPageMessage)
 
 }

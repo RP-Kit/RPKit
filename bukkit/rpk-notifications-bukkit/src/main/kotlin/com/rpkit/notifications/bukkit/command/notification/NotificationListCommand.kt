@@ -16,6 +16,7 @@
 
 package com.rpkit.notifications.bukkit.command.notification
 
+import com.rpkit.core.bukkit.pagination.PaginatedView
 import com.rpkit.core.command.RPKCommandExecutor
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.CommandSuccess
@@ -59,25 +60,39 @@ class NotificationListCommand(private val plugin: RPKNotificationsBukkit) : RPKC
             sender.sendMessage(plugin.messages.noNotificationService)
             return completedFuture(MissingServiceFailure(RPKNotificationService::class.java))
         }
+        val page = args.lastOrNull()?.toIntOrNull() ?: 1
         return notificationService.getNotifications(profile).thenApply { notifications ->
-            sender.sendMessage(plugin.messages.notificationListTitle)
-            notifications
-                .sortedWith { a, b ->
-                    val readComparison = a.read.compareTo(b.read)
-                    if (readComparison != 0) return@sortedWith readComparison
-                    return@sortedWith b.time.compareTo(a.time)
-                }
-                .forEach { notification ->
-                    val listItem = TextComponent.fromLegacyText(plugin.messages.notificationListItem.withParameters(notification))
-                    listItem.forEach { component ->
-                        component.hoverEvent = HoverEvent(SHOW_TEXT, Text(plugin.messages.notificationListItemHover))
-                        component.clickEvent = ClickEvent(RUN_COMMAND, "/notification view ${notification.id?.value}")
-                        if (!notification.read) {
-                            component.isBold = true
-                        }
+            val view = PaginatedView.fromChatComponents(
+                TextComponent.fromLegacyText(plugin.messages.notificationListTitle),
+                notifications
+                    .sortedWith { a, b ->
+                        val readComparison = a.read.compareTo(b.read)
+                        if (readComparison != 0) return@sortedWith readComparison
+                        return@sortedWith b.time.compareTo(a.time)
                     }
-                    sender.sendMessage(*listItem)
-                }
+                    .map { notification ->
+                        val listItem = TextComponent.fromLegacyText(plugin.messages.notificationListItem.withParameters(notification))
+                        listItem.forEach { component ->
+                            component.hoverEvent = HoverEvent(SHOW_TEXT, Text(plugin.messages.notificationListItemHover))
+                            component.clickEvent = ClickEvent(RUN_COMMAND, "/notification view ${notification.id?.value} $page")
+                            if (!notification.read) {
+                                component.isBold = true
+                            }
+                        }
+                        listItem
+                    },
+                plugin.messages.previousPage,
+                plugin.messages.previousPageHover,
+                plugin.messages.nextPage,
+                plugin.messages.nextPageHover,
+                plugin.messages.page::withParameters,
+                10
+            ) { pageNumber -> "/notification list $pageNumber" }
+            if (view.isPageValid(page)) {
+                view.sendPage(sender, page)
+            } else {
+                sender.sendMessage(plugin.messages.invalidPage.withParameters(page))
+            }
             return@thenApply CommandSuccess
         }.exceptionally { exception ->
             plugin.logger.log(Level.SEVERE, "Failed to list notifications", exception)

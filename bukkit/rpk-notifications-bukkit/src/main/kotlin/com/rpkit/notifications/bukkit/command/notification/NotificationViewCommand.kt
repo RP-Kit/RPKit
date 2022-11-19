@@ -27,6 +27,13 @@ import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import net.md_5.bungee.api.ChatColor.GRAY
+import net.md_5.bungee.api.chat.ClickEvent
+import net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND
+import net.md_5.bungee.api.chat.HoverEvent
+import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
+import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.api.chat.hover.content.Text
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.logging.Level
@@ -61,6 +68,11 @@ class NotificationViewCommand(private val plugin: RPKNotificationsBukkit) : RPKC
             sender.sendMessage(plugin.messages.noNotificationService)
             return completedFuture(MissingServiceFailure(RPKNotificationService::class.java))
         }
+        val page = if (args.size > 1) {
+            args[1].toIntOrNull() ?: 1
+        } else {
+            1
+        }
         return notificationService.getNotification(notificationId).thenApplyAsync { notification ->
             if (notification == null) {
                 sender.sendMessage(plugin.messages.notificationViewInvalidNotification)
@@ -75,6 +87,21 @@ class NotificationViewCommand(private val plugin: RPKNotificationsBukkit) : RPKC
                 plugin.messages.notificationViewValid
                     .withParameters(notification = notification)
                     .forEach(sender::sendMessage)
+                sender.sendMessage(
+                    *TextComponent.fromLegacyText(plugin.messages.notificationViewViewList).map {
+                        it.apply {
+                            hoverEvent = HoverEvent(SHOW_TEXT, Text(TextComponent.fromLegacyText(plugin.messages.notificationViewViewListHover)))
+                            clickEvent = ClickEvent(RUN_COMMAND, "/notification list $page")
+                        }
+                    }.toTypedArray(),
+                    TextComponent(" - ").apply { color = GRAY },
+                    *TextComponent.fromLegacyText(plugin.messages.notificationViewDismiss).map {
+                        it.apply {
+                            hoverEvent = HoverEvent(SHOW_TEXT, Text(TextComponent.fromLegacyText(plugin.messages.notificationViewDismissHover)))
+                            clickEvent = ClickEvent(RUN_COMMAND, "/notification dismiss ${notification.id?.value}")
+                        }
+                    }.toTypedArray()
+                )
                 return@thenApply CommandSuccess
             }.join()
         }.exceptionally { exception ->
