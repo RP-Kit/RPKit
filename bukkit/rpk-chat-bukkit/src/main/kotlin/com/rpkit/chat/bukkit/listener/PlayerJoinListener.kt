@@ -37,5 +37,9 @@ class PlayerJoinListener : Listener {
                 muteService.addChatChannelMute(minecraftProfile, chatChannel)
             }
         }
+        val defaultChatChannel = chatChannelService.defaultChatChannel
+        if (defaultChatChannel != null) {
+            chatChannelService.setMinecraftProfileChannel(minecraftProfile, defaultChatChannel)
+        }
     }
 }

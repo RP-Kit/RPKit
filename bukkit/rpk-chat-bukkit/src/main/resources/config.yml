@@ -316,6 +316,7 @@ chat-channels:
       format: '$color&o$sender-character $message'
     - ==: LogComponent
     joined-by-default: true
+default-chat-channel: general
 match-patterns:
   '\*([^\*]+)\*':
     groups:
