@@ -62,6 +62,10 @@ class RPKChatChannelServiceImpl(override val plugin: RPKChatBukkit) : RPKChatCha
             ?.toMutableList()
             ?: mutableListOf()
 
+    override val defaultChatChannel: RPKChatChannel? = plugin.config.getString("default-chat-channel")
+        ?.let(::RPKChatChannelName)
+        ?.let(::getChatChannel)
+
     override val matchPatterns: List<RPKChatChannelMatchPattern> = plugin.config.getConfigurationSection("match-patterns")
             ?.getKeys(false)
             ?.map { pattern ->

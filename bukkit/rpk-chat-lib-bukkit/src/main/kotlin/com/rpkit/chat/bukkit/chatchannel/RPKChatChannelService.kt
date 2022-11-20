@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +33,11 @@ interface RPKChatChannelService : Service {
      * The collection is immutable.
      */
     val chatChannels: Collection<RPKChatChannel>
+
+    /**
+     * The channel which a player should be speaking in by default, if it is their first time playing on the server.
+     */
+    val defaultChatChannel: RPKChatChannel?
 
     /**
      * Gets a chat channel by name.
