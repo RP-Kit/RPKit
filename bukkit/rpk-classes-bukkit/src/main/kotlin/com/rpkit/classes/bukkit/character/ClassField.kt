@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +17,44 @@
 package com.rpkit.classes.bukkit.character
 
 import com.rpkit.characters.bukkit.character.RPKCharacter
-import com.rpkit.characters.bukkit.character.field.CharacterCardField
+import com.rpkit.characters.bukkit.character.field.CharacterCardFieldSetFailure
+import com.rpkit.characters.bukkit.character.field.CharacterCardFieldSetResult
+import com.rpkit.characters.bukkit.character.field.CharacterCardFieldSetSuccess
+import com.rpkit.characters.bukkit.character.field.SettableCharacterCardField
+import com.rpkit.classes.bukkit.RPKClassesBukkit
+import com.rpkit.classes.bukkit.classes.RPKClassName
 import com.rpkit.classes.bukkit.classes.RPKClassService
 import com.rpkit.core.service.Services
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 
-class ClassField : CharacterCardField {
+class ClassField(private val plugin: RPKClassesBukkit) : SettableCharacterCardField {
 
     override val name = "class"
 
     override fun get(character: RPKCharacter): CompletableFuture<String> {
         return Services[RPKClassService::class.java]?.getClass(character)?.thenApply {
             it?.name?.value ?: "unset"
-        } ?: CompletableFuture.completedFuture("unset")
+        } ?: completedFuture("unset")
+    }
+
+    override fun set(character: RPKCharacter, value: String): CompletableFuture<CharacterCardFieldSetResult> {
+        val classService = Services[RPKClassService::class.java] ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noClassService))
+        val `class` = classService.getClass(RPKClassName(value)) ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.classSetInvalidClass))
+        return `class`.hasPrerequisites(character).thenApplyAsync { hasPreqrequisites ->
+            if (!hasPreqrequisites) {
+                return@thenApplyAsync CharacterCardFieldSetFailure(plugin.messages.classSetInvalidPrerequisites)
+            }
+            if (character.age >= `class`.maxAge || character.age < `class`.minAge) {
+                return@thenApplyAsync CharacterCardFieldSetFailure(plugin.messages.classSetInvalidAge
+                    .withParameters(`class`.maxAge, `class`.minAge))
+            }
+
+            return@thenApplyAsync classService.setClass(character, `class`)
+                .thenApply { CharacterCardFieldSetSuccess }
+                .join()
+        }
     }
 
 }

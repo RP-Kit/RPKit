@@ -16,17 +16,19 @@
 
 package com.rpkit.characters.bukkit.character.field
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * Character card field for gender.
  */
-class GenderField : HideableCharacterCardField {
+class GenderField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField, HideableCharacterCardField {
 
     override val name = "gender"
     override fun get(character: RPKCharacter): CompletableFuture<String> {
@@ -49,15 +51,23 @@ class GenderField : HideableCharacterCardField {
         }
     }
 
+    override fun set(character: RPKCharacter, value: String): CompletableFuture<CharacterCardFieldSetResult> {
+        val characterService = Services[RPKCharacterService::class.java] ?: return completedFuture(
+            CharacterCardFieldSetFailure(plugin.messages.noCharacterService)
+        )
+        character.gender = value
+        return characterService.updateCharacter(character).thenApply { CharacterCardFieldSetSuccess }
+    }
+
     override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
-        return CompletableFuture.completedFuture(character.isGenderHidden)
+        return completedFuture(character.isGenderHidden)
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isGenderHidden = hidden
         return Services[RPKCharacterService::class.java]?.updateCharacter(character)
             ?.thenApply { null }
-            ?: CompletableFuture.completedFuture(null)
+            ?: completedFuture(null)
     }
 
 }

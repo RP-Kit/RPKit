@@ -16,6 +16,7 @@
 
 package com.rpkit.characters.bukkit.character.field
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
@@ -26,7 +27,7 @@ import java.util.concurrent.CompletableFuture
 /**
  * A character card field for description
  */
-class DescriptionField : HideableCharacterCardField {
+class DescriptionField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField, HideableCharacterCardField {
 
     override val name = "description"
     override fun get(character: RPKCharacter): CompletableFuture<String> {
@@ -47,6 +48,14 @@ class DescriptionField : HideableCharacterCardField {
                 return@thenApplyAsync "[HIDDEN]"
             }
         }
+    }
+
+    override fun set(character: RPKCharacter, value: String): CompletableFuture<CharacterCardFieldSetResult> {
+        val characterService = Services[RPKCharacterService::class.java] ?: return CompletableFuture.completedFuture(
+            CharacterCardFieldSetFailure(plugin.messages.noCharacterService)
+        )
+        character.description = value
+        return characterService.updateCharacter(character).thenApply { CharacterCardFieldSetSuccess }
     }
 
     override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {

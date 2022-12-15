@@ -18,19 +18,28 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.command.result.NoCharacterSelfFailure
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.CommandResult
+import com.rpkit.core.command.result.CommandSuccess
+import com.rpkit.core.command.result.MissingServiceFailure
+import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
+import com.rpkit.players.bukkit.profile.minecraft.toBukkitPlayer
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * Character set description command.
  * Sets character's description state.
  */
-class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
+class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : RPKCommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -38,49 +47,47 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
                 .withModality(true)
                 .withFirstPrompt(DescriptionPrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages.notFromConsole)
                 .addConversationAbandonedListener { event ->
                     if (!event.gracefulExit()) {
                         val conversable = event.context.forWhom
                         if (conversable is Player) {
-                            conversable.sendMessage(plugin.messages["operation-cancelled"])
+                            conversable.sendMessage(plugin.messages.operationCancelled)
                         }
                     }
                 }
     }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
+        if (sender !is RPKMinecraftProfile) {
+            sender.sendMessage(plugin.messages.notFromConsole)
+            return completedFuture(NotAPlayerFailure())
         }
         if (!sender.hasPermission("rpkit.characters.command.character.set.description")) {
-            sender.sendMessage(plugin.messages["no-permission-character-set-description"])
-            return true
+            sender.sendMessage(plugin.messages.noPermissionCharacterSetDescription)
+            return completedFuture(NoPermissionFailure("rpkit.characters.command.character.set.description"))
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
+            return completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
-            return true
+            sender.sendMessage(plugin.messages.noCharacterService)
+            return completedFuture(MissingServiceFailure(RPKCharacterService::class.java))
         }
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(sender)
         if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
-            return true
+            sender.sendMessage(plugin.messages.noCharacter)
+            return completedFuture(NoCharacterSelfFailure())
         }
         if (args.isEmpty()) {
-            conversationFactory.buildConversation(sender).begin()
-            return true
+            val bukkitPlayer = sender.toBukkitPlayer()
+            if (bukkitPlayer != null) {
+                conversationFactory.buildConversation(bukkitPlayer).begin()
+            }
+            return completedFuture(CommandSuccess)
         }
         val descriptionBuilder = StringBuilder()
         for (i in 0 until args.size - 1) {
@@ -88,17 +95,17 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
         }
         descriptionBuilder.append(args[args.size - 1])
         character.description = descriptionBuilder.toString()
-        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
-            sender.sendMessage(plugin.messages["character-set-description-valid"])
-            updatedCharacter?.showCharacterCard(minecraftProfile)
+        return characterService.updateCharacter(character).thenApply { updatedCharacter ->
+            sender.sendMessage(plugin.messages.characterSetDescriptionValid)
+            updatedCharacter?.showCharacterCard(sender)
+            CommandSuccess
         }
-        return true
     }
 
     private inner class DescriptionPrompt : StringPrompt() {
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["character-set-description-prompt"]
+            return plugin.messages.characterSetDescriptionPrompt
         }
 
         override fun acceptInput(context: ConversationContext, input: String?): Prompt {
@@ -131,12 +138,12 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
             if (conversable is Player) {
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
                 if (minecraftProfileService == null) {
-                    conversable.sendMessage(plugin.messages["no-minecraft-profile-service"])
+                    conversable.sendMessage(plugin.messages.noMinecraftProfileService)
                     return END_OF_CONVERSATION
                 }
                 val characterService = Services[RPKCharacterService::class.java]
                 if (characterService == null) {
-                    conversable.sendMessage(plugin.messages["no-character-service"])
+                    conversable.sendMessage(plugin.messages.noCharacterService)
                     return END_OF_CONVERSATION
                 }
                 val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(context.forWhom as Player)
@@ -148,7 +155,7 @@ class CharacterSetDescriptionCommand(private val plugin: RPKCharactersBukkit) : 
         }
 
         override fun getPromptText(context: ConversationContext): String {
-            return plugin.messages["character-set-description-valid"]
+            return plugin.messages.characterSetDescriptionValid
         }
 
     }

@@ -16,17 +16,28 @@
 
 package com.rpkit.characters.bukkit.character.field
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
+import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.core.service.Services
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * A character card field for dead.
  */
-class DeadField : CharacterCardField {
+class DeadField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField {
 
     override val name = "dead"
     override fun get(character: RPKCharacter): CompletableFuture<String> {
-        return CompletableFuture.completedFuture(character.isDead.toString())
+        return completedFuture(character.isDead.toString())
+    }
+
+    override fun set(character: RPKCharacter, value: String): CompletableFuture<CharacterCardFieldSetResult> {
+        val characterService = Services[RPKCharacterService::class.java] ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noCharacterService))
+        val isDead = value.toBooleanStrictOrNull() ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.characterSetDeadInvalidBoolean))
+        character.isDead = isDead
+        return characterService.updateCharacter(character).thenApply { CharacterCardFieldSetSuccess }
     }
 
 }

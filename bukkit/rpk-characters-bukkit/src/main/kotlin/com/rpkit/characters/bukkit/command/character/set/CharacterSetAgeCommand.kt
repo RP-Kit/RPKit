@@ -19,14 +19,19 @@ package com.rpkit.characters.bukkit.command.character.set
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.command.result.NoCharacterSelfFailure
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.*
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
+import com.rpkit.players.bukkit.profile.minecraft.toBukkitPlayer
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 import kotlin.math.max
 import kotlin.math.min
 
@@ -34,7 +39,7 @@ import kotlin.math.min
  * Character set age command.
  * Sets character's age.
  */
-class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
+class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : RPKCommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -53,59 +58,59 @@ class CharacterSetAgeCommand(private val plugin: RPKCharactersBukkit) : CommandE
                 }
     }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender !is Player) {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
+        if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return true
+            return completedFuture(NotAPlayerFailure())
         }
         if (!sender.hasPermission("rpkit.characters.command.character.set.age")) {
             sender.sendMessage(plugin.messages.noPermissionCharacterSetAge)
-            return true
+            return completedFuture(NoPermissionFailure("rpkit.characters.command.character.set.age"))
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages.noCharacterService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKCharacterService::class.java))
         }
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages.noMinecraftProfile)
-            return true
-        }
-        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(sender)
         if (character == null) {
             sender.sendMessage(plugin.messages.noCharacter)
-            return true
+            return completedFuture(NoCharacterSelfFailure())
         }
         if (args.isEmpty()) {
-            conversationFactory.buildConversation(sender).begin()
-            return true
+            val bukkitPlayer = sender.toBukkitPlayer()
+            if (bukkitPlayer != null) {
+                conversationFactory.buildConversation(bukkitPlayer).begin()
+            }
+            return completedFuture(CommandSuccess)
         }
         try {
             val age = args[0].toInt()
             val minAge = max(plugin.config.getInt("characters.min-age"), character.species?.minAge ?: Int.MIN_VALUE)
             val maxAge = min(plugin.config.getInt("characters.max-age"), character.species?.maxAge ?: Int.MAX_VALUE)
-            if (age in minAge..maxAge) {
+            return if (age in minAge..maxAge) {
                 character.age = age
-                characterService.updateCharacter(character).thenAccept { updatedCharacter ->
+                characterService.updateCharacter(character).thenApply { updatedCharacter ->
                     sender.sendMessage(plugin.messages.characterSetAgeValid)
-                    updatedCharacter?.showCharacterCard(minecraftProfile)
+                    updatedCharacter?.showCharacterCard(sender)
+                    CommandSuccess
                 }
             } else {
                 sender.sendMessage(plugin.messages.characterSetAgeInvalidValidation.withParameters(
                     minAge = minAge,
                     maxAge = maxAge
                 ))
+                completedFuture(IncorrectUsageFailure())
             }
         } catch (exception: NumberFormatException) {
             sender.sendMessage(plugin.messages.characterSetAgeInvalidNumber)
+            return completedFuture(IncorrectUsageFailure())
         }
-        return true
     }
 
     private inner class AgePrompt : NumericPrompt() {

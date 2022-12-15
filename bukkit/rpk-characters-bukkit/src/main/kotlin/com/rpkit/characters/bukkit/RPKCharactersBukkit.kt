@@ -142,13 +142,13 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKCharacterCardFieldService::class.java] = characterCardFieldService
         Services[RPKNewCharacterCooldownService::class.java] = newCharacterCooldownService
 
-        characterCardFieldService.addCharacterCardField(NameField())
-        characterCardFieldService.addCharacterCardField(ProfileField())
-        characterCardFieldService.addCharacterCardField(GenderField())
-        characterCardFieldService.addCharacterCardField(AgeField())
-        characterCardFieldService.addCharacterCardField(SpeciesField())
-        characterCardFieldService.addCharacterCardField(DescriptionField())
-        characterCardFieldService.addCharacterCardField(DeadField())
+        characterCardFieldService.addCharacterCardField(NameField(this))
+        characterCardFieldService.addCharacterCardField(ProfileField(this))
+        characterCardFieldService.addCharacterCardField(GenderField(this))
+        characterCardFieldService.addCharacterCardField(AgeField(this))
+        characterCardFieldService.addCharacterCardField(SpeciesField(this))
+        characterCardFieldService.addCharacterCardField(DescriptionField(this))
+        characterCardFieldService.addCharacterCardField(DeadField(this))
         characterCardFieldService.addCharacterCardField(HealthField())
         characterCardFieldService.addCharacterCardField(MaxHealthField())
         characterCardFieldService.addCharacterCardField(ManaField())
