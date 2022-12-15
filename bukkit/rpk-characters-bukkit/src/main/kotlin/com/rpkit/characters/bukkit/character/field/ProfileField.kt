@@ -16,15 +16,21 @@
 
 package com.rpkit.characters.bukkit.character.field
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
+import com.rpkit.players.bukkit.profile.RPKProfileDiscriminator
+import com.rpkit.players.bukkit.profile.RPKProfileName
+import com.rpkit.players.bukkit.profile.RPKProfileService
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.concurrent.CompletableFuture.supplyAsync
 
 
-class ProfileField : HideableCharacterCardField {
+class ProfileField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField, HideableCharacterCardField {
 
     override val name = "profile"
     override fun get(character: RPKCharacter): CompletableFuture<String> {
@@ -49,15 +55,37 @@ class ProfileField : HideableCharacterCardField {
         }
     }
 
+    override fun set(character: RPKCharacter, value: String): CompletableFuture<CharacterCardFieldSetResult> {
+        val characterService = Services[RPKCharacterService::class.java] ?: return completedFuture(
+            CharacterCardFieldSetFailure(plugin.messages.noCharacterService)
+        )
+        val profileService = Services[RPKProfileService::class.java] ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noProfileService))
+        if (!value.contains("#")) {
+            return completedFuture(CharacterCardFieldSetFailure(plugin.messages.characterSetProfileInvalidNoDiscriminator))
+        }
+        val (name, discriminatorString) = value.split("#")
+        val discriminator = discriminatorString.toIntOrNull()
+        if (discriminator == null) {
+            return completedFuture(CharacterCardFieldSetFailure(plugin.messages.characterSetProfileInvalidDiscriminator))
+        }
+        return supplyAsync {
+            val profile = profileService.getProfile(RPKProfileName(name), RPKProfileDiscriminator(discriminator)).join()
+                ?: return@supplyAsync CharacterCardFieldSetFailure(plugin.messages.characterSetProfileInvalidProfile)
+            character.profile = profile
+            characterService.updateCharacter(character).join()
+            return@supplyAsync CharacterCardFieldSetSuccess
+        }
+    }
+
     override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
-        return CompletableFuture.completedFuture(character.isProfileHidden)
+        return completedFuture(character.isProfileHidden)
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isProfileHidden = hidden
         return Services[RPKCharacterService::class.java]?.updateCharacter(character)
             ?.thenApply { null }
-            ?: CompletableFuture.completedFuture(null)
+            ?: completedFuture(null)
     }
 
 }

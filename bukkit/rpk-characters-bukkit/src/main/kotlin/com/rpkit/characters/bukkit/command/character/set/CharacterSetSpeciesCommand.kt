@@ -18,21 +18,27 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.command.result.NoCharacterSelfFailure
 import com.rpkit.characters.bukkit.species.RPKSpeciesName
 import com.rpkit.characters.bukkit.species.RPKSpeciesService
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.*
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
+import com.rpkit.players.bukkit.profile.minecraft.toBukkitPlayer
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * Character set species command.
  * Sets character's species.
  */
-class CharacterSetSpeciesCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
+class CharacterSetSpeciesCommand(private val plugin: RPKCharactersBukkit) : RPKCommandExecutor {
     private val conversationFactory: ConversationFactory
 
     init {
@@ -51,38 +57,36 @@ class CharacterSetSpeciesCommand(private val plugin: RPKCharactersBukkit) : Comm
                 }
     }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender !is Player) {
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
+        if (sender !is RPKMinecraftProfile) {
             sender.sendMessage(plugin.messages.notFromConsole)
-            return true
+            return completedFuture(NotAPlayerFailure())
         }
         if (!sender.hasPermission("rpkit.characters.command.character.set.species")) {
             sender.sendMessage(plugin.messages.noPermissionCharacterSetSpecies)
-            return true
+            return completedFuture(NoPermissionFailure("rpkit.characters.command.characters.set.species"))
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfileService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
             sender.sendMessage(plugin.messages.noCharacterService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKCharacterService::class.java))
         }
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages.noMinecraftProfile)
-            return true
-        }
-        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(sender)
         if (character == null) {
             sender.sendMessage(plugin.messages.noCharacter)
-            return true
+            return completedFuture(NoCharacterSelfFailure())
         }
         if (args.isEmpty()) {
-            conversationFactory.buildConversation(sender).begin()
-            return true
+            val bukkitPlayer = sender.toBukkitPlayer()
+            if (bukkitPlayer != null) {
+                conversationFactory.buildConversation(bukkitPlayer).begin()
+            }
+            return completedFuture(CommandSuccess)
         }
         val speciesBuilder = StringBuilder()
         for (i in 0 until args.size - 1) {
@@ -92,19 +96,19 @@ class CharacterSetSpeciesCommand(private val plugin: RPKCharactersBukkit) : Comm
         val speciesService = Services[RPKSpeciesService::class.java]
         if (speciesService == null) {
             sender.sendMessage(plugin.messages.noSpeciesService)
-            return true
+            return completedFuture(MissingServiceFailure(RPKSpeciesService::class.java))
         }
         val species = speciesService.getSpecies(RPKSpeciesName(speciesBuilder.toString()))
         if (species == null) {
             sender.sendMessage(plugin.messages.characterSetSpeciesInvalidSpecies)
-            return true
+            return completedFuture(IncorrectUsageFailure())
         }
         character.species = species
-        characterService.updateCharacter(character).thenAccept { updatedCharacter ->
+        return characterService.updateCharacter(character).thenApply { updatedCharacter ->
             sender.sendMessage(plugin.messages.characterSetSpeciesValid)
-            updatedCharacter?.showCharacterCard(minecraftProfile)
+            updatedCharacter?.showCharacterCard(sender)
+            CommandSuccess
         }
-        return true
     }
 
     private inner class RacePrompt : ValidatingPrompt() {

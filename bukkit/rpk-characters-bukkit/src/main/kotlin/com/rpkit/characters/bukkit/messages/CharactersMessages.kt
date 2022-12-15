@@ -20,6 +20,7 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
 import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
+import com.rpkit.characters.bukkit.character.field.SettableCharacterCardField
 import com.rpkit.characters.bukkit.species.RPKSpecies
 import com.rpkit.core.bukkit.message.BukkitMessages
 import com.rpkit.core.message.MessageParameter
@@ -166,6 +167,19 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
         )
     }
 
+    class CharacterSetValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: SettableCharacterCardField, value: String) = message.withParameters(
+            "field" to field.name,
+            "value" to value
+        )
+    }
+
+    class CharacterSetPromptMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: SettableCharacterCardField) = message.withParameters(
+            "field" to field.name
+        )
+    }
+
     val characterUsage = get("character-usage")
     val characterSetUsage = get("character-set-usage")
     val characterSetAgePrompt = get("character-set-age-prompt")
@@ -176,16 +190,25 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterSetDeadPrompt = get("character-set-dead-prompt")
     val characterSetDeadInvalidBoolean = get("character-set-dead-invalid-boolean")
     val characterSetDeadValid = get("character-set-dead-valid")
+    val characterSetDescriptionValid = get("character-set-description-valid")
+    val characterSetDescriptionPrompt = get("character-set-description-prompt")
     val characterSetProfilePrompt = get("character-set-profile-prompt")
     val characterSetProfileInvalidNoDiscriminator = get("character-set-profile-invalid-no-discriminator")
     val characterSetProfileInvalidDiscriminator = get("character-set-profile-invalid-discriminator")
+    val characterSetProfileInvalidProfile = get("character-set-profile-invalid-profile")
     val characterSetProfileValid = get("character-set-profile-valid")
     val characterSetGenderPrompt = get("character-set-gender-prompt")
     val characterSetGenderNotSet = get("character-set-gender-not-set")
     val characterSetGenderValid = get("character-set-gender-valid")
+    val characterSetNamePrompt = get("character-set-name-prompt")
+    val characterSetNameValid = get("character-set-name-valid")
     val characterSetSpeciesPrompt = get("character-set-species-prompt")
     val characterSetSpeciesInvalidSpecies = get("character-set-species-invalid-species")
     val characterSetSpeciesValid = get("character-set-species-valid")
+    val characterSetPrompt = getParameterized("character-set-prompt")
+        .let(::CharacterSetPromptMessage)
+    val characterSetValid = getParameterized("character-set-valid")
+        .let(::CharacterSetValidMessage)
     val characterHideUsage = get("character-hide-usage")
     val characterHideInvalidField = getParameterized("character-hide-invalid-field")
         .let(::CharacterHideInvalidFieldMessage)
@@ -239,6 +262,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val noPermissionCharacterSetDescription = get("no-permission-character-set-description")
     val noPermissionCharacterSetGender = get("no-permission-character-set-gender")
     val noPermissionCharacterSetName = get("no-permission-character-set-name")
+    val noPermissionCharacterSetProfile = get("no-permission-character-set-profile")
     val noPermissionCharacterSetSpecies = get("no-permission-character-set-species")
     val noPermissionCharacterHide = getParameterized("no-permission-character-hide")
         .let(::NoPermissionCharacterHideMessage)

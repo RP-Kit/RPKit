@@ -18,21 +18,30 @@ package com.rpkit.characters.bukkit.command.character.set
 
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.command.result.NoCharacterSelfFailure
+import com.rpkit.core.command.RPKCommandExecutor
+import com.rpkit.core.command.result.CommandResult
+import com.rpkit.core.command.result.CommandSuccess
+import com.rpkit.core.command.result.MissingServiceFailure
+import com.rpkit.core.command.result.NoPermissionFailure
+import com.rpkit.core.command.sender.RPKCommandSender
 import com.rpkit.core.service.Services
+import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
+import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
+import com.rpkit.players.bukkit.profile.minecraft.toBukkitPlayer
 import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * Character set dead command.
  * Sets character's dead state.
  */
-class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
+class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : RPKCommandExecutor {
 
     private val conversationFactory: ConversationFactory
 
@@ -41,71 +50,86 @@ class CharacterSetDeadCommand(private val plugin: RPKCharactersBukkit) : Command
                 .withModality(true)
                 .withFirstPrompt(DeadPrompt())
                 .withEscapeSequence("cancel")
-                .thatExcludesNonPlayersWithMessage(plugin.messages["not-from-console"])
+                .thatExcludesNonPlayersWithMessage(plugin.messages.notFromConsole)
                 .addConversationAbandonedListener { event ->
                     if (!event.gracefulExit()) {
                         val conversable = event.context.forWhom
                         if (conversable is Player) {
-                            conversable.sendMessage(plugin.messages["operation-cancelled"])
+                            conversable.sendMessage(plugin.messages.operationCancelled)
                         }
                     }
                 }
     }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
-            return true
+    override fun onCommand(sender: RPKCommandSender, args: Array<out String>): CompletableFuture<out CommandResult> {
+        if (sender !is RPKMinecraftProfile) {
+            sender.sendMessage(plugin.messages.notFromConsole)
+            return completedFuture(NotAPlayerFailure())
         }
         if (!sender.hasPermission("rpkit.characters.command.character.set.dead")) {
-            sender.sendMessage(plugin.messages["no-permission-character-set-dead"])
-            return true
+            sender.sendMessage(plugin.messages.noPermissionCharacterSetDead)
+            return completedFuture(NoPermissionFailure("rpkit.characters.command.character.set.dead"))
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
-            return true
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
+            return completedFuture(MissingServiceFailure(RPKMinecraftProfileService::class.java))
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
-            return true
+            sender.sendMessage(plugin.messages.noCharacterService)
+            return completedFuture(MissingServiceFailure(RPKCharacterService::class.java))
         }
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
-        if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
-            return true
-        }
-        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
+        val character = characterService.getPreloadedActiveCharacter(sender)
         if (character == null) {
-            sender.sendMessage(plugin.messages["no-character"])
-            return true
+            sender.sendMessage(plugin.messages.noCharacter)
+            return completedFuture(NoCharacterSelfFailure())
         }
+        val bukkitPlayer = sender.toBukkitPlayer()
         if (args.isEmpty()) {
-            conversationFactory.buildConversation(sender).begin()
-            return true
+
+            if (bukkitPlayer != null) {
+                conversationFactory.buildConversation(bukkitPlayer).begin()
+            }
+            return completedFuture(CommandSuccess)
         }
         val dead = args[0].toBoolean()
         if (dead && sender.hasPermission("rpkit.characters.command.character.set.dead.yes") || !dead && sender.hasPermission("rpkit.characters.command.character.set.dead.no")) {
             character.isDead = dead
-            characterService.updateCharacter(character).thenAccept { updatedCharacter ->
-                sender.sendMessage(plugin.messages["character-set-dead-valid"])
-                updatedCharacter?.showCharacterCard(minecraftProfile)
+            return characterService.updateCharacter(character).thenApply { updatedCharacter ->
+                sender.sendMessage(plugin.messages.characterSetDeadValid)
+                updatedCharacter?.showCharacterCard(sender)
                 plugin.server.scheduler.runTask(plugin, Runnable {
                     if (dead) {
-                        sender.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
-                        sender.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
+                        if (bukkitPlayer != null) {
+                            bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
+                            bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
+                        }
                     } else {
-                        sender.removePotionEffect(PotionEffectType.BLINDNESS)
-                        sender.removePotionEffect(PotionEffectType.SLOW)
+                        if (bukkitPlayer != null) {
+                            bukkitPlayer.removePotionEffect(PotionEffectType.BLINDNESS)
+                            bukkitPlayer.removePotionEffect(PotionEffectType.SLOW)
+                        }
                     }
                 })
+                CommandSuccess
             }
         } else {
-            sender.sendMessage(plugin.messages["no-permission-character-set-dead-" + if (dead) "yes" else "no"])
-            return true
+            sender.sendMessage(
+                if (dead) {
+                    plugin.messages.noPermissionCharacterSetDeadYes
+                } else {
+                    plugin.messages.noPermissionCharacterSetDeadNo
+                }
+            )
+            return completedFuture(NoPermissionFailure(
+                if (dead) {
+                    "rpkit.characters.command.character.set.dead.yes"
+                } else {
+                    "rpkit.characters.command.character.set.dead.no"
+                }
+            ))
         }
-        return true
     }
 
     private inner class DeadPrompt : BooleanPrompt() {

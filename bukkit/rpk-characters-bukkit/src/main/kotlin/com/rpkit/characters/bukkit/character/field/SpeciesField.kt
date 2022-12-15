@@ -16,17 +16,21 @@
 
 package com.rpkit.characters.bukkit.character.field
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.service.Services
 import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * Character card field for species.
  */
-class SpeciesField : HideableCharacterCardField {
+class SpeciesField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField, HideableCharacterCardField {
 
     override val name = "species"
     override fun get(character: RPKCharacter): CompletableFuture<String> {
@@ -49,15 +53,23 @@ class SpeciesField : HideableCharacterCardField {
         }
     }
 
+    override fun set(character: RPKCharacter, value: String): CompletableFuture<CharacterCardFieldSetResult> {
+        val characterService = Services[RPKCharacterService::class.java] ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noCharacterService))
+        val speciesService = Services[RPKSpeciesService::class.java] ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noSpeciesService))
+        val species = speciesService.getSpecies(RPKSpeciesName(value)) ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.characterSetSpeciesInvalidSpecies))
+        character.species = species
+        return characterService.updateCharacter(character).thenApply { CharacterCardFieldSetSuccess }
+    }
+
     override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
-        return CompletableFuture.completedFuture(character.isSpeciesHidden)
+        return completedFuture(character.isSpeciesHidden)
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         character.isSpeciesHidden = hidden
         return Services[RPKCharacterService::class.java]?.updateCharacter(character)
             ?.thenApply { null }
-            ?: CompletableFuture.completedFuture(null)
+            ?: completedFuture(null)
     }
 
 }

@@ -16,6 +16,7 @@
 
 package com.rpkit.characters.bukkit.character.field
 
+import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
@@ -23,11 +24,13 @@ import com.rpkit.permissions.bukkit.group.hasPermission
 import com.rpkit.players.bukkit.profile.RPKProfile
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * A character card field for age.
  */
-class AgeField : HideableCharacterCardField {
+class AgeField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField, HideableCharacterCardField {
 
     override val name = "age"
     override fun get(character: RPKCharacter): CompletableFuture<String> {
@@ -50,8 +53,21 @@ class AgeField : HideableCharacterCardField {
         }
     }
 
+    override fun set(character: RPKCharacter, value: String): CompletableFuture<CharacterCardFieldSetResult> {
+        val characterService = Services[RPKCharacterService::class.java]
+            ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noCharacterService))
+        val age = value.toIntOrNull() ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.characterSetAgeInvalidNumber))
+        val minAge = max(plugin.config.getInt("characters.min-age"), character.species?.minAge ?: Int.MIN_VALUE)
+        val maxAge = min(plugin.config.getInt("characters.max-age"), character.species?.maxAge ?: Int.MAX_VALUE)
+        if (age !in minAge..maxAge) {
+            return completedFuture(CharacterCardFieldSetFailure(plugin.messages.characterSetAgeInvalidValidation.withParameters(minAge, maxAge)))
+        }
+        character.age = age
+        return characterService.updateCharacter(character).thenApply { CharacterCardFieldSetSuccess }
+    }
+
     override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
-        return CompletableFuture.completedFuture(character.isAgeHidden)
+        return completedFuture(character.isAgeHidden)
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
