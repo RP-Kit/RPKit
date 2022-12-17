@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ class BlockPlaceListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
         val profile = minecraftProfile?.profile as? RPKProfile
         val character = if (minecraftProfile == null) null else characterService.getPreloadedActiveCharacter(minecraftProfile)
+        val oldType = event.blockReplacedState.type
+        val newType = event.block.type
         blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
@@ -48,8 +50,8 @@ class BlockPlaceListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
                 profile = profile,
                 minecraftProfile = minecraftProfile,
                 character = character,
-                from = event.blockReplacedState.type,
-                to = event.block.type,
+                from = oldType,
+                to = newType,
                 reason = "PLACE"
             )
             plugin.server.scheduler.runTask(plugin, Runnable {

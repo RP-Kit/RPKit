@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
         } else {
             characterService?.getPreloadedActiveCharacter(minecraftProfile)
         }
+        val oldType = event.block.type
         blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
@@ -57,7 +58,7 @@ class BlockBreakListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
                 profile = profile,
                 minecraftProfile = minecraftProfile,
                 character = character,
-                from = event.block.type,
+                from = oldType,
                 to = Material.AIR,
                 reason = "BREAK"
             )

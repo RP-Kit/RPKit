@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ class EntityExplodeListener(private val plugin: RPKBlockLoggingBukkit) : Listene
     fun onEntityExplode(event: EntityExplodeEvent) {
         for (block in event.blockList()) {
             val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
+            val oldType = block.type
             blockHistoryService.getBlockHistory(block.toRPKBlockLocation()).thenAccept { blockHistory ->
                 val blockChange = RPKBlockChangeImpl(
                     blockHistory = blockHistory,
@@ -42,7 +43,7 @@ class EntityExplodeListener(private val plugin: RPKBlockLoggingBukkit) : Listene
                     profile = null,
                     minecraftProfile = null,
                     character = null,
-                    from = block.type,
+                    from = oldType,
                     to = Material.AIR,
                     reason = "ENTITY_EXPLODE"
                 )
