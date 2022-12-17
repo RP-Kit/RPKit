@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ class InventoryDragListener(private val plugin: RPKBlockLoggingBukkit) : Listene
                 val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(whoClicked)
                 val profile = minecraftProfile?.profile as? RPKProfile
                 val character = if (minecraftProfile == null) null else characterService.getPreloadedActiveCharacter(minecraftProfile)
+                val newContents = event.inventory.contents
                 blockHistoryService.getBlockHistory(inventoryHolder.block.toRPKBlockLocation()).thenAccept { blockHistory ->
                     val blockInventoryChange = RPKBlockInventoryChangeImpl(
                         blockHistory = blockHistory,
@@ -58,7 +59,7 @@ class InventoryDragListener(private val plugin: RPKBlockLoggingBukkit) : Listene
                         minecraftProfile = minecraftProfile,
                         character = character,
                         from = oldContents,
-                        to = event.inventory.contents,
+                        to = newContents,
                         reason = "DRAG"
                     )
                     plugin.server.scheduler.runTask(plugin, Runnable {

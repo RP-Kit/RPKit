@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ class BlockFormListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
             plugin.logger.severe("Failed to retrieve block history service, did the plugin load correctly?")
             return
         }
+        val oldType = event.block.type
+        val newType = event.newState.type
         blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
@@ -44,8 +46,8 @@ class BlockFormListener(private val plugin: RPKBlockLoggingBukkit) : Listener {
                 profile = null,
                 minecraftProfile = null,
                 character = null,
-                from = event.block.type,
-                to = event.newState.type,
+                from = oldType,
+                to = newType,
                 reason = "FORM"
             )
             plugin.server.scheduler.runTask(plugin, Runnable {

@@ -25,6 +25,8 @@ import com.rpkit.blocklog.bukkit.database.jooq.Tables.RPKIT_BLOCK_HISTORY
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.Table
 import com.rpkit.core.location.RPKBlockLocation
+import org.jooq.impl.DSL.select
+import org.jooq.impl.DSL.`val`
 import java.util.concurrent.CompletableFuture
 import java.util.logging.Level
 
@@ -44,7 +46,7 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
 
     fun insert(entity: RPKBlockHistory): CompletableFuture<Void> {
         return CompletableFuture.runAsync {
-            database.create
+            val rowCount = database.create
                 .insertInto(
                     RPKIT_BLOCK_HISTORY,
                     RPKIT_BLOCK_HISTORY.WORLD,
@@ -52,13 +54,29 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     RPKIT_BLOCK_HISTORY.Y,
                     RPKIT_BLOCK_HISTORY.Z
                 )
-                .values(
-                    entity.world,
-                    entity.x,
-                    entity.y,
-                    entity.z
+                .select(
+                    select(
+                        `val`(entity.world),
+                        `val`(entity.x),
+                        `val`(entity.y),
+                        `val`(entity.z)
+                    ).whereNotExists(
+                        database.create.selectFrom(RPKIT_BLOCK_HISTORY)
+                            .where(RPKIT_BLOCK_HISTORY.WORLD.eq(entity.world))
+                            .and(RPKIT_BLOCK_HISTORY.X.eq(entity.x))
+                            .and(RPKIT_BLOCK_HISTORY.Y.eq(entity.y))
+                            .and(RPKIT_BLOCK_HISTORY.Z.eq(entity.z))
+                    )
                 )
                 .execute()
+            if (rowCount == 0) {
+                val existingBlockHistory = get(RPKBlockLocation(entity.world, entity.x, entity.y, entity.z)).join()
+                if (existingBlockHistory != null) {
+                    val existingBlockHistoryId = existingBlockHistory.id
+                    entity.id = existingBlockHistoryId
+                }
+                return@runAsync
+            }
             val id = database.create.lastID().toInt()
             entity.id = RPKBlockHistoryId(id)
             cache?.set(id, entity)
@@ -100,6 +118,8 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     )
                     .from(RPKIT_BLOCK_HISTORY)
                     .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
+                    .orderBy(RPKIT_BLOCK_HISTORY.ID)
+                    .limit(1)
                     .fetchOne() ?: return@supplyAsync null
                 val blockHistory = RPKBlockHistoryImpl(
                     plugin,
@@ -127,6 +147,8 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 .and(RPKIT_BLOCK_HISTORY.X.eq(block.x))
                 .and(RPKIT_BLOCK_HISTORY.Y.eq(block.y))
                 .and(RPKIT_BLOCK_HISTORY.Z.eq(block.z))
+                .orderBy(RPKIT_BLOCK_HISTORY.ID)
+                .limit(1)
                 .fetchOne() ?: return@supplyAsync null
             val id = result.get(RPKIT_BLOCK_HISTORY.ID)
             return@supplyAsync if (id == null) {
