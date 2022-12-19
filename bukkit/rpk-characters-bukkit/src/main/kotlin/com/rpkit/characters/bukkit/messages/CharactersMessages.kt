@@ -192,6 +192,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterSetDeadValid = get("character-set-dead-valid")
     val characterSetDescriptionValid = get("character-set-description-valid")
     val characterSetDescriptionPrompt = get("character-set-description-prompt")
+    val characterSetHeightInvalidHeight = get("character-set-height-invalid-height")
     val characterSetWeightInvalidWeight = get("character-set-weight-invalid-weight")
     val characterSetProfilePrompt = get("character-set-profile-prompt")
     val characterSetProfileInvalidNoDiscriminator = get("character-set-profile-invalid-no-discriminator")

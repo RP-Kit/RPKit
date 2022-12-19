@@ -31,6 +31,7 @@ data class CharacterResponse(
     val race: String?,
     val species: String?,
     val description: String,
+    val height: Double?,
     val weight: Double?,
     val isDead: Boolean,
     val world: String?,
@@ -56,7 +57,9 @@ data class CharacterResponse(
     val isAgeHidden: Boolean,
     val isRaceHidden: Boolean,
     val isSpeciesHidden: Boolean,
-    val isDescriptionHidden: Boolean
+    val isDescriptionHidden: Boolean,
+    val isHeightHidden: Boolean,
+    val isWeightHidden: Boolean
 ) {
     companion object {
         val lens = Body.auto<CharacterResponse>().toLens()
@@ -74,6 +77,7 @@ fun RPKCharacter.toCharacterResponse() = CharacterResponse(
     species?.name?.value ?: race?.name?.value,
     species?.name?.value,
     description,
+    height,
     weight,
     isDead,
     location.world,
@@ -99,5 +103,7 @@ fun RPKCharacter.toCharacterResponse() = CharacterResponse(
     isAgeHidden,
     isRaceHidden,
     isSpeciesHidden,
-    isDescriptionHidden
+    isDescriptionHidden,
+    isHeightHidden,
+    isWeightHidden
 )

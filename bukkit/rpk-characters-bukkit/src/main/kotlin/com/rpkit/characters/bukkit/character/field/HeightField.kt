@@ -22,18 +22,18 @@ import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.unit.RPKUnitService
-import com.rpkit.players.bukkit.unit.UnitType.Companion.WEIGHT
+import com.rpkit.players.bukkit.unit.UnitType.Companion.HEIGHT
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 
-class WeightField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField, HideableCharacterCardField {
+class HeightField(private val plugin: RPKCharactersBukkit) : SettableCharacterCardField, HideableCharacterCardField {
     override fun isHidden(character: RPKCharacter): CompletableFuture<Boolean> {
-        return completedFuture(character.isWeightHidden)
+        return completedFuture(character.isHeightHidden)
     }
 
     override fun setHidden(character: RPKCharacter, hidden: Boolean): CompletableFuture<Void> {
         val characterService = Services[RPKCharacterService::class.java]
-        character.isWeightHidden = hidden
+        character.isHeightHidden = hidden
         return characterService?.updateCharacter(character)?.thenApply { null } ?: completedFuture(null)
     }
 
@@ -44,33 +44,33 @@ class WeightField(private val plugin: RPKCharactersBukkit) : SettableCharacterCa
             ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noUnitService))
         val characterService = Services[RPKCharacterService::class.java]
             ?: return completedFuture(CharacterCardFieldSetFailure(plugin.messages.noCharacterService))
-        return unitService.getPreferredUnit(profileId, WEIGHT).thenApply { preferredWeightUnit ->
-            val parsedValue = preferredWeightUnit.parse(value)
-                ?: return@thenApply CharacterCardFieldSetFailure(plugin.messages.characterSetWeightInvalidWeight)
-            character.weight = parsedValue
+        return unitService.getPreferredUnit(profileId, HEIGHT).thenApply { preferredHeightUnit ->
+            val parsedValue = preferredHeightUnit.parse(value)
+                ?: return@thenApply CharacterCardFieldSetFailure(plugin.messages.characterSetHeightInvalidHeight)
+            character.height = parsedValue
             characterService.updateCharacter(character)
             return@thenApply CharacterCardFieldSetSuccess
         }
     }
 
-    override val name = "weight"
+    override val name = "height"
 
     override fun get(character: RPKCharacter): CompletableFuture<String> {
-        val weight = character.weight ?: return completedFuture("unset")
+        val height = character.height ?: return completedFuture("unset")
         val profile = character.profile ?: return completedFuture("unset")
         val profileId = profile.id ?: return completedFuture("unset")
         val unitService = Services[RPKUnitService::class.java] ?: return completedFuture("unset")
-        return unitService.getPreferredUnit(profileId, WEIGHT).thenApply { preferredWeightUnit ->
-            unitService.format(preferredWeightUnit.scaleFactor * weight, preferredWeightUnit)
+        return unitService.getPreferredUnit(profileId, HEIGHT).thenApply { preferredHeightUnit ->
+            unitService.format(preferredHeightUnit.scaleFactor * height, preferredHeightUnit)
         }
     }
 
     override fun get(character: RPKCharacter, viewer: RPKProfile): CompletableFuture<String> {
-        val weight = character.weight ?: return completedFuture("unset")
+        val height = character.height ?: return completedFuture("unset")
         val profileId = viewer.id ?: return completedFuture("unset")
         val unitService = Services[RPKUnitService::class.java] ?: return completedFuture("unset")
-        return unitService.getPreferredUnit(profileId, WEIGHT).thenApply { preferredWeightUnit ->
-            unitService.format(preferredWeightUnit.scaleFactor * weight, preferredWeightUnit)
+        return unitService.getPreferredUnit(profileId, HEIGHT).thenApply { preferredHeightUnit ->
+            unitService.format(preferredHeightUnit.scaleFactor * height, preferredHeightUnit)
         }
     }
 }

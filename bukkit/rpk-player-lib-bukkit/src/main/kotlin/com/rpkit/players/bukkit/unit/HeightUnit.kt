@@ -18,10 +18,10 @@ package com.rpkit.players.bukkit.unit
 
 enum class HeightUnit(override val displayName: String, override val scaleFactor: Double) : MeasurementUnit {
 
-    METRES("Metres", 15.0),
-    CENTIMETRES("Centimetres", 1500.0),
-    FEET("Feet", 50.0),
-    INCHES("Inches", 600.0);
+    METRES("Metres", 100000.0),
+    CENTIMETRES("Centimetres", 10000000.0),
+    FEET("Feet", 328084.0),
+    INCHES("Inches", 3937008.0);
 
     override fun parse(value: String) = when (this) {
         METRES -> parseMetres(value)

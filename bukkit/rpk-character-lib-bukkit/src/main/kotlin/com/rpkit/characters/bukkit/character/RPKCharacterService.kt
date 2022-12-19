@@ -131,6 +131,7 @@ interface RPKCharacterService : Service {
      * @param age The age
      * @param species The species
      * @param description The description
+     * @param height The height
      * @param weight The weight
      * @param isDead Whether the character is dead
      * @param location The location
@@ -160,6 +161,7 @@ interface RPKCharacterService : Service {
         age: Int? = null,
         species: RPKSpecies? = null,
         description: String? = null,
+        height: Double? = null,
         weight: Double? = null,
         isDead: Boolean? = null,
         location: RPKLocation? = null,
@@ -180,6 +182,7 @@ interface RPKCharacterService : Service {
         isAgeHidden: Boolean? = null,
         isSpeciesHidden: Boolean? = null,
         isDescriptionHidden: Boolean? = null,
+        isHeightHidden: Boolean? = null,
         isWeightHidden: Boolean? = null
     ): CompletableFuture<RPKCharacter>
 
