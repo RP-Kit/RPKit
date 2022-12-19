@@ -75,9 +75,11 @@ class PrivateRollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor
                     else -> rollPartResult.toString()
                 }
             }
-            .reduce { a, b -> "$a+$b" } + " = $total"
+            .reduce { a, b -> "$a+$b" }
         sender.sendMessage(plugin.messages.privateRoll.withParameters(
-            roll = results,
+            rollParts = results,
+            rollTotal = total.toString(),
+            roll = "$results = $total",
             dice = parsedRoll
         ))
         return true
