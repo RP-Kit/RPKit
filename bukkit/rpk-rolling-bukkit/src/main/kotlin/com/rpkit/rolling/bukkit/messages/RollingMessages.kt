@@ -28,11 +28,15 @@ class RollingMessages(plugin: RPKRollingBukkit) : BukkitMessages(plugin) {
         fun withParameters(
             character: RPKCharacter,
             player: RPKMinecraftProfile,
+            rollParts: String,
+            rollTotal: String,
             roll: String,
             dice: String
         ) = message.withParameters(
             "character" to character.name,
             "player" to player.name,
+            "roll_parts" to rollParts,
+            "roll_total" to rollTotal,
             "roll" to roll,
             "dice" to dice
         )
@@ -40,9 +44,13 @@ class RollingMessages(plugin: RPKRollingBukkit) : BukkitMessages(plugin) {
 
     class PrivateRollMessage(private val message: ParameterizedMessage) {
         fun withParameters(
+            rollParts: String,
+            rollTotal: String,
             roll: String,
             dice: String
         ) = message.withParameters(
+            "roll_parts" to rollParts,
+            "roll_total" to rollTotal,
             "roll" to roll,
             "dice" to dice
         )
