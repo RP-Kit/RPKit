@@ -97,6 +97,14 @@ interface RPKCharacter {
     var description: String
 
     /**
+     * The height of the character.
+     * This value is absent units and should be multiplied by [MeasurementUnit.scaleFactor] in order to get a value
+     * to display.
+     * This may be null in the case that a player has not set their character's height.
+     */
+    var height: Double?
+
+    /**
      * The weight of the character.
      * This value is absent units and should be multiplied by [MeasurementUnit.scaleFactor] in order to get a value
      * to display.
@@ -266,6 +274,11 @@ interface RPKCharacter {
      * description.
      */
     var isDescriptionHidden: Boolean
+
+    /**
+     * Whether the height of the character is hidden.
+     */
+    var isHeightHidden: Boolean
 
     /**
      * Whether the weight of the character is hidden.

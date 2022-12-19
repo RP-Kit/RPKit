@@ -148,6 +148,7 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
         characterCardFieldService.addCharacterCardField(AgeField(this))
         characterCardFieldService.addCharacterCardField(SpeciesField(this))
         characterCardFieldService.addCharacterCardField(DescriptionField(this))
+        characterCardFieldService.addCharacterCardField(HeightField(this))
         characterCardFieldService.addCharacterCardField(WeightField(this))
         characterCardFieldService.addCharacterCardField(DeadField(this))
         characterCardFieldService.addCharacterCardField(HealthField())

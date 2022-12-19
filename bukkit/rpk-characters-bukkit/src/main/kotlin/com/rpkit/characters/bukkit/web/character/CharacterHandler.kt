@@ -80,6 +80,7 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.age = characterPutRequest.age
         character.species = characterPutRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies) ?: characterPutRequest.race?.let(::RPKRaceName)?.let(speciesService::getRace)
         character.description = characterPutRequest.description
+        character.height = characterPutRequest.height
         character.weight = characterPutRequest.weight
         character.isDead = characterPutRequest.isDead
         character.isProfileHidden = characterPutRequest.isProfileHidden
@@ -88,6 +89,8 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.isAgeHidden = characterPutRequest.isAgeHidden
         character.isSpeciesHidden = characterPutRequest.isSpeciesHidden ?: characterPutRequest.isRaceHidden ?: plugin.config.getBoolean("characters.defaults.species-hidden")
         character.isDescriptionHidden = characterPutRequest.isDescriptionHidden
+        character.isHeightHidden = characterPutRequest.isHeightHidden
+        character.isWeightHidden = characterPutRequest.isWeightHidden
         characterService.updateCharacter(character).join()
         if (plugin.config.getBoolean("characters.set-player-nameplate")
             && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
@@ -123,6 +126,7 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.age = characterPatchRequest.age ?: character.age
         character.species = characterPatchRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies) ?: character.species
         character.description = characterPatchRequest.description ?: character.description
+        character.height = characterPatchRequest.height ?: character.height
         character.weight = characterPatchRequest.weight ?: character.weight
         character.isDead = characterPatchRequest.isDead ?: character.isDead
         character.isProfileHidden = characterPatchRequest.isProfileHidden ?: character.isProfileHidden
@@ -131,6 +135,8 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.isAgeHidden = characterPatchRequest.isAgeHidden ?: character.isAgeHidden
         character.isSpeciesHidden = characterPatchRequest.isSpeciesHidden ?: characterPatchRequest.isRaceHidden ?: character.isSpeciesHidden
         character.isDescriptionHidden = characterPatchRequest.isDescriptionHidden ?: character.isDescriptionHidden
+        character.isHeightHidden = characterPatchRequest.isHeightHidden ?: character.isHeightHidden
+        character.isWeightHidden = characterPatchRequest.isWeightHidden ?: character.isWeightHidden
         characterService.updateCharacter(character).join()
         if (plugin.config.getBoolean("characters.set-player-nameplate")
             && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
@@ -177,6 +183,7 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
             characterPostRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies)
                 ?: characterPostRequest.race?.let(::RPKRaceName)?.let(speciesService::getRace),
             characterPostRequest.description,
+            characterPostRequest.height,
             characterPostRequest.weight,
             characterPostRequest.isDead,
             null,
@@ -196,7 +203,9 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
             characterPostRequest.isGenderHidden,
             characterPostRequest.isAgeHidden,
             characterPostRequest.isRaceHidden,
-            characterPostRequest.isDescriptionHidden
+            characterPostRequest.isDescriptionHidden,
+            characterPostRequest.isHeightHidden,
+            characterPostRequest.isWeightHidden
         ).join()
         return Response(OK)
             .with(CharacterResponse.lens of character.toCharacterResponse())

@@ -233,6 +233,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         age: Int?,
         species: RPKSpecies?,
         description: String?,
+        height: Double?,
         weight: Double?,
         isDead: Boolean?,
         location: RPKLocation?,
@@ -253,6 +254,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         isAgeHidden: Boolean?,
         isSpeciesHidden: Boolean?,
         isDescriptionHidden: Boolean?,
+        isHeightHidden: Boolean?,
         isWeightHidden: Boolean?
     ): CompletableFuture<RPKCharacter> {
         val character = RPKCharacterImpl(
@@ -266,6 +268,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             species ?: plugin.config.getString("characters.defaults.species")
                 ?.let { Services[RPKSpeciesService::class.java]?.getSpecies(RPKSpeciesName(it)) },
             description ?: plugin.config.getString("characters.defaults.description") ?: "",
+            height ?: plugin.config.getDouble("characters.defaults.height"),
             weight ?: plugin.config.getDouble("characters.defaults.weight"),
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
             location ?: plugin.server.worlds[0].spawnLocation.toRPKLocation(),
@@ -288,6 +291,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             isAgeHidden ?: plugin.config.getBoolean("characters.defaults.age-hidden"),
             isSpeciesHidden ?: plugin.config.getBoolean("characters.defaults.species-hidden"),
             isDescriptionHidden ?: plugin.config.getBoolean("characters.defaults.description-hidden"),
+            isHeightHidden ?: plugin.config.getBoolean("characters.defaults.height-hidden"),
             isWeightHidden ?: plugin.config.getBoolean("characters.defaults.weight-hidden")
         )
         return addCharacter(character).thenApply { character }

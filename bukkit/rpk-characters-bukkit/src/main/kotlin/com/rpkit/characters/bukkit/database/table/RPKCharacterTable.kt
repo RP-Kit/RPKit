@@ -77,6 +77,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.AGE, entity.age)
                 .set(RPKIT_CHARACTER.SPECIES_NAME, entity.species?.name?.value)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
+                .set(RPKIT_CHARACTER.HEIGHT, entity.height)
                 .set(RPKIT_CHARACTER.WEIGHT, entity.weight)
                 .set(RPKIT_CHARACTER.DEAD, entity.isDead)
                 .set(RPKIT_CHARACTER.WORLD, entity.location.world)
@@ -102,6 +103,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
                 .set(RPKIT_CHARACTER.SPECIES_HIDDEN, entity.isSpeciesHidden)
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
+                .set(RPKIT_CHARACTER.HEIGHT_HIDDEN, entity.isHeightHidden)
                 .set(RPKIT_CHARACTER.WEIGHT_HIDDEN, entity.isWeightHidden)
                 .execute()
             val id = database.create.lastID().toInt()
@@ -129,6 +131,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.AGE, entity.age)
                 .set(RPKIT_CHARACTER.SPECIES_NAME, entity.species?.name?.value)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
+                .set(RPKIT_CHARACTER.HEIGHT, entity.height)
                 .set(RPKIT_CHARACTER.WEIGHT, entity.weight)
                 .set(RPKIT_CHARACTER.DEAD, entity.isDead)
                 .set(RPKIT_CHARACTER.WORLD, entity.location.world)
@@ -154,6 +157,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
                 .set(RPKIT_CHARACTER.SPECIES_HIDDEN, entity.isSpeciesHidden)
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
+                .set(RPKIT_CHARACTER.HEIGHT_HIDDEN, entity.isHeightHidden)
                 .set(RPKIT_CHARACTER.WEIGHT_HIDDEN, entity.isWeightHidden)
                 .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
@@ -183,6 +187,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                         RPKIT_CHARACTER.AGE,
                         RPKIT_CHARACTER.SPECIES_NAME,
                         RPKIT_CHARACTER.DESCRIPTION,
+                        RPKIT_CHARACTER.HEIGHT,
                         RPKIT_CHARACTER.WEIGHT,
                         RPKIT_CHARACTER.DEAD,
                         RPKIT_CHARACTER.WORLD,
@@ -208,6 +213,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                         RPKIT_CHARACTER.AGE_HIDDEN,
                         RPKIT_CHARACTER.SPECIES_HIDDEN,
                         RPKIT_CHARACTER.DESCRIPTION_HIDDEN,
+                        RPKIT_CHARACTER.HEIGHT_HIDDEN,
                         RPKIT_CHARACTER.WEIGHT_HIDDEN
                     )
                     .from(RPKIT_CHARACTER)
@@ -239,6 +245,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     age = result[RPKIT_CHARACTER.AGE],
                     species = species,
                     description = result[RPKIT_CHARACTER.DESCRIPTION],
+                    height = result[RPKIT_CHARACTER.HEIGHT],
                     weight = result[RPKIT_CHARACTER.WEIGHT],
                     dead = result[RPKIT_CHARACTER.DEAD],
                     location = RPKLocation(
@@ -266,6 +273,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     isAgeHidden = result[RPKIT_CHARACTER.AGE_HIDDEN],
                     isSpeciesHidden = result[RPKIT_CHARACTER.SPECIES_HIDDEN],
                     isDescriptionHidden = result[RPKIT_CHARACTER.DESCRIPTION_HIDDEN],
+                    isHeightHidden = result[RPKIT_CHARACTER.HEIGHT_HIDDEN],
                     isWeightHidden = result[RPKIT_CHARACTER.WEIGHT_HIDDEN]
                 )
                 cache?.set(id.value, character)

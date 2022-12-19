@@ -27,6 +27,7 @@ data class CharacterPostRequest(
     val race: String?,
     val species: String?,
     val description: String,
+    val height: Double?,
     val weight: Double?,
     val isDead: Boolean,
     val isProfileHidden: Boolean,
@@ -34,7 +35,9 @@ data class CharacterPostRequest(
     val isGenderHidden: Boolean,
     val isAgeHidden: Boolean,
     val isRaceHidden: Boolean,
-    val isDescriptionHidden: Boolean
+    val isDescriptionHidden: Boolean,
+    val isHeightHidden: Boolean,
+    val isWeightHidden: Boolean
 ) {
     companion object {
         val lens = Body.auto<CharacterPostRequest>().toLens()
