@@ -22,6 +22,7 @@ import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.location.RPKLocation
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.unit.MeasurementUnit
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -94,6 +95,14 @@ interface RPKCharacter {
      * Its length may be limited by implementations.
      */
     var description: String
+
+    /**
+     * The weight of the character.
+     * This value is absent units and should be multiplied by [MeasurementUnit.scaleFactor] in order to get a value
+     * to display.
+     * This may be null in the case that a player has not set their character's weight.
+     */
+    var weight: Double?
 
     /**
      * Whether the character is dead or not.
@@ -257,6 +266,11 @@ interface RPKCharacter {
      * description.
      */
     var isDescriptionHidden: Boolean
+
+    /**
+     * Whether the weight of the character is hidden.
+     */
+    var isWeightHidden: Boolean
 
     /**
      * Shows the character card to the given Minecraft profile.

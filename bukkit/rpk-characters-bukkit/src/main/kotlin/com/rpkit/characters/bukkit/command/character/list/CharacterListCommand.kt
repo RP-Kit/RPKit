@@ -58,7 +58,7 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit) : CommandExe
         }
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages.noProfile)
+            sender.sendMessage(plugin.messages.noProfileSelf)
             return true
         }
         sender.sendMessage(plugin.messages.characterListTitle)

@@ -233,6 +233,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         age: Int?,
         species: RPKSpecies?,
         description: String?,
+        weight: Double?,
         isDead: Boolean?,
         location: RPKLocation?,
         inventoryContents: Array<ItemStack?>?,
@@ -251,7 +252,8 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         isGenderHidden: Boolean?,
         isAgeHidden: Boolean?,
         isSpeciesHidden: Boolean?,
-        isDescriptionHidden: Boolean?
+        isDescriptionHidden: Boolean?,
+        isWeightHidden: Boolean?
     ): CompletableFuture<RPKCharacter> {
         val character = RPKCharacterImpl(
             plugin,
@@ -264,6 +266,7 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             species ?: plugin.config.getString("characters.defaults.species")
                 ?.let { Services[RPKSpeciesService::class.java]?.getSpecies(RPKSpeciesName(it)) },
             description ?: plugin.config.getString("characters.defaults.description") ?: "",
+            weight ?: plugin.config.getDouble("characters.defaults.weight"),
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
             location ?: plugin.server.worlds[0].spawnLocation.toRPKLocation(),
             inventoryContents
@@ -284,7 +287,8 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             isGenderHidden ?: plugin.config.getBoolean("characters.defaults.gender-hidden"),
             isAgeHidden ?: plugin.config.getBoolean("characters.defaults.age-hidden"),
             isSpeciesHidden ?: plugin.config.getBoolean("characters.defaults.species-hidden"),
-            isDescriptionHidden ?: plugin.config.getBoolean("characters.defaults.description-hidden")
+            isDescriptionHidden ?: plugin.config.getBoolean("characters.defaults.description-hidden"),
+            isWeightHidden ?: plugin.config.getBoolean("characters.defaults.weight-hidden")
         )
         return addCharacter(character).thenApply { character }
     }

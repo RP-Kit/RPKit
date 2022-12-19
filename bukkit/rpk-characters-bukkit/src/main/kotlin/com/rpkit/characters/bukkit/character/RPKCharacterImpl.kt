@@ -53,6 +53,7 @@ class RPKCharacterImpl(
     species: RPKSpecies? = plugin.config.getString("characters.defaults.species")
             ?.let { Services[RPKSpeciesService::class.java]?.getSpecies(RPKSpeciesName(it)) },
     description: String = plugin.config.getString("characters.defaults.description") ?: "",
+    override var weight: Double? = plugin.config.getDouble("characters.defaults.weight") ?: null,
     dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
     override var location: RPKLocation = Bukkit.getWorlds()[0].spawnLocation.toRPKLocation(),
     override var inventoryContents: Array<ItemStack?> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>).toTypedArray(),
@@ -71,7 +72,8 @@ class RPKCharacterImpl(
     override var isGenderHidden: Boolean = plugin.config.getBoolean("characters.defaults.gender-hidden"),
     override var isAgeHidden: Boolean = plugin.config.getBoolean("characters.defaults.age-hidden"),
     override var isSpeciesHidden: Boolean = plugin.config.getBoolean("characters.defaults.species-hidden"),
-    override var isDescriptionHidden: Boolean = plugin.config.getBoolean("characters.defaults.description-hidden")
+    override var isDescriptionHidden: Boolean = plugin.config.getBoolean("characters.defaults.description-hidden"),
+    override var isWeightHidden: Boolean = plugin.config.getBoolean("characters.defaults.weight-hidden")
 ) : RPKCharacter {
 
     override var name = name

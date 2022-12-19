@@ -192,6 +192,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterSetDeadValid = get("character-set-dead-valid")
     val characterSetDescriptionValid = get("character-set-description-valid")
     val characterSetDescriptionPrompt = get("character-set-description-prompt")
+    val characterSetWeightInvalidWeight = get("character-set-weight-invalid-weight")
     val characterSetProfilePrompt = get("character-set-profile-prompt")
     val characterSetProfileInvalidNoDiscriminator = get("character-set-profile-invalid-no-discriminator")
     val characterSetProfileInvalidDiscriminator = get("character-set-profile-invalid-discriminator")
@@ -250,6 +251,8 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val noCharacter = get("no-character")
     val noCharacterOther = get("no-character-other")
     val noProfile = get("no-profile")
+    val noProfileSelf = get("no-profile-self")
+    val noProfileOther = get("no-profile-other")
     val noMinecraftProfile = get("no-minecraft-profile")
     val noPermissionCharacterCardSelf = get("no-permission-character-card-self")
     val noPermissionCharacterCardOther = get("no-permission-character-card-other")
@@ -280,4 +283,5 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val noCharacterCardFieldService = get("no-character-card-field-service")
     val noNewCharacterCooldownService = get("no-new-character-cooldown-service")
     val noSpeciesService = get("no-species-service")
+    val noUnitService = get("no-unit-service")
 }

@@ -19,6 +19,25 @@ package com.rpkit.players.bukkit.unit
 enum class LongDistanceUnit(override val displayName: String, override val scaleFactor: Double) : MeasurementUnit {
 
     MILES("Miles", 5.0),
-    KILOMETRES("Kilometres", 8.0)
+    KILOMETRES("Kilometres", 8.0);
+
+    override fun parse(value: String) = when (this) {
+        MILES -> parseMiles(value)
+        KILOMETRES -> parseKilometres(value)
+    }
+
+    private fun parseMiles(value: String): Double? {
+        val regex = Regex("([\\d.]+)mi")
+        val result = regex.matchEntire(value) ?: return null
+        val miles = result.groupValues[1].toDoubleOrNull() ?: 0.0
+        return miles / MILES.scaleFactor
+    }
+
+    private fun parseKilometres(value: String): Double? {
+        val regex = Regex("([\\d.]+)km")
+        val result = regex.matchEntire(value) ?: return null
+        val miles = result.groupValues[1].toDoubleOrNull() ?: 0.0
+        return miles / KILOMETRES.scaleFactor
+    }
 
 }

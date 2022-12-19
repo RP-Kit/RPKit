@@ -131,6 +131,7 @@ interface RPKCharacterService : Service {
      * @param age The age
      * @param species The species
      * @param description The description
+     * @param weight The weight
      * @param isDead Whether the character is dead
      * @param location The location
      * @param inventoryContents The inventory contents
@@ -150,6 +151,7 @@ interface RPKCharacterService : Service {
      * @param isAgeHidden Whether the age is hidden
      * @param isSpeciesHidden Whether the species is hidden
      * @param isDescriptionHidden Whether the description is hidden
+     * @param isWeightHidden Whether the weight is hidden
      */
     fun createCharacter(
         profile: RPKProfile? = null,
@@ -158,6 +160,7 @@ interface RPKCharacterService : Service {
         age: Int? = null,
         species: RPKSpecies? = null,
         description: String? = null,
+        weight: Double? = null,
         isDead: Boolean? = null,
         location: RPKLocation? = null,
         inventoryContents: Array<ItemStack?>? = null,
@@ -176,7 +179,8 @@ interface RPKCharacterService : Service {
         isGenderHidden: Boolean? = null,
         isAgeHidden: Boolean? = null,
         isSpeciesHidden: Boolean? = null,
-        isDescriptionHidden: Boolean? = null
+        isDescriptionHidden: Boolean? = null,
+        isWeightHidden: Boolean? = null
     ): CompletableFuture<RPKCharacter>
 
     /**
