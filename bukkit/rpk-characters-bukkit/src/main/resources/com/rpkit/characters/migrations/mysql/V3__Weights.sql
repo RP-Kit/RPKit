@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package com.rpkit.players.bukkit.unit
+ALTER TABLE `rpkit_character`
+    ADD `weight` double NULL;
 
-interface MeasurementUnit {
-    val displayName: String
-    val scaleFactor: Double
-    fun parse(value: String): Double?
-}
+ALTER TABLE `rpkit_character`
+    ADD `weight_hidden` boolean NOT NULL;

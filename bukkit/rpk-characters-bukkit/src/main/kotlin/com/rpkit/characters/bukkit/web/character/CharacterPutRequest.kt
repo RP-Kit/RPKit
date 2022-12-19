@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +27,7 @@ data class CharacterPutRequest(
     val race: String?,
     val species: String?,
     val description: String,
+    val weight: Double?,
     val isDead: Boolean,
     val isProfileHidden: Boolean,
     val isNameHidden: Boolean,

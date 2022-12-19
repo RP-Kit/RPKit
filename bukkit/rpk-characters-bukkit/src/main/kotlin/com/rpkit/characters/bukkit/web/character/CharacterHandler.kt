@@ -80,6 +80,7 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.age = characterPutRequest.age
         character.species = characterPutRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies) ?: characterPutRequest.race?.let(::RPKRaceName)?.let(speciesService::getRace)
         character.description = characterPutRequest.description
+        character.weight = characterPutRequest.weight
         character.isDead = characterPutRequest.isDead
         character.isProfileHidden = characterPutRequest.isProfileHidden
         character.isNameHidden = characterPutRequest.isNameHidden
@@ -122,6 +123,7 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.age = characterPatchRequest.age ?: character.age
         character.species = characterPatchRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies) ?: character.species
         character.description = characterPatchRequest.description ?: character.description
+        character.weight = characterPatchRequest.weight ?: character.weight
         character.isDead = characterPatchRequest.isDead ?: character.isDead
         character.isProfileHidden = characterPatchRequest.isProfileHidden ?: character.isProfileHidden
         character.isNameHidden = characterPatchRequest.isNameHidden ?: character.isNameHidden
@@ -175,6 +177,7 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
             characterPostRequest.species?.let(::RPKSpeciesName)?.let(speciesService::getSpecies)
                 ?: characterPostRequest.race?.let(::RPKRaceName)?.let(speciesService::getRace),
             characterPostRequest.description,
+            characterPostRequest.weight,
             characterPostRequest.isDead,
             null,
             null,

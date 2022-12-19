@@ -21,6 +21,33 @@ enum class ShortDistanceUnit(override val displayName: String, override val scal
     METRES("Metres", 15.0),
     CENTIMETRES("Centimetres", 1500.0),
     FEET("Feet", 50.0),
-    INCHES("Inches", 600.0)
+    INCHES("Inches", 600.0);
+
+    override fun parse(value: String) = when (this) {
+        METRES -> parseMetres(value)
+        CENTIMETRES -> parseCentimetres(value)
+        FEET -> parseFeet(value)
+        INCHES -> parseInches(value)
+    }
+
+    private fun parseMetres(value: String): Double? {
+        val regex = Regex("(?:([\\d.]+)m)?\\s*(?:([\\d.]+)cm)?")
+        val result = regex.matchEntire(value) ?: return null
+        val metres = result.groupValues[1].toDoubleOrNull() ?: 0.0
+        val centimetres = result.groupValues[2].toDoubleOrNull() ?: 0.0
+        return (metres / METRES.scaleFactor) + (centimetres / CENTIMETRES.scaleFactor)
+    }
+
+    private fun parseCentimetres(value: String): Double? = parseMetres(value)
+
+    private fun parseFeet(value: String): Double? {
+        val regex = Regex("(?:(\\d+)')?\\s*(?:(\\d+)\")?")
+        val result = regex.matchEntire(value) ?: return null
+        val feet = result.groupValues[1].toIntOrNull()?.toDouble() ?: 0.0
+        val inches = result.groupValues[2].toIntOrNull()?.toDouble() ?: 0.0
+        return (feet / FEET.scaleFactor) + (inches / INCHES.scaleFactor)
+    }
+
+    private fun parseInches(value: String): Double? = parseFeet(value)
 
 }

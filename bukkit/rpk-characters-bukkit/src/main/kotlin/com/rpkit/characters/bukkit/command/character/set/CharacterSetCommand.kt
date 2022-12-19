@@ -152,6 +152,7 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit) : RPKCommandE
                             value = value
                         )
                 )
+                character.showCharacterCard(minecraftProfile)
                 return@thenApply CommandSuccess
             }
         }
@@ -173,7 +174,9 @@ class CharacterSetCommand(private val plugin: RPKCharactersBukkit) : RPKCommandE
             val character = context.getSessionData("character") as RPKCharacter
             val field = context.getSessionData("field") as SettableCharacterCardField
             if (input == null) return END_OF_CONVERSATION
-            setCharacterCardField(minecraftProfile, character, field, input)
+            plugin.server.scheduler.runTask(plugin, Runnable {
+                setCharacterCardField(minecraftProfile, character, field, input)
+            })
             return END_OF_CONVERSATION
         }
 
