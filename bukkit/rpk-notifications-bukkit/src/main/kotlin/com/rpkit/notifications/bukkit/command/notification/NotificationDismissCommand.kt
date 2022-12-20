@@ -27,6 +27,7 @@ import com.rpkit.players.bukkit.command.result.NoProfileSelfFailure
 import com.rpkit.players.bukkit.command.result.NotAPlayerFailure
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.profile.minecraft.toBukkitPlayer
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.logging.Level
@@ -61,6 +62,11 @@ class NotificationDismissCommand(private val plugin: RPKNotificationsBukkit) : R
             sender.sendMessage(plugin.messages.notificationDismissInvalidNotificationIdNotANumber)
             return completedFuture(InvalidNotificationIdNotANumberFailure())
         }.let(::RPKNotificationId)
+        val page = if (args.size > 1) {
+            args[1].toIntOrNull() ?: 1
+        } else {
+            1
+        }
         val notificationService = Services[RPKNotificationService::class.java]
         if (notificationService == null) {
             sender.sendMessage(plugin.messages.noNotificationService)
@@ -75,9 +81,11 @@ class NotificationDismissCommand(private val plugin: RPKNotificationsBukkit) : R
                 sender.sendMessage(plugin.messages.notificationDismissInvalidRecipient)
                 return@thenApplyAsync InvalidNotificationRecipientFailure()
             }
-            notification.read = true
-            return@thenApplyAsync notificationService.updateNotification(notification).thenApply {
+            return@thenApplyAsync notificationService.removeNotification(notification).thenApply {
                 sender.sendMessage(plugin.messages.notificationDismissValid)
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    sender.toBukkitPlayer()?.performCommand("notification list $page")
+                })
                 return@thenApply CommandSuccess
             }.join()
         }.exceptionally { exception ->

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit) : Lis
         var block = event.block
         var count = 0
         while (block.type != Material.AIR && count < 12) {
+            val oldType = block.type
+            val newType = block.getRelative(event.direction.oppositeFace).type
             blockHistoryService.getBlockHistory(block.toRPKBlockLocation()).thenAccept { blockHistory ->
                 val blockChange = RPKBlockChangeImpl(
                     blockHistory = blockHistory,
@@ -44,8 +46,8 @@ class BlockPistonExtendListener(private val plugin: RPKBlockLoggingBukkit) : Lis
                     profile = null,
                     minecraftProfile = null,
                     character = null,
-                    from = block.type,
-                    to = block.getRelative(event.direction.oppositeFace).type,
+                    from = oldType,
+                    to = newType,
                     reason = "PISTON"
                 )
                 plugin.server.scheduler.runTask(plugin, Runnable {

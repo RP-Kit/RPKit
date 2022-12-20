@@ -119,7 +119,7 @@ class RPKDiscordProfileTable(
             } else {
                 null
             } ?: RPKThinProfileImpl(
-                RPKProfileName(discordService.getUserName(DiscordUserId(result[RPKIT_DISCORD_PROFILE.DISCORD_ID]))
+                RPKProfileName(discordService.getDisplayName(DiscordUserId(result[RPKIT_DISCORD_PROFILE.DISCORD_ID]))
                     ?: "Unknown Discord user")
             )
             val discordProfile = RPKDiscordProfileImpl(

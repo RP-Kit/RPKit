@@ -27,9 +27,9 @@ import kotlin.math.min
 
 class RPKCharacterLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKCharacterLanguageService {
     override fun getCharacterLanguageUnderstanding(character: RPKCharacter, language: RPKLanguage): CompletableFuture<Float> {
-        val race = character.race
+        val species = character.species
         return plugin.database.getTable(RPKCharacterLanguageTable::class.java)[character, language]
-            .thenApply { it?.understanding ?: if (race != null) language.getBaseUnderstanding(race) else 0f }
+            .thenApply { it?.understanding ?: if (species != null) language.getBaseUnderstanding(species) else 0f }
 
     }
 

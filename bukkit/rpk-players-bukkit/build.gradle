@@ -14,6 +14,7 @@
  */
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "nu.studer.jooq" version "8.0"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -29,27 +30,28 @@ if (propertiesFile.exists()) {
 }
 
 dependencies {
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.7.0"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.7.0"
-    implementation group: "org.spigotmc", name: "spigot-api", version: "1.19-R0.1-SNAPSHOT"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.7.22"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.7.22"
+    implementation group: "org.spigotmc", name: "spigot-api", version: "1.19.3-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "3.0.0"
-    implementation group: "org.jooq", name: "jooq", version: "3.16.6"
-    implementation group: "org.kohsuke", name: "github-api", version: "1.306"
-    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.0-alpha7"
-    implementation platform("org.http4k:http4k-bom:4.27.0.0")
+    implementation group: "org.jooq", name: "jooq", version: "3.17.6"
+    implementation group: "org.kohsuke", name: "github-api", version: "1.313"
+    implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.6"
+    implementation platform("org.http4k:http4k-bom:4.34.3.1")
     implementation group: "org.http4k", name: "http4k-core"
     implementation group: "org.http4k", name: "http4k-server-jetty"
     implementation group: "org.http4k", name: "http4k-format-gson"
-    implementation group: "me.clip", name: "placeholderapi", version: "2.11.1"
+    implementation group: "me.clip", name: "placeholderapi", version: "2.11.2"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
     implementation project(":bukkit:rpk-chat-lib-bukkit")
-    testImplementation group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: "1.6.1"
-    testImplementation group: "io.kotest", name: "kotest-runner-junit5-jvm", version: "5.3.1"
-    testImplementation group: "io.kotest", name: "kotest-framework-engine-jvm", version: "5.3.1"
-    testImplementation group: "io.kotest", name: "kotest-assertions-core-jvm", version: "5.3.1"
-    testImplementation group: "io.mockk", name: "mockk", version: "1.12.4"
+    testImplementation group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: "1.6.4"
+    testImplementation group: "io.kotest", name: "kotest-runner-junit5-jvm", version: "5.5.4"
+    testImplementation group: "io.kotest", name: "kotest-framework-engine-jvm", version: "5.5.4"
+    testImplementation group: "io.kotest", name: "kotest-assertions-core-jvm", version: "5.5.4"
+    testImplementation group: "io.mockk", name: "mockk", version: "1.13.3"
+    jooqGenerator "org.jooq:jooq-meta-extensions:3.17.6"
 }
 
 test {
@@ -60,6 +62,44 @@ processResources {
     filter ReplaceTokens, tokens: [
             "version": version
     ]
+}
+
+import org.jooq.meta.jaxb.Logging
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                logging = Logging.WARN
+                generator {
+                    name = "org.jooq.codegen.DefaultGenerator"
+                    database {
+                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                        inputSchema = "PUBLIC"
+                        includes = ".*"
+                        excludes = ""
+                        properties {
+                            property {
+                                key = "scripts"
+                                value = "src/main/resources/com/rpkit/players/migrations/sqlite"
+                            }
+                            property {
+                                key = "sort"
+                                value = "semantic"
+                            }
+                            property {
+                                key = "defaultNameCase"
+                                value = "lower"
+                            }
+                        }
+                    }
+                    target {
+                        packageName = "com.rpkit.players.bukkit.database.jooq"
+                    }
+                }
+            }
+        }
+    }
 }
 
 shadowJar {

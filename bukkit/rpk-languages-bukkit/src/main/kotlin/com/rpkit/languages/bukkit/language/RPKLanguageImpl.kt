@@ -15,7 +15,7 @@
 
 package com.rpkit.languages.bukkit.language
 
-import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.species.RPKSpecies
 import kotlin.random.Random
 
 class RPKLanguageImpl(
@@ -26,21 +26,21 @@ class RPKLanguageImpl(
         private val cypher: Map<String, String>
 ) : RPKLanguage {
 
-    override fun getBaseUnderstanding(race: RPKRace): Float {
-        return baseUnderstanding[race.name.value] ?: 0f
+    override fun getBaseUnderstanding(species: RPKSpecies): Float {
+        return baseUnderstanding[species.name.value] ?: 0f
     }
 
-    override fun getMinimumUnderstandingIncrement(race: RPKRace): Float {
-        return minimumUnderstandingIncrement[race.name.value] ?: 0f
+    override fun getMinimumUnderstandingIncrement(species: RPKSpecies): Float {
+        return minimumUnderstandingIncrement[species.name.value] ?: 0f
     }
 
-    override fun getMaximumUnderstandingIncrement(race: RPKRace): Float {
-        return maximumUnderstandingIncrement[race.name.value] ?: 0f
+    override fun getMaximumUnderstandingIncrement(species: RPKSpecies): Float {
+        return maximumUnderstandingIncrement[species.name.value] ?: 0f
     }
 
-    override fun randomUnderstandingIncrement(race: RPKRace): Float {
-        val min = getMinimumUnderstandingIncrement(race)
-        val max = getMaximumUnderstandingIncrement(race)
+    override fun randomUnderstandingIncrement(species: RPKSpecies): Float {
+        val min = getMinimumUnderstandingIncrement(species)
+        val max = getMaximumUnderstandingIncrement(species)
         return min + (Random.nextFloat() * (max - min))
     }
 

@@ -77,14 +77,16 @@ class RollCommand(private val plugin: RPKRollingBukkit) : CommandExecutor {
                     else -> rollPartResult.toString()
                 }
             }
-            .reduce { a, b -> "$a+$b" } + " = $total"
+            .reduce { a, b -> "$a+$b" }
         sender.world.players
                 .filter { player -> player.location.distanceSquared(sender.location) <= radius * radius }
                 .forEach {
                     it.sendMessage(plugin.messages.roll.withParameters(
                         character = character,
                         player = minecraftProfile,
-                        roll = results,
+                        rollParts = results,
+                        rollTotal = total.toString(),
+                        roll = "$results = $total",
                         dice = parsedRoll
                     ))
                 }

@@ -16,7 +16,7 @@
 
 package com.rpkit.characters.bukkit.character
 
-import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.species.RPKSpecies
 import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Service
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -129,8 +129,10 @@ interface RPKCharacterService : Service {
      * @param name The name
      * @param gender The gender
      * @param age The age
-     * @param race The race
+     * @param species The species
      * @param description The description
+     * @param height The height
+     * @param weight The weight
      * @param isDead Whether the character is dead
      * @param location The location
      * @param inventoryContents The inventory contents
@@ -148,16 +150,19 @@ interface RPKCharacterService : Service {
      * @param isNameHidden Whether the name is hidden
      * @param isGenderHidden Whether the gender is hidden
      * @param isAgeHidden Whether the age is hidden
-     * @param isRaceHidden Whether the race is hidden
+     * @param isSpeciesHidden Whether the species is hidden
      * @param isDescriptionHidden Whether the description is hidden
+     * @param isWeightHidden Whether the weight is hidden
      */
     fun createCharacter(
         profile: RPKProfile? = null,
         name: String? = null,
         gender: String? = null,
         age: Int? = null,
-        race: RPKRace? = null,
+        species: RPKSpecies? = null,
         description: String? = null,
+        height: Double? = null,
+        weight: Double? = null,
         isDead: Boolean? = null,
         location: RPKLocation? = null,
         inventoryContents: Array<ItemStack?>? = null,
@@ -175,8 +180,10 @@ interface RPKCharacterService : Service {
         isNameHidden: Boolean? = null,
         isGenderHidden: Boolean? = null,
         isAgeHidden: Boolean? = null,
-        isRaceHidden: Boolean? = null,
-        isDescriptionHidden: Boolean? = null
+        isSpeciesHidden: Boolean? = null,
+        isDescriptionHidden: Boolean? = null,
+        isHeightHidden: Boolean? = null,
+        isWeightHidden: Boolean? = null
     ): CompletableFuture<RPKCharacter>
 
     /**

@@ -36,7 +36,7 @@ import org.bukkit.command.CommandSender
  */
 class CharacterCommand(private val plugin: RPKCharactersBukkit) : CommandExecutor {
 
-    private val characterSetCommand = CharacterSetCommand(plugin)
+    private val characterSetCommand = CharacterSetCommand(plugin).toBukkit()
     private val characterHideCommand = CharacterHideCommand(plugin).toBukkit()
     private val characterUnhideCommand = CharacterUnhideCommand(plugin).toBukkit()
     private val characterCardCommand = CharacterCardCommand(plugin)

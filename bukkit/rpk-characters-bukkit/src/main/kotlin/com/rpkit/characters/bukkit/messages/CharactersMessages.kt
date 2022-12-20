@@ -19,11 +19,17 @@ package com.rpkit.characters.bukkit.messages
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
-import com.rpkit.characters.bukkit.race.RPKRace
+import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
+import com.rpkit.characters.bukkit.character.field.SettableCharacterCardField
+import com.rpkit.characters.bukkit.species.RPKSpecies
 import com.rpkit.core.bukkit.message.BukkitMessages
+import com.rpkit.core.message.MessageParameter
 import com.rpkit.core.message.ParameterizedMessage
 import com.rpkit.core.message.to
+import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
+import java.util.concurrent.CompletableFuture
+import java.util.logging.Level.SEVERE
 
 class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
 
@@ -63,7 +69,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
             profile: RPKProfile,
             gender: String,
             age: Int,
-            race: RPKRace,
+            species: RPKSpecies,
             description: String,
             dead: Boolean,
             health: Double,
@@ -78,7 +84,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
                 "profile" to profile.name + profile.discriminator,
                 "gender" to gender,
                 "age" to age.toString(),
-                "race" to race.name.value,
+                "species" to species.name.value,
                 "description" to description,
                 "dead" to if (dead) "Yes" else "No",
                 "health" to health.toString(),
@@ -97,7 +103,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
             profile: RPKProfile,
             gender: String,
             age: Int,
-            race: RPKRace,
+            species: RPKSpecies,
             description: String,
             dead: Boolean,
             health: Double,
@@ -112,7 +118,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
                 "profile" to profile.name + profile.discriminator,
                 "gender" to gender,
                 "age" to age.toString(),
-                "race" to race.name.value,
+                "species" to species.name.value,
                 "description" to description,
                 "dead" to if (dead) "Yes" else "No",
                 "health" to health.toString(),
@@ -125,15 +131,27 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
         }
     }
 
-    class CharacterListItem(private val message: ParameterizedMessage) {
-        fun withParameters(character: RPKCharacter) = message.withParameters(
-            "character" to character.name
-        )
+    class CharacterListItemMessage(private val plugin: RPKCharactersBukkit, private val message: ParameterizedMessage) {
+        fun withParameters(character: RPKCharacter): CompletableFuture<String> {
+            val characterCardFieldService = Services[RPKCharacterCardFieldService::class.java]
+            val fieldParameterFutures = characterCardFieldService?.characterCardFields?.map { field ->
+                field.get(character).exceptionally { exception ->
+                    plugin.logger.log(SEVERE, "Failed to get character card field ${field.name} for character ${character.name} (${character.id?.value})", exception)
+                    throw exception
+                }.thenApply { field.name to it }
+            } ?: emptyList<CompletableFuture<MessageParameter>>()
+            return CompletableFuture.allOf(*fieldParameterFutures.toTypedArray()).thenApply {
+                return@thenApply message.withParameters(
+                    "character" to character.name,
+                    *fieldParameterFutures.map(CompletableFuture<MessageParameter>::join).toTypedArray()
+                )
+            }
+        }
     }
 
-    class RaceListItem(private val message: ParameterizedMessage) {
-        fun withParameters(race: RPKRace) = message.withParameters(
-            "race" to race.name.value
+    class SpeciesListItem(private val message: ParameterizedMessage) {
+        fun withParameters(species: RPKSpecies) = message.withParameters(
+            "species" to species.name.value
         )
     }
 
@@ -149,6 +167,19 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
         )
     }
 
+    class CharacterSetValidMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: SettableCharacterCardField, value: String) = message.withParameters(
+            "field" to field.name,
+            "value" to value
+        )
+    }
+
+    class CharacterSetPromptMessage(private val message: ParameterizedMessage) {
+        fun withParameters(field: SettableCharacterCardField) = message.withParameters(
+            "field" to field.name
+        )
+    }
+
     val characterUsage = get("character-usage")
     val characterSetUsage = get("character-set-usage")
     val characterSetAgePrompt = get("character-set-age-prompt")
@@ -159,16 +190,27 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterSetDeadPrompt = get("character-set-dead-prompt")
     val characterSetDeadInvalidBoolean = get("character-set-dead-invalid-boolean")
     val characterSetDeadValid = get("character-set-dead-valid")
+    val characterSetDescriptionValid = get("character-set-description-valid")
+    val characterSetDescriptionPrompt = get("character-set-description-prompt")
+    val characterSetHeightInvalidHeight = get("character-set-height-invalid-height")
+    val characterSetWeightInvalidWeight = get("character-set-weight-invalid-weight")
     val characterSetProfilePrompt = get("character-set-profile-prompt")
     val characterSetProfileInvalidNoDiscriminator = get("character-set-profile-invalid-no-discriminator")
     val characterSetProfileInvalidDiscriminator = get("character-set-profile-invalid-discriminator")
+    val characterSetProfileInvalidProfile = get("character-set-profile-invalid-profile")
     val characterSetProfileValid = get("character-set-profile-valid")
     val characterSetGenderPrompt = get("character-set-gender-prompt")
     val characterSetGenderNotSet = get("character-set-gender-not-set")
     val characterSetGenderValid = get("character-set-gender-valid")
-    val characterSetRacePrompt = get("character-set-race-prompt")
-    val characterSetRaceInvalidRace = get("character-set-race-invalid-race")
-    val characterSetRaceValid = get("character-set-race-valid")
+    val characterSetNamePrompt = get("character-set-name-prompt")
+    val characterSetNameValid = get("character-set-name-valid")
+    val characterSetSpeciesPrompt = get("character-set-species-prompt")
+    val characterSetSpeciesInvalidSpecies = get("character-set-species-invalid-species")
+    val characterSetSpeciesValid = get("character-set-species-valid")
+    val characterSetPrompt = getParameterized("character-set-prompt")
+        .let(::CharacterSetPromptMessage)
+    val characterSetValid = getParameterized("character-set-valid")
+        .let(::CharacterSetValidMessage)
     val characterHideUsage = get("character-hide-usage")
     val characterHideInvalidField = getParameterized("character-hide-invalid-field")
         .let(::CharacterHideInvalidFieldMessage)
@@ -182,7 +224,7 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterCardOwner = getParameterizedList("character-card-owner").let(::CharacterCardOwnerMessage)
     val characterCardNotOwner = getParameterizedList("character-card-not-owner").let(::CharacterCardNotOwnerMessage)
     val characterListTitle = get("character-list-title")
-    val characterListItem = getParameterized("character-list-item").let(::CharacterListItem)
+    val characterListItem = CharacterListItemMessage(plugin, getParameterized("character-list-item"))
     val characterSwitchPrompt = get("character-switch-prompt")
     val characterSwitchInvalidCharacter = get("character-switch-invalid-character")
     val characterSwitchInvalidCharacterOtherAccount = get("character-switch-invalid-character-other-account")
@@ -196,20 +238,22 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val characterDeleteConfirmationInvalidBoolean = get("character-delete-confirmation-invalid-boolean")
     val characterDeleteValid = get("character-delete-valid")
     val characterDeleteUsage = get("character-delete-usage")
-    val raceUsage = get("race-usage")
-    val raceAddPrompt = get("race-add-prompt")
-    val raceAddInvalidRace = get("race-add-invalid-race")
-    val raceAddValid = get("race-add-valid")
-    val raceRemovePrompt = get("race-remove-prompt")
-    val raceRemoveInvalidRace = get("race-remove-invalid-race")
-    val raceRemoveValid = get("race-remove-valid")
-    val raceListTitle = get("race-list-title")
-    val raceListItem = getParameterized("race-list-item").let(::RaceListItem)
+    val speciesUsage = get("species-usage")
+    val speciesAddPrompt = get("species-add-prompt")
+    val speciesAddInvalidSpecies = get("species-add-invalid-species")
+    val speciesAddValid = get("species-add-valid")
+    val speciesRemovePrompt = get("species-remove-prompt")
+    val speciesRemoveInvalidSpecies = get("species-remove-invalid-species")
+    val speciesRemoveValid = get("species-remove-valid")
+    val speciesListTitle = get("species-list-title")
+    val speciesListItem = getParameterized("species-list-item").let(::SpeciesListItem)
     val notFromConsole = get("not-from-console")
     val operationCancelled = get("operation-cancelled")
     val noCharacter = get("no-character")
     val noCharacterOther = get("no-character-other")
     val noProfile = get("no-profile")
+    val noProfileSelf = get("no-profile-self")
+    val noProfileOther = get("no-profile-other")
     val noMinecraftProfile = get("no-minecraft-profile")
     val noPermissionCharacterCardSelf = get("no-permission-character-card-self")
     val noPermissionCharacterCardOther = get("no-permission-character-card-other")
@@ -222,21 +266,23 @@ class CharactersMessages(plugin: RPKCharactersBukkit) : BukkitMessages(plugin) {
     val noPermissionCharacterSetDescription = get("no-permission-character-set-description")
     val noPermissionCharacterSetGender = get("no-permission-character-set-gender")
     val noPermissionCharacterSetName = get("no-permission-character-set-name")
-    val noPermissionCharacterSetRace = get("no-permission-character-set-race")
+    val noPermissionCharacterSetProfile = get("no-permission-character-set-profile")
+    val noPermissionCharacterSetSpecies = get("no-permission-character-set-species")
     val noPermissionCharacterHide = getParameterized("no-permission-character-hide")
         .let(::NoPermissionCharacterHideMessage)
     val noPermissionCharacterUnhide = getParameterized("no-permission-character-unhide")
         .let(::NoPermissionCharacterUnhideMessage)
     val noPermissionCharacterSwitch = get("no-permission-character-switch")
     val noPermissionCharacterDelete = get("no-permission-character-delete")
-    val noPermissionRaceAdd = get("no-permission-race-add")
-    val noPermissionRaceRemove = get("no-permission-race-remove")
-    val noPermissionRaceList = get("no-permission-race-list")
+    val noPermissionSpeciesAdd = get("no-permission-species-add")
+    val noPermissionSpeciesRemove = get("no-permission-species-remove")
+    val noPermissionSpeciesList = get("no-permission-species-list")
     val deadCharacter = get("dead-character")
     val noProfileService = get("no-profile-service")
     val noMinecraftProfileService = get("no-minecraft-profile-service")
     val noCharacterService = get("no-character-service")
     val noCharacterCardFieldService = get("no-character-card-field-service")
     val noNewCharacterCooldownService = get("no-new-character-cooldown-service")
-    val noRaceService = get("no-race-service")
+    val noSpeciesService = get("no-species-service")
+    val noUnitService = get("no-unit-service")
 }

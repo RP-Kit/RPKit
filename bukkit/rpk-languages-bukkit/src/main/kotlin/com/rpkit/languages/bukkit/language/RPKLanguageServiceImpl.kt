@@ -24,22 +24,22 @@ class RPKLanguageServiceImpl(override val plugin: RPKLanguagesBukkit) : RPKLangu
             ?.map { languageName ->
                 RPKLanguageImpl(
                         RPKLanguageName(languageName),
-                    plugin.config.getConfigurationSection("languages.$languageName.default-race-understanding")
+                    plugin.config.getConfigurationSection("languages.$languageName.default-species-understanding")
                         ?.getKeys(false)
-                        ?.associate { race ->
-                            race to plugin.config.getDouble("languages.$languageName.default-race-understanding.$race")
+                        ?.associate { species ->
+                            species to plugin.config.getDouble("languages.$languageName.default-species-understanding.$species")
                                 .toFloat()
                         } ?: emptyMap(),
                     plugin.config.getConfigurationSection("languages.$languageName.understanding-increment")
                         ?.getKeys(false)
-                        ?.associate { race ->
-                            race to plugin.config.getDouble("languages.$languageName.understanding-increment.$race.minimum")
+                        ?.associate { species ->
+                            species to plugin.config.getDouble("languages.$languageName.understanding-increment.$species.minimum")
                                 .toFloat()
                         } ?: emptyMap(),
                     plugin.config.getConfigurationSection("languages.$languageName.understanding-increment")
                         ?.getKeys(false)
-                        ?.associate { race ->
-                            race to plugin.config.getDouble("languages.$languageName.understanding-increment.$race.maximum")
+                        ?.associate { species ->
+                            species to plugin.config.getDouble("languages.$languageName.understanding-increment.$species.maximum")
                                 .toFloat()
                         } ?: emptyMap(),
                     plugin.config.getConfigurationSection("languages.$languageName.cypher")

@@ -17,10 +17,12 @@
 package com.rpkit.characters.bukkit.character
 
 import com.rpkit.characters.bukkit.race.RPKRace
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpecies
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.location.RPKLocation
 import com.rpkit.players.bukkit.profile.RPKProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
+import com.rpkit.players.bukkit.unit.MeasurementUnit
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -75,7 +77,16 @@ interface RPKCharacter {
      * This may be set to null, which is the current default in the config, as races must be set up by the admins of
      * the server.
      */
+    @Deprecated("Use species", ReplaceWith("species"))
     var race: RPKRace?
+
+    /**
+     * The species of the character.
+     * May be set to any species implementation, as long as it has been registered with the [RPKSpeciesService].
+     * This may be set to null, which is the current default in the config, as species must be set up by the admins of
+     * the server.
+     */
+    var species: RPKSpecies?
 
     /**
      * The description of the character.
@@ -84,6 +95,22 @@ interface RPKCharacter {
      * Its length may be limited by implementations.
      */
     var description: String
+
+    /**
+     * The height of the character.
+     * This value is absent units and should be multiplied by [MeasurementUnit.scaleFactor] in order to get a value
+     * to display.
+     * This may be null in the case that a player has not set their character's height.
+     */
+    var height: Double?
+
+    /**
+     * The weight of the character.
+     * This value is absent units and should be multiplied by [MeasurementUnit.scaleFactor] in order to get a value
+     * to display.
+     * This may be null in the case that a player has not set their character's weight.
+     */
+    var weight: Double?
 
     /**
      * Whether the character is dead or not.
@@ -232,7 +259,14 @@ interface RPKCharacter {
      * Whether the character's race is hidden on the character's character card.
      * If a character is, for example, a half-elf and wishes to fit into a human society this may be of use.
      */
+    @Deprecated("Use isSpeciesHidden", ReplaceWith("isSpeciesHidden"))
     var isRaceHidden: Boolean
+
+    /**
+     * Whether the character's species is hidden on the character's character card.
+     * If a character is, for example, a half-elf and wishes to fit into a human society this may be of use.
+     */
+    var isSpeciesHidden: Boolean
 
     /**
      * Whether the description of the character is hidden.
@@ -240,6 +274,16 @@ interface RPKCharacter {
      * description.
      */
     var isDescriptionHidden: Boolean
+
+    /**
+     * Whether the height of the character is hidden.
+     */
+    var isHeightHidden: Boolean
+
+    /**
+     * Whether the weight of the character is hidden.
+     */
+    var isWeightHidden: Boolean
 
     /**
      * Shows the character card to the given Minecraft profile.

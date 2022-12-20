@@ -106,17 +106,13 @@ class PaymentJoinCommand(private val plugin: RPKPaymentsBukkit) : CommandExecuto
                 )
                 paymentGroup.owners.thenAccept { owners ->
                     owners.forEach { owner ->
-                        if (owner.minecraftProfile?.isOnline == true) {
-                            owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
-                        } else {
-                            val ownerProfile = owner.profile
-                            if (ownerProfile != null) {
-                                notificationService.createNotification(
-                                    ownerProfile,
-                                    ownerNotificationTitle,
-                                    ownerNotificationMessage
-                                )
-                            }
+                        val ownerProfile = owner.profile
+                        if (ownerProfile != null) {
+                            notificationService.createNotification(
+                                ownerProfile,
+                                ownerNotificationTitle,
+                                ownerNotificationMessage
+                            )
                         }
                     }
                 }

@@ -104,17 +104,13 @@ class PaymentLeaveCommand(private val plugin: RPKPaymentsBukkit) : CommandExecut
                     )
                     paymentGroup.owners.thenAccept { owners ->
                         owners.forEach { owner ->
-                            if (owner.minecraftProfile?.isOnline != true) {
-                                val ownerProfile = owner.profile
-                                if (ownerProfile != null) {
-                                    notificationService.createNotification(
-                                        ownerProfile,
-                                        ownerNotificationTitle,
-                                        ownerNotificationMessage
-                                    )
-                                }
-                            } else {
-                                owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+                            val ownerProfile = owner.profile
+                            if (ownerProfile != null) {
+                                notificationService.createNotification(
+                                    ownerProfile,
+                                    ownerNotificationTitle,
+                                    ownerNotificationMessage
+                                )
                             }
                         }
                     }

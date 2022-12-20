@@ -100,6 +100,8 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                     )
                     .from(RPKIT_BLOCK_HISTORY)
                     .where(RPKIT_BLOCK_HISTORY.ID.eq(id.value))
+                    .orderBy(RPKIT_BLOCK_HISTORY.ID)
+                    .limit(1)
                     .fetchOne() ?: return@supplyAsync null
                 val blockHistory = RPKBlockHistoryImpl(
                     plugin,
@@ -127,6 +129,8 @@ class RPKBlockHistoryTable(private val database: Database, private val plugin: R
                 .and(RPKIT_BLOCK_HISTORY.X.eq(block.x))
                 .and(RPKIT_BLOCK_HISTORY.Y.eq(block.y))
                 .and(RPKIT_BLOCK_HISTORY.Z.eq(block.z))
+                .orderBy(RPKIT_BLOCK_HISTORY.ID)
+                .limit(1)
                 .fetchOne() ?: return@supplyAsync null
             val id = result.get(RPKIT_BLOCK_HISTORY.ID)
             return@supplyAsync if (id == null) {

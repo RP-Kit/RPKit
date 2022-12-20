@@ -64,17 +64,13 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                                 group = group,
                                                 date = now.atZone(ZoneId.systemDefault())
                                             )
-                                            if (member.minecraftProfile?.isOnline == true) { // If online
-                                                member.minecraftProfile?.sendMessage(notificationMessage)
-                                            } else { // If offline
-                                                val profile = member.profile
-                                                if (profile != null) {
-                                                    notificationService.createNotification(
-                                                        profile,
-                                                        notificationTitle,
-                                                        notificationMessage
-                                                    )
-                                                }
+                                            val memberProfile = member.profile
+                                            if (memberProfile != null) {
+                                                notificationService.createNotification(
+                                                    memberProfile,
+                                                    notificationTitle,
+                                                    notificationMessage
+                                                )
                                             }
                                             val ownerNotificationTitle = plugin.messages.paymentNotificationOwnerFailToPayTitle
                                                 .withParameters(
@@ -90,17 +86,13 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                                 )
                                             group.owners.thenAccept { owners ->
                                                 owners.forEach { owner ->
-                                                    if (owner.minecraftProfile?.isOnline != true) {
-                                                        val profile = owner.profile
-                                                        if (profile != null) {
-                                                            notificationService.createNotification(
-                                                                profile,
-                                                                ownerNotificationTitle,
-                                                                ownerNotificationMessage
-                                                            )
-                                                        }
-                                                    } else {
-                                                        owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+                                                    val ownerProfile = owner.profile
+                                                    if (ownerProfile != null) {
+                                                        notificationService.createNotification(
+                                                            ownerProfile,
+                                                            ownerNotificationTitle,
+                                                            ownerNotificationMessage
+                                                        )
                                                     }
                                                 }
                                             }
@@ -132,17 +124,13 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                                 group = group,
                                                 date = now.atZone(ZoneId.systemDefault())
                                             )
-                                        if (member.minecraftProfile?.isOnline != true) { // If offline
-                                            val profile = member.profile
-                                            if (profile != null) {
-                                                notificationService.createNotification(
-                                                    profile,
-                                                    notificationTitle,
-                                                    notificationMessage
-                                                )
-                                            }
-                                        } else { // If online
-                                            member.minecraftProfile?.sendMessage(notificationMessage)
+                                        val profile = member.profile
+                                        if (profile != null) {
+                                            notificationService.createNotification(
+                                                profile,
+                                                notificationTitle,
+                                                notificationMessage
+                                            )
                                         }
                                         // Send notification to owners
                                         val ownerNotificationTitle = plugin.messages.paymentNotificationOwnerFailToPayTitle
@@ -160,17 +148,13 @@ class PaymentTask(private val plugin: RPKPaymentsBukkit) : BukkitRunnable() {
                                                 )
                                         group.owners.thenAccept { owners ->
                                             owners.forEach { owner ->
-                                                if (owner.minecraftProfile?.isOnline != true) { // If offline
-                                                    val ownerProfile = owner.profile
-                                                    if (ownerProfile != null) {
-                                                        notificationService.createNotification(
-                                                            ownerProfile,
-                                                            ownerNotificationTitle,
-                                                            ownerNotificationMessage
-                                                        )
-                                                    }
-                                                } else { // If online
-                                                    owner.minecraftProfile?.sendMessage(ownerNotificationMessage)
+                                                val ownerProfile = owner.profile
+                                                if (ownerProfile != null) {
+                                                    notificationService.createNotification(
+                                                        ownerProfile,
+                                                        ownerNotificationTitle,
+                                                        ownerNotificationMessage
+                                                    )
                                                 }
                                             }
                                         }

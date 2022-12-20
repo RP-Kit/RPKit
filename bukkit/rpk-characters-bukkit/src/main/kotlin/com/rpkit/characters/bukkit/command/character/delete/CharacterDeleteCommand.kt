@@ -92,7 +92,7 @@ class CharacterDeleteCommand(private val plugin: RPKCharactersBukkit) : CommandE
                     }
                 }
             } else {
-                sender.sendMessage(plugin.messages.noProfile)
+                sender.sendMessage(plugin.messages.noProfileSelf)
             }
         } else {
             sender.sendMessage(plugin.messages.noMinecraftProfile)

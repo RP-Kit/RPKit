@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2022 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +24,7 @@ import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKThinProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfile
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
+import org.bukkit.conversations.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -34,17 +36,78 @@ import org.bukkit.event.player.AsyncPlayerChatEvent
  */
 class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
 
+    private val conversationFactory = ConversationFactory(plugin)
+        .withModality(true)
+        .withFirstPrompt(ContinueMessagePrompt())
+        .thatExcludesNonPlayersWithMessage(plugin.messages.notFromConsole)
+        .addConversationAbandonedListener { event ->
+            if (!event.gracefulExit()) {
+                val conversable = event.context.forWhom
+                if (conversable is Player) {
+                    conversable.sendMessage(plugin.messages.operationCancelled)
+                }
+            }
+        }
+
+    inner class ContinueMessagePrompt : StringPrompt() {
+        override fun getPromptText(context: ConversationContext): String {
+            return plugin.messages.continueWriting
+        }
+
+        override fun acceptInput(context: ConversationContext, input: String?): Prompt? {
+            val suffix = plugin.config.getString("message-continuation.suffix")
+            return when {
+                input == null -> OperationCancelledPrompt()
+                suffix != null && input.endsWith(suffix) -> {
+                    context.setSessionData(
+                        "message",
+                        (context.getSessionData("message") as String? ?: "") + input.dropLast(suffix.length)
+                    )
+                    ContinueMessagePrompt()
+                }
+                else -> {
+                    processMessage(context.forWhom as Player, (context.getSessionData("message") as String? ?: "") + input)
+                    END_OF_CONVERSATION
+                }
+            }
+        }
+    }
+
+    inner class OperationCancelledPrompt : MessagePrompt() {
+        override fun getPromptText(context: ConversationContext): String {
+            return plugin.messages.operationCancelled
+        }
+
+        override fun getNextPrompt(context: ConversationContext): Prompt? {
+            return END_OF_CONVERSATION
+        }
+
+    }
+
     @EventHandler
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         event.isCancelled = true
+        plugin.server.scheduler.runTask(plugin, Runnable {
+            val continuationEnabled = plugin.config.getBoolean("message-continuation.enabled")
+            val suffix = plugin.config.getString("message-continuation.suffix")
+            if (continuationEnabled && suffix != null && event.message.endsWith(suffix)) {
+                val conversation = conversationFactory.buildConversation(event.player)
+                conversation.context.setSessionData("message", event.message.dropLast(suffix.length))
+                conversation.begin()
+            } else {
+                processMessage(event.player, event.message)
+            }
+        })
+    }
+
+    private fun processMessage(player: Player, message: String) {
         val chatChannelService = Services[RPKChatChannelService::class.java] ?: return
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player)
+        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(player)
         if (minecraftProfile != null) {
             val profile = minecraftProfile.profile
             chatChannelService.getMinecraftProfileChannel(minecraftProfile).thenAcceptAsync { chatChannel ->
                 val queuedMessages = mutableListOf<QueuedMessage>()
-                val message = event.message
                 var readMessageIndex = 0
                 chatChannelService.matchPatterns
                     .map { matchPattern ->
@@ -54,40 +117,46 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                     .flatMap { (matches, matchPattern) -> matches.associateWith { matchPattern }.toList() }
                     .sortedBy { (match, _) -> match.range.first }
                     .forEach { (match, matchPattern) ->
-                        queuedMessages.add(QueuedMessage(
-                            chatChannel,
-                            message.substring(readMessageIndex, match.range.first),
-                            event.player,
-                            profile,
-                            minecraftProfile
-                        ))
+                        queuedMessages.add(
+                            QueuedMessage(
+                                chatChannel,
+                                message.substring(readMessageIndex, match.range.first),
+                                player,
+                                profile,
+                                minecraftProfile
+                            )
+                        )
                         match.groupValues.forEachIndexed { index, value ->
                             val otherChatChannel = matchPattern.groups[index]
                             if (otherChatChannel != null) {
-                                queuedMessages.add(QueuedMessage(
-                                    otherChatChannel,
-                                    value,
-                                    event.player,
-                                    profile,
-                                    minecraftProfile
-                                ))
+                                queuedMessages.add(
+                                    QueuedMessage(
+                                        otherChatChannel,
+                                        value,
+                                        player,
+                                        profile,
+                                        minecraftProfile
+                                    )
+                                )
                             }
                         }
                         readMessageIndex = match.range.last + 1
                     }
                 if (readMessageIndex < message.length) {
-                    queuedMessages.add(QueuedMessage(
-                        chatChannel,
-                        message.substring(readMessageIndex, message.length),
-                        event.player,
-                        profile,
-                        minecraftProfile
-                    ))
+                    queuedMessages.add(
+                        QueuedMessage(
+                            chatChannel,
+                            message.substring(readMessageIndex, message.length),
+                            player,
+                            profile,
+                            minecraftProfile
+                        )
+                    )
                 }
                 sendMessages(queuedMessages)
             }
         } else {
-            event.player.sendMessage(plugin.messages["no-minecraft-profile"])
+            player.sendMessage(plugin.messages.noMinecraftProfile)
         }
     }
 
@@ -131,7 +200,7 @@ class AsyncPlayerChatListener(private val plugin: RPKChatBukkit) : Listener {
                 }
             })
         } else {
-            bukkitPlayer.sendMessage(plugin.messages["no-chat-channel"])
+            bukkitPlayer.sendMessage(plugin.messages.noChatChannel)
         }
     }
 

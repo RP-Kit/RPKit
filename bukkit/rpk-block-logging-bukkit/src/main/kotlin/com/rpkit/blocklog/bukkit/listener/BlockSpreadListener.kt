@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ class BlockSpreadListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
     @EventHandler(priority = MONITOR)
     fun onBlockSpread(event: BlockSpreadEvent) {
         val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
+        val oldType = event.block.type
+        val newType = event.newState.type
         blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
@@ -40,8 +42,8 @@ class BlockSpreadListener(private val plugin: RPKBlockLoggingBukkit) : Listener 
                 profile = null,
                 minecraftProfile = null,
                 character = null,
-                from = event.block.type,
-                to = event.newState.type,
+                from = oldType,
+                to = newType,
                 reason = "SPREAD"
             )
             plugin.server.scheduler.runTask(plugin, Runnable {

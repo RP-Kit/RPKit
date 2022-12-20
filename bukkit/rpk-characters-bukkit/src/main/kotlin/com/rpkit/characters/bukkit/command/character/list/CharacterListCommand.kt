@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,39 +34,39 @@ class CharacterListCommand(private val plugin: RPKCharactersBukkit) : CommandExe
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         if (!sender.hasPermission("rpkit.characters.command.character.list")) {
-            sender.sendMessage(plugin.messages["no-permission-character-list"])
+            sender.sendMessage(plugin.messages.noPermissionCharacterList)
             return true
         }
         val characterService = Services[RPKCharacterService::class.java]
         if (characterService == null) {
-            sender.sendMessage(plugin.messages["no-character-service"])
+            sender.sendMessage(plugin.messages.noCharacterService)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
         val profile = minecraftProfile.profile
         if (profile !is RPKProfile) {
-            sender.sendMessage(plugin.messages["no-profile"])
+            sender.sendMessage(plugin.messages.noProfileSelf)
             return true
         }
-        sender.sendMessage(plugin.messages["character-list-title"])
+        sender.sendMessage(plugin.messages.characterListTitle)
         characterService.getCharacters(profile).thenAccept { characters ->
             for (character in characters) {
-                sender.sendMessage(plugin.messages.characterListItem.withParameters(
+                plugin.messages.characterListItem.withParameters(
                     character = character
-                ))
+                ).thenAccept(sender::sendMessage)
             }
         }
         return true

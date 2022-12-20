@@ -17,9 +17,10 @@ commands:
     description: Character management command
     aliases: [char, c]
     usage: /<command> [set|card|switch|list|new|delete]
-  race:
-    description: Race management command
+  species:
+    description: Species management command
     usage: /<command> [list]
+    aliases: [race]
 permissions:
   rpkit.characters.command.character.card.self:
     description: Allows viewing your own character card
@@ -63,8 +64,8 @@ permissions:
   rpkit.characters.command.character.set.profile:
     description: Allows assigning your characters to a different profile
     default: op
-  rpkit.characters.command.character.set.race:
-    description: Allows setting your character''s race
+  rpkit.characters.command.character.set.species:
+    description: Allows setting your character''s species
     default: true
   rpkit.characters.command.character.switch:
     description: Allows switching to other characters
@@ -72,6 +73,6 @@ permissions:
   rpkit.characters.command.character.delete:
     description: Allows deleting characters
     default: op
-  rpkit.characters.command.race.list:
-    description: Allows listing of races
+  rpkit.characters.command.species.list:
+    description: Allows listing of species
     default: true

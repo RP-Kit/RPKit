@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ class BlockPistonRetractListener(private val plugin: RPKBlockLoggingBukkit) : Li
     @EventHandler(priority = MONITOR)
     fun onBlockPistonRetract(event: BlockPistonRetractEvent) {
         val blockHistoryService = Services[RPKBlockHistoryService::class.java] ?: return
+        val oldType = event.block.type
         blockHistoryService.getBlockHistory(event.block.toRPKBlockLocation()).thenAccept { blockHistory ->
             val blockChange = RPKBlockChangeImpl(
                 blockHistory = blockHistory,
@@ -40,7 +41,7 @@ class BlockPistonRetractListener(private val plugin: RPKBlockLoggingBukkit) : Li
                 profile = null,
                 minecraftProfile = null,
                 character = null,
-                from = event.block.type,
+                from = oldType,
                 to = Material.AIR,
                 reason = "PISTON"
             )

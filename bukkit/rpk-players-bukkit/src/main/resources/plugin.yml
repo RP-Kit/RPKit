@@ -21,6 +21,11 @@ commands:
       /profile denylink [type] [id] - denies the link to the given profile
     usage: /<command> [create|login]
     aliases: [account, acc]
+  units:
+    description: |
+      Units preferences command
+      /units - Display unit preferences
+      /units set [unit type] [unit] - Set unit preference for given unit type
 permissions:
   rpkit.players.command.profile.link:
     description: Allows linking other profiles
@@ -39,3 +44,7 @@ permissions:
     default: true
   rpkit.players.command.profile.view.other:
     description: Allows viewing other people's profiles
+    default: op
+  rpkit.players.command.units:
+    description: Allows customising unit preferences
+    default: true

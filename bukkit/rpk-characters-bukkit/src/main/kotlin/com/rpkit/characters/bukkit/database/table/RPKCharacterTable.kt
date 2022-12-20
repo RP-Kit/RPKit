@@ -22,8 +22,8 @@ import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterImpl
 import com.rpkit.characters.bukkit.database.create
 import com.rpkit.characters.bukkit.database.jooq.Tables.RPKIT_CHARACTER
-import com.rpkit.characters.bukkit.race.RPKRaceName
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.bukkit.extension.toByteArray
 import com.rpkit.core.bukkit.extension.toItemStack
 import com.rpkit.core.bukkit.extension.toItemStackArray
@@ -37,7 +37,6 @@ import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
-import java.util.logging.Level
 import java.util.logging.Level.SEVERE
 
 /**
@@ -70,99 +69,16 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
     fun insert(entity: RPKCharacter): CompletableFuture<Void> {
         return runAsync {
             database.create
-                .insertInto(
-                    RPKIT_CHARACTER,
-                    RPKIT_CHARACTER.PROFILE_ID,
-                    RPKIT_CHARACTER.MINECRAFT_PROFILE_ID,
-                    RPKIT_CHARACTER.NAME,
-                    RPKIT_CHARACTER.GENDER,
-                    RPKIT_CHARACTER.AGE,
-                    RPKIT_CHARACTER.RACE_NAME,
-                    RPKIT_CHARACTER.DESCRIPTION,
-                    RPKIT_CHARACTER.DEAD,
-                    RPKIT_CHARACTER.WORLD,
-                    RPKIT_CHARACTER.X,
-                    RPKIT_CHARACTER.Y,
-                    RPKIT_CHARACTER.Z,
-                    RPKIT_CHARACTER.YAW,
-                    RPKIT_CHARACTER.PITCH,
-                    RPKIT_CHARACTER.INVENTORY_CONTENTS,
-                    RPKIT_CHARACTER.HELMET,
-                    RPKIT_CHARACTER.CHESTPLATE,
-                    RPKIT_CHARACTER.LEGGINGS,
-                    RPKIT_CHARACTER.BOOTS,
-                    RPKIT_CHARACTER.HEALTH,
-                    RPKIT_CHARACTER.MAX_HEALTH,
-                    RPKIT_CHARACTER.MANA,
-                    RPKIT_CHARACTER.MAX_MANA,
-                    RPKIT_CHARACTER.FOOD_LEVEL,
-                    RPKIT_CHARACTER.THIRST_LEVEL,
-                    RPKIT_CHARACTER.PROFILE_HIDDEN,
-                    RPKIT_CHARACTER.NAME_HIDDEN,
-                    RPKIT_CHARACTER.GENDER_HIDDEN,
-                    RPKIT_CHARACTER.AGE_HIDDEN,
-                    RPKIT_CHARACTER.RACE_HIDDEN,
-                    RPKIT_CHARACTER.DESCRIPTION_HIDDEN
-                )
-                .values(
-                    entity.profile?.id?.value,
-                    entity.minecraftProfile?.id?.value,
-                    entity.name,
-                    entity.gender,
-                    entity.age,
-                    entity.race?.name?.value,
-                    entity.description,
-                    entity.isDead,
-                    entity.location.world,
-                    entity.location.x,
-                    entity.location.y,
-                    entity.location.z,
-                    entity.location.yaw,
-                    entity.location.pitch,
-                    entity.inventoryContents.toByteArray(),
-                    entity.helmet?.toByteArray(),
-                    entity.chestplate?.toByteArray(),
-                    entity.leggings?.toByteArray(),
-                    entity.boots?.toByteArray(),
-                    entity.health,
-                    entity.maxHealth,
-                    entity.mana,
-                    entity.maxMana,
-                    entity.foodLevel,
-                    entity.thirstLevel,
-                    entity.isProfileHidden,
-                    entity.isNameHidden,
-                    entity.isGenderHidden,
-                    entity.isAgeHidden,
-                    entity.isRaceHidden,
-                    entity.isDescriptionHidden
-                )
-                .execute()
-            val id = database.create.lastID().toInt()
-            entity.id = RPKCharacterId(id)
-            cache?.set(id, entity)
-            val minecraftProfileId = entity.minecraftProfile?.id
-            if (minecraftProfileId != null) {
-                minecraftProfileIdCache?.set(minecraftProfileId.value, entity)
-            }
-        }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to insert character", exception)
-            throw exception
-        }
-    }
-
-    fun update(entity: RPKCharacter): CompletableFuture<Void> {
-        val id = entity.id ?: return CompletableFuture.completedFuture(null)
-        return runAsync {
-            database.create
-                .update(RPKIT_CHARACTER)
+                .insertInto(RPKIT_CHARACTER)
                 .set(RPKIT_CHARACTER.PROFILE_ID, entity.profile?.id?.value)
                 .set(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id?.value)
                 .set(RPKIT_CHARACTER.NAME, entity.name)
                 .set(RPKIT_CHARACTER.GENDER, entity.gender)
                 .set(RPKIT_CHARACTER.AGE, entity.age)
-                .set(RPKIT_CHARACTER.RACE_NAME, entity.race?.name?.value)
+                .set(RPKIT_CHARACTER.SPECIES_NAME, entity.species?.name?.value)
                 .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
+                .set(RPKIT_CHARACTER.HEIGHT, entity.height)
+                .set(RPKIT_CHARACTER.WEIGHT, entity.weight)
                 .set(RPKIT_CHARACTER.DEAD, entity.isDead)
                 .set(RPKIT_CHARACTER.WORLD, entity.location.world)
                 .set(RPKIT_CHARACTER.X, entity.location.x)
@@ -185,8 +101,64 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .set(RPKIT_CHARACTER.NAME_HIDDEN, entity.isNameHidden)
                 .set(RPKIT_CHARACTER.GENDER_HIDDEN, entity.isGenderHidden)
                 .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
-                .set(RPKIT_CHARACTER.RACE_HIDDEN, entity.isRaceHidden)
+                .set(RPKIT_CHARACTER.SPECIES_HIDDEN, entity.isSpeciesHidden)
                 .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
+                .set(RPKIT_CHARACTER.HEIGHT_HIDDEN, entity.isHeightHidden)
+                .set(RPKIT_CHARACTER.WEIGHT_HIDDEN, entity.isWeightHidden)
+                .execute()
+            val id = database.create.lastID().toInt()
+            entity.id = RPKCharacterId(id)
+            cache?.set(id, entity)
+            val minecraftProfileId = entity.minecraftProfile?.id
+            if (minecraftProfileId != null) {
+                minecraftProfileIdCache?.set(minecraftProfileId.value, entity)
+            }
+        }.exceptionally { exception ->
+            plugin.logger.log(SEVERE, "Failed to insert character", exception)
+            throw exception
+        }
+    }
+
+    fun update(entity: RPKCharacter): CompletableFuture<Void> {
+        val id = entity.id ?: return CompletableFuture.completedFuture(null)
+        return runAsync {
+            database.create
+                .update(RPKIT_CHARACTER)
+                .set(RPKIT_CHARACTER.PROFILE_ID, entity.profile?.id?.value)
+                .set(RPKIT_CHARACTER.MINECRAFT_PROFILE_ID, entity.minecraftProfile?.id?.value)
+                .set(RPKIT_CHARACTER.NAME, entity.name)
+                .set(RPKIT_CHARACTER.GENDER, entity.gender)
+                .set(RPKIT_CHARACTER.AGE, entity.age)
+                .set(RPKIT_CHARACTER.SPECIES_NAME, entity.species?.name?.value)
+                .set(RPKIT_CHARACTER.DESCRIPTION, entity.description)
+                .set(RPKIT_CHARACTER.HEIGHT, entity.height)
+                .set(RPKIT_CHARACTER.WEIGHT, entity.weight)
+                .set(RPKIT_CHARACTER.DEAD, entity.isDead)
+                .set(RPKIT_CHARACTER.WORLD, entity.location.world)
+                .set(RPKIT_CHARACTER.X, entity.location.x)
+                .set(RPKIT_CHARACTER.Y, entity.location.y)
+                .set(RPKIT_CHARACTER.Z, entity.location.z)
+                .set(RPKIT_CHARACTER.YAW, entity.location.yaw)
+                .set(RPKIT_CHARACTER.PITCH, entity.location.pitch)
+                .set(RPKIT_CHARACTER.INVENTORY_CONTENTS, entity.inventoryContents.toByteArray())
+                .set(RPKIT_CHARACTER.HELMET, entity.helmet?.toByteArray())
+                .set(RPKIT_CHARACTER.CHESTPLATE, entity.chestplate?.toByteArray())
+                .set(RPKIT_CHARACTER.LEGGINGS, entity.leggings?.toByteArray())
+                .set(RPKIT_CHARACTER.BOOTS, entity.boots?.toByteArray())
+                .set(RPKIT_CHARACTER.HEALTH, entity.health)
+                .set(RPKIT_CHARACTER.MAX_HEALTH, entity.maxHealth)
+                .set(RPKIT_CHARACTER.MANA, entity.mana)
+                .set(RPKIT_CHARACTER.MAX_MANA, entity.maxMana)
+                .set(RPKIT_CHARACTER.FOOD_LEVEL, entity.foodLevel)
+                .set(RPKIT_CHARACTER.THIRST_LEVEL, entity.thirstLevel)
+                .set(RPKIT_CHARACTER.PROFILE_HIDDEN, entity.isProfileHidden)
+                .set(RPKIT_CHARACTER.NAME_HIDDEN, entity.isNameHidden)
+                .set(RPKIT_CHARACTER.GENDER_HIDDEN, entity.isGenderHidden)
+                .set(RPKIT_CHARACTER.AGE_HIDDEN, entity.isAgeHidden)
+                .set(RPKIT_CHARACTER.SPECIES_HIDDEN, entity.isSpeciesHidden)
+                .set(RPKIT_CHARACTER.DESCRIPTION_HIDDEN, entity.isDescriptionHidden)
+                .set(RPKIT_CHARACTER.HEIGHT_HIDDEN, entity.isHeightHidden)
+                .set(RPKIT_CHARACTER.WEIGHT_HIDDEN, entity.isWeightHidden)
                 .where(RPKIT_CHARACTER.ID.eq(id.value))
                 .execute()
             cache?.set(id.value, entity)
@@ -195,7 +167,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 minecraftProfileIdCache?.set(minecraftProfileId.value, entity)
             }
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to update character", exception)
+            plugin.logger.log(SEVERE, "Failed to update character", exception)
             throw exception
         }
     }
@@ -213,8 +185,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                         RPKIT_CHARACTER.NAME,
                         RPKIT_CHARACTER.GENDER,
                         RPKIT_CHARACTER.AGE,
-                        RPKIT_CHARACTER.RACE_NAME,
+                        RPKIT_CHARACTER.SPECIES_NAME,
                         RPKIT_CHARACTER.DESCRIPTION,
+                        RPKIT_CHARACTER.HEIGHT,
+                        RPKIT_CHARACTER.WEIGHT,
                         RPKIT_CHARACTER.DEAD,
                         RPKIT_CHARACTER.WORLD,
                         RPKIT_CHARACTER.X,
@@ -237,8 +211,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                         RPKIT_CHARACTER.NAME_HIDDEN,
                         RPKIT_CHARACTER.GENDER_HIDDEN,
                         RPKIT_CHARACTER.AGE_HIDDEN,
-                        RPKIT_CHARACTER.RACE_HIDDEN,
-                        RPKIT_CHARACTER.DESCRIPTION_HIDDEN
+                        RPKIT_CHARACTER.SPECIES_HIDDEN,
+                        RPKIT_CHARACTER.DESCRIPTION_HIDDEN,
+                        RPKIT_CHARACTER.HEIGHT_HIDDEN,
+                        RPKIT_CHARACTER.WEIGHT_HIDDEN
                     )
                     .from(RPKIT_CHARACTER)
                     .where(RPKIT_CHARACTER.ID.eq(id.value))
@@ -246,7 +222,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
 
                 val profileService = Services[RPKProfileService::class.java]
                 val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
-                val raceService = Services[RPKRaceService::class.java]
+                val speciesService = Services[RPKSpeciesService::class.java]
                 val profileId = result[RPKIT_CHARACTER.PROFILE_ID]
                 val profile = if (profileId == null) null else profileService?.getProfile(RPKProfileId(profileId))?.join()
                 val minecraftProfileId = result[RPKIT_CHARACTER.MINECRAFT_PROFILE_ID]
@@ -257,8 +233,8 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                         RPKMinecraftProfileId(minecraftProfileId)
                     )?.join()
                 }
-                val raceName = result[RPKIT_CHARACTER.RACE_NAME]
-                val race = if (raceName == null) null else raceService?.getRace(RPKRaceName(raceName))
+                val speciesName = result[RPKIT_CHARACTER.SPECIES_NAME]
+                val species = if (speciesName == null) null else speciesService?.getSpecies(RPKSpeciesName(speciesName))
                 val character = RPKCharacterImpl(
                     plugin = plugin,
                     id = RPKCharacterId(result[RPKIT_CHARACTER.ID]),
@@ -267,8 +243,10 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     name = result[RPKIT_CHARACTER.NAME],
                     gender = result[RPKIT_CHARACTER.GENDER],
                     age = result[RPKIT_CHARACTER.AGE],
-                    race = race,
+                    species = species,
                     description = result[RPKIT_CHARACTER.DESCRIPTION],
+                    height = result[RPKIT_CHARACTER.HEIGHT],
+                    weight = result[RPKIT_CHARACTER.WEIGHT],
                     dead = result[RPKIT_CHARACTER.DEAD],
                     location = RPKLocation(
                         result[RPKIT_CHARACTER.WORLD],
@@ -293,13 +271,15 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                     isNameHidden = result[RPKIT_CHARACTER.NAME_HIDDEN],
                     isGenderHidden = result[RPKIT_CHARACTER.GENDER_HIDDEN],
                     isAgeHidden = result[RPKIT_CHARACTER.AGE_HIDDEN],
-                    isRaceHidden = result[RPKIT_CHARACTER.RACE_HIDDEN],
-                    isDescriptionHidden = result[RPKIT_CHARACTER.DESCRIPTION_HIDDEN]
+                    isSpeciesHidden = result[RPKIT_CHARACTER.SPECIES_HIDDEN],
+                    isDescriptionHidden = result[RPKIT_CHARACTER.DESCRIPTION_HIDDEN],
+                    isHeightHidden = result[RPKIT_CHARACTER.HEIGHT_HIDDEN],
+                    isWeightHidden = result[RPKIT_CHARACTER.WEIGHT_HIDDEN]
                 )
                 cache?.set(id.value, character)
                 return@supplyAsync character
             }.exceptionally { exception ->
-                plugin.logger.log(Level.SEVERE, "Failed to get character", exception)
+                plugin.logger.log(SEVERE, "Failed to get character", exception)
                 throw exception
             }
         }
@@ -317,7 +297,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 .fetchOne() ?: return@supplyAsync null
             return@supplyAsync get(RPKCharacterId(result[RPKIT_CHARACTER.ID])).join()
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get active character", exception)
+            plugin.logger.log(SEVERE, "Failed to get active character", exception)
             throw exception
         }
     }
@@ -333,7 +313,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
             CompletableFuture.allOf(*futures.toTypedArray()).join()
             return@supplyAsync futures.mapNotNull(CompletableFuture<out RPKCharacter?>::join)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get characters for profile", exception)
+            plugin.logger.log(SEVERE, "Failed to get characters for profile", exception)
             throw exception
         }
     }
@@ -349,7 +329,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
             CompletableFuture.allOf(*futures.toTypedArray()).join()
             return@supplyAsync futures.mapNotNull(CompletableFuture<out RPKCharacter?>::join)
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to get characters for name", exception)
+            plugin.logger.log(SEVERE, "Failed to get characters for name", exception)
             throw exception
         }
     }
@@ -367,7 +347,7 @@ class RPKCharacterTable(private val database: Database, private val plugin: RPKC
                 minecraftProfileIdCache?.remove(minecraftProfileId.value)
             }
         }.exceptionally { exception ->
-            plugin.logger.log(Level.SEVERE, "Failed to delete character", exception)
+            plugin.logger.log(SEVERE, "Failed to delete character", exception)
             throw exception
         }
     }

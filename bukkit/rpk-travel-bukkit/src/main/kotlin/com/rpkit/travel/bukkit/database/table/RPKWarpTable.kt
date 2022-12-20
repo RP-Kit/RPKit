@@ -61,8 +61,8 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                     entity.location.x,
                     entity.location.y,
                     entity.location.z,
-                    entity.location.yaw.toDouble(),
-                    entity.location.pitch.toDouble()
+                    entity.location.yaw,
+                    entity.location.pitch
                 )
                 .execute()
             cache?.set(entity.name.value, entity)
@@ -80,8 +80,8 @@ class RPKWarpTable(private val database: Database, private val plugin: RPKTravel
                 .set(RPKIT_WARP.X, entity.location.x)
                 .set(RPKIT_WARP.Y, entity.location.y)
                 .set(RPKIT_WARP.Z, entity.location.z)
-                .set(RPKIT_WARP.YAW, entity.location.yaw.toDouble())
-                .set(RPKIT_WARP.PITCH, entity.location.pitch.toDouble())
+                .set(RPKIT_WARP.YAW, entity.location.yaw)
+                .set(RPKIT_WARP.PITCH, entity.location.pitch)
                 .where(RPKIT_WARP.NAME.eq(entity.name.value))
                 .execute()
             cache?.set(entity.name.value, entity)

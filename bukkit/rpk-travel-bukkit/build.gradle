@@ -14,6 +14,7 @@
  */
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "nu.studer.jooq" version "8.0"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -29,21 +30,61 @@ if (propertiesFile.exists()) {
 }
 
 dependencies {
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.7.0"
-    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.7.0"
-    implementation group: "org.spigotmc", name: "spigot-api", version: "1.19-R0.1-SNAPSHOT"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-stdlib-jdk8", version: "1.7.22"
+    implementation group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "1.7.22"
+    implementation group: "org.spigotmc", name: "spigot-api", version: "1.19.2-R0.1-SNAPSHOT"
     implementation group: "org.bstats", name: "bstats-bukkit", version: "3.0.0"
-    implementation group: "org.jooq", name: "jooq", version: "3.16.6"
+    implementation group: "org.jooq", name: "jooq", version: "3.17.6"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
+    implementation project(":bukkit:rpk-character-lib-bukkit")
     implementation project(":bukkit:rpk-warp-lib-bukkit")
+    jooqGenerator "org.jooq:jooq-meta-extensions:3.17.6"
 }
 
 processResources {
     filter ReplaceTokens, tokens: [
             "version": version
     ]
+}
+
+import org.jooq.meta.jaxb.Logging
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                logging = Logging.WARN
+                generator {
+                    name = "org.jooq.codegen.DefaultGenerator"
+                    database {
+                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                        inputSchema = "PUBLIC"
+                        includes = ".*"
+                        excludes = ""
+                        properties {
+                            property {
+                                key = "scripts"
+                                value = "src/main/resources/com/rpkit/travel/migrations/sqlite"
+                            }
+                            property {
+                                key = "sort"
+                                value = "semantic"
+                            }
+                            property {
+                                key = "defaultNameCase"
+                                value = "lower"
+                            }
+                        }
+                    }
+                    target {
+                        packageName = "com.rpkit.travel.bukkit.database.jooq"
+                    }
+                }
+            }
+        }
+    }
 }
 
 shadowJar {

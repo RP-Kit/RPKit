@@ -31,6 +31,7 @@ import com.rpkit.chat.bukkit.chatchannel.undirected.*
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupService
 import com.rpkit.chat.bukkit.chatgroup.RPKChatGroupServiceImpl
 import com.rpkit.chat.bukkit.command.chatchannel.ChatChannelCommand
+import com.rpkit.chat.bukkit.command.chatchannel.QuickChatChannelCommand
 import com.rpkit.chat.bukkit.command.chatgroup.ChatGroupCommand
 import com.rpkit.chat.bukkit.command.listchatchannels.ListChatChannelsCommand
 import com.rpkit.chat.bukkit.command.message.MessageCommand
@@ -45,6 +46,7 @@ import com.rpkit.chat.bukkit.irc.RPKIRCService
 import com.rpkit.chat.bukkit.irc.RPKIRCServiceImpl
 import com.rpkit.chat.bukkit.listener.AsyncPlayerChatListener
 import com.rpkit.chat.bukkit.listener.PlayerCommandPreprocessListener
+import com.rpkit.chat.bukkit.listener.PlayerJoinListener
 import com.rpkit.chat.bukkit.listener.RPKMinecraftProfileDeleteListener
 import com.rpkit.chat.bukkit.messages.ChatMessages
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
@@ -53,6 +55,7 @@ import com.rpkit.chat.bukkit.prefix.RPKPrefixServiceImpl
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.chat.bukkit.snooper.RPKSnooperServiceImpl
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
+import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
 import com.rpkit.core.database.DatabaseConnectionProperties
@@ -61,12 +64,17 @@ import com.rpkit.core.database.UnsupportedDatabaseDialectException
 import com.rpkit.core.plugin.RPKPlugin
 import com.rpkit.core.service.Services
 import org.bstats.bukkit.Metrics
+import org.bukkit.command.CommandMap
+import org.bukkit.command.PluginCommand
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.SimplePluginManager
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
+import java.lang.reflect.Constructor
 
 /**
  * RPK chat plugin default implementation.
@@ -90,10 +98,14 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         // Format parts
         ConfigurationSerialization.registerClass(ChannelPart::class.java, "ChannelPart")
         ConfigurationSerialization.registerClass(MessagePart::class.java, "MessagePart")
+        ConfigurationSerialization.registerClass(ReceiverCharacterCardFieldPart::class.java, "ReceiverCharacterCardFieldPart")
         ConfigurationSerialization.registerClass(ReceiverCharacterNamePart::class.java, "ReceiverCharacterNamePart")
+        ConfigurationSerialization.registerClass(ReceiverPlaceholderPart::class.java, "ReceiverPlaceholderPart")
         ConfigurationSerialization.registerClass(ReceiverPrefixPart::class.java, "ReceiverPrefixPart")
         ConfigurationSerialization.registerClass(ReceiverProfileNamePart::class.java, "ReceiverProfileNamePart")
+        ConfigurationSerialization.registerClass(SenderCharacterCardFieldPart::class.java, "SenderCharacterCardFieldPart")
         ConfigurationSerialization.registerClass(SenderCharacterNamePart::class.java, "SenderCharacterNamePart")
+        ConfigurationSerialization.registerClass(SenderPlaceholderPart::class.java, "SenderPlaceholderPart")
         ConfigurationSerialization.registerClass(SenderPrefixPart::class.java, "SenderPrefixPart")
         ConfigurationSerialization.registerClass(SenderProfileNamePart::class.java, "SenderProfileNamePart")
         ConfigurationSerialization.registerClass(TextPart::class.java)
@@ -221,12 +233,16 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         getCommand("message")?.setExecutor(MessageCommand(this))
         getCommand("reply")?.setExecutor(ReplyCommand(this))
         getCommand("snoop")?.setExecutor(SnoopCommand(this))
+        Services[RPKChatChannelService::class.java]?.chatChannels?.forEach { chatChannel ->
+            getDynamicCommand(chatChannel.name.value).setExecutor(QuickChatChannelCommand(this, chatChannel).toBukkit())
+        }
     }
 
     private fun registerListeners() {
         registerListeners(
             AsyncPlayerChatListener(this),
             PlayerCommandPreprocessListener(this),
+            PlayerJoinListener(),
             RPKMinecraftProfileDeleteListener(this)
         )
     }
@@ -264,6 +280,21 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
                     PermissionDefault.FALSE
             ))
         }
+    }
+
+    private fun getCommandMap(): CommandMap {
+        val commandMapField = SimplePluginManager::class.java.getDeclaredField("commandMap")
+        commandMapField.isAccessible = true
+        return commandMapField.get(server.pluginManager) as CommandMap
+    }
+
+    private fun getDynamicCommand(name: String, vararg aliases: String): PluginCommand {
+        val constructor: Constructor<PluginCommand> = PluginCommand::class.java.getDeclaredConstructor(String::class.java, Plugin::class.java)
+        constructor.isAccessible = true
+        val command = constructor.newInstance(name, this)
+        command.aliases = aliases.toList()
+        getCommandMap().register(description.name, command)
+        return command
     }
 
 }

@@ -20,8 +20,9 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.field.HideableCharacterCardField
 import com.rpkit.characters.bukkit.character.field.RPKCharacterCardFieldService
 import com.rpkit.characters.bukkit.race.RPKRace
-import com.rpkit.characters.bukkit.race.RPKRaceName
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpecies
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.location.RPKLocation
 import com.rpkit.core.service.Services
@@ -49,9 +50,11 @@ class RPKCharacterImpl(
     name: String = plugin.config.getString("characters.defaults.name") ?: "",
     override var gender: String? = plugin.config.getString("characters.defaults.gender"),
     override var age: Int = plugin.config.getInt("characters.defaults.age"),
-    race: RPKRace? = plugin.config.getString("characters.defaults.race")
-            ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
+    species: RPKSpecies? = plugin.config.getString("characters.defaults.species")
+            ?.let { Services[RPKSpeciesService::class.java]?.getSpecies(RPKSpeciesName(it)) },
     description: String = plugin.config.getString("characters.defaults.description") ?: "",
+    override var height: Double? = plugin.config.getDouble("characters.defaults.height"),
+    override var weight: Double? = plugin.config.getDouble("characters.defaults.weight"),
     dead: Boolean = plugin.config.getBoolean("characters.defaults.dead"),
     override var location: RPKLocation = Bukkit.getWorlds()[0].spawnLocation.toRPKLocation(),
     override var inventoryContents: Array<ItemStack?> = (plugin.config.getList("characters.defaults.inventory-contents") as MutableList<ItemStack?>).toTypedArray(),
@@ -69,8 +72,10 @@ class RPKCharacterImpl(
     override var isNameHidden: Boolean = plugin.config.getBoolean("characters.defaults.name-hidden"),
     override var isGenderHidden: Boolean = plugin.config.getBoolean("characters.defaults.gender-hidden"),
     override var isAgeHidden: Boolean = plugin.config.getBoolean("characters.defaults.age-hidden"),
-    override var isRaceHidden: Boolean = plugin.config.getBoolean("characters.defaults.race-hidden"),
-    override var isDescriptionHidden: Boolean = plugin.config.getBoolean("characters.defaults.description-hidden")
+    override var isSpeciesHidden: Boolean = plugin.config.getBoolean("characters.defaults.species-hidden"),
+    override var isDescriptionHidden: Boolean = plugin.config.getBoolean("characters.defaults.description-hidden"),
+    override var isHeightHidden: Boolean = plugin.config.getBoolean("characters.defaults.height-hidden"),
+    override var isWeightHidden: Boolean = plugin.config.getBoolean("characters.defaults.weight-hidden")
 ) : RPKCharacter {
 
     override var name = name
@@ -84,13 +89,20 @@ class RPKCharacterImpl(
             }
         }
 
-    override var race = race
-        set(race) {
+    @Deprecated("Use species", ReplaceWith("species"))
+    override var race: RPKRace?
+        get() = species
+        set(value) {
+            species = value
+        }
+
+    override var species = species
+        set(species) {
             age = age.coerceIn(
-                race?.minAge ?: plugin.config.getInt("characters.min-age"),
-                race?.maxAge ?: plugin.config.getInt("characters.max-age")
+                species?.minAge ?: plugin.config.getInt("characters.min-age"),
+                species?.maxAge ?: plugin.config.getInt("characters.max-age")
             )
-            field = race
+            field = species
         }
 
     override var description = description
@@ -102,6 +114,13 @@ class RPKCharacterImpl(
         }
 
     override var isDead = dead
+
+    @Deprecated("Use isSpeciesHidden", replaceWith = ReplaceWith("isSpeciesHidden"))
+    override var isRaceHidden: Boolean
+        get() = isSpeciesHidden
+        set(value) {
+            isSpeciesHidden = value
+        }
 
     override fun showCharacterCard(minecraftProfile: RPKMinecraftProfile) {
         CompletableFuture.runAsync {

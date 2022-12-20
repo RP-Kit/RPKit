@@ -23,9 +23,9 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
 import com.rpkit.characters.bukkit.protocol.reloadPlayer
-import com.rpkit.characters.bukkit.race.RPKRace
-import com.rpkit.characters.bukkit.race.RPKRaceName
-import com.rpkit.characters.bukkit.race.RPKRaceService
+import com.rpkit.characters.bukkit.species.RPKSpecies
+import com.rpkit.characters.bukkit.species.RPKSpeciesName
+import com.rpkit.characters.bukkit.species.RPKSpeciesService
 import com.rpkit.core.bukkit.location.toBukkitLocation
 import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.location.RPKLocation
@@ -173,7 +173,8 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                             reloadPlayer(
                                 bukkitPlayer,
                                 newCharacter,
-                                plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
+                                plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId }
+                            )
                         }
                     }
                     newCharacter.minecraftProfile = minecraftProfile
@@ -186,6 +187,23 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                         if (minecraftProfileId != null) {
                             activeCharacters[minecraftProfileId.value] = characterId.value
                             plugin.logger.info("Character ${newCharacter.name} (${characterId.value}) loaded for Minecraft user ${minecraftProfile.minecraftUsername.value} (${minecraftProfile.minecraftUUID})")
+                        }
+                    }
+                } else {
+                    val offlineBukkitPlayer = plugin.server.getOfflinePlayer(minecraftProfile.minecraftUUID)
+                    val bukkitPlayer = offlineBukkitPlayer.player
+                    if (bukkitPlayer != null) {
+                        bukkitPlayer.inventory.contents = emptyArray()
+                        bukkitPlayer.inventory.helmet = null
+                        bukkitPlayer.inventory.chestplate = null
+                        bukkitPlayer.inventory.leggings = null
+                        bukkitPlayer.inventory.boots = null
+                        bukkitPlayer.teleport(plugin.server.worlds.first().spawnLocation)
+                        bukkitPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.baseValue = 20.0
+                        bukkitPlayer.health = 20.0
+                        bukkitPlayer.foodLevel = 20
+                        if (plugin.config.getBoolean("characters.set-player-display-name")) {
+                            bukkitPlayer.setDisplayName(bukkitPlayer.name)
                         }
                     }
                 }
@@ -213,8 +231,10 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         name: String?,
         gender: String?,
         age: Int?,
-        race: RPKRace?,
+        species: RPKSpecies?,
         description: String?,
+        height: Double?,
+        weight: Double?,
         isDead: Boolean?,
         location: RPKLocation?,
         inventoryContents: Array<ItemStack?>?,
@@ -232,8 +252,10 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
         isNameHidden: Boolean?,
         isGenderHidden: Boolean?,
         isAgeHidden: Boolean?,
-        isRaceHidden: Boolean?,
-        isDescriptionHidden: Boolean?
+        isSpeciesHidden: Boolean?,
+        isDescriptionHidden: Boolean?,
+        isHeightHidden: Boolean?,
+        isWeightHidden: Boolean?
     ): CompletableFuture<RPKCharacter> {
         val character = RPKCharacterImpl(
             plugin,
@@ -243,9 +265,11 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             name ?: plugin.config.getString("characters.defaults.name") ?: "",
             gender ?: plugin.config.getString("characters.defaults.gender"),
             age ?: plugin.config.getInt("characters.defaults.age"),
-            race ?: plugin.config.getString("characters.defaults.race")
-                ?.let { Services[RPKRaceService::class.java]?.getRace(RPKRaceName(it)) },
+            species ?: plugin.config.getString("characters.defaults.species")
+                ?.let { Services[RPKSpeciesService::class.java]?.getSpecies(RPKSpeciesName(it)) },
             description ?: plugin.config.getString("characters.defaults.description") ?: "",
+            height ?: plugin.config.getDouble("characters.defaults.height"),
+            weight ?: plugin.config.getDouble("characters.defaults.weight"),
             isDead ?: plugin.config.getBoolean("characters.defaults.dead"),
             location ?: plugin.server.worlds[0].spawnLocation.toRPKLocation(),
             inventoryContents
@@ -265,8 +289,10 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
             isNameHidden ?: plugin.config.getBoolean("characters.defaults.name-hidden"),
             isGenderHidden ?: plugin.config.getBoolean("characters.defaults.gender-hidden"),
             isAgeHidden ?: plugin.config.getBoolean("characters.defaults.age-hidden"),
-            isRaceHidden ?: plugin.config.getBoolean("characters.defaults.race-hidden"),
-            isDescriptionHidden ?: plugin.config.getBoolean("characters.defaults.description-hidden")
+            isSpeciesHidden ?: plugin.config.getBoolean("characters.defaults.species-hidden"),
+            isDescriptionHidden ?: plugin.config.getBoolean("characters.defaults.description-hidden"),
+            isHeightHidden ?: plugin.config.getBoolean("characters.defaults.height-hidden"),
+            isWeightHidden ?: plugin.config.getBoolean("characters.defaults.weight-hidden")
         )
         return addCharacter(character).thenApply { character }
     }
