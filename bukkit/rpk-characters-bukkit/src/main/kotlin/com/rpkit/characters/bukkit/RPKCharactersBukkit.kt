@@ -215,6 +215,13 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
         if (config.getBoolean("characters.kill-character-on-death")) {
             registerListeners(PlayerDeathListener(this))
         }
+
+//        ProtocolLibrary.getProtocolManager().addPacketListener(object : PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.PLAYER_INFO) {
+//            override fun onPacketSending(event: PacketEvent) {
+//                plugin.logger.info(event.packet.playerInfoAction.fields.zip(event.packet.playerInfoAction.values).toMap().toString())
+//                plugin.logger.info(event.packet.playerInfoActions.)
+//            }
+//        })
     }
 
     private var webConfig: FileConfiguration? = null

@@ -23,8 +23,7 @@ import com.rpkit.players.bukkit.profile.RPKProfileId
 import com.rpkit.players.bukkit.profile.RPKProfileService
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfile
-import net.dv8tion.jda.api.entities.Emoji
-import net.dv8tion.jda.api.interactions.components.ActionRow
+import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import java.util.concurrent.CompletableFuture
@@ -59,7 +58,7 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
         discordServer
             ?.getUser(profile.discordId)
             ?.openPrivateChannel()?.queue { channel ->
-                channel.sendMessage(message).setActionRows(ActionRow.of(buttons.map { button ->
+                channel.sendMessage(message).addActionRow(buttons.map { button ->
                     val style = when (button.variant) {
                         DiscordButton.Variant.PRIMARY -> ButtonStyle.PRIMARY
                         DiscordButton.Variant.SUCCESS -> ButtonStyle.SUCCESS
@@ -72,7 +71,7 @@ class RPKDiscordServiceImpl(override val plugin: RPKChatBukkit) : RPKDiscordServ
                         is DiscordTextButton -> Button.of(style, button.id, button.text)
                         is DiscordEmojiButton -> Button.of(style, button.id, Emoji.fromUnicode(button.emoji))
                     }
-            })).queue()
+            }).queue()
         }
     }
 

@@ -23,10 +23,9 @@ buildscript {
 }
 
 plugins {
-    id "com.github.breadmoirai.github-release" version "2.2.12"
-    id "org.jetbrains.kotlin.jvm" version "1.7.0" apply false
+    id "org.jetbrains.kotlin.jvm" version "1.7.22" apply false
     id "maven-publish"
-    id "org.jetbrains.dokka" version "1.7.0" apply false
+    id "org.jetbrains.dokka" version "1.7.20" apply false
 }
 
 repositories {
@@ -64,47 +63,5 @@ subprojects {
         kotlinOptions {
             jvmTarget = "17"
         }
-    }
-}
-
-def githubToken = ""
-def githubPropertiesFile = new File("github.properties")
-if (githubPropertiesFile.exists()) {
-    def githubProperties = new Properties()
-    githubProperties.load(new FileInputStream(githubPropertiesFile))
-    githubToken = githubProperties.get("token")
-}
-
-githubRelease {
-    token githubToken
-    owner "RP-Kit"
-    repo "RPKit"
-    releaseName "Version " + version
-    releaseAssets subprojects.stream()
-            .flatMap { subproject ->
-                subproject.evaluate()
-                def noSource = true
-                def sourceSets = subproject.sourceSets
-                for (sourceSet in sourceSets) {
-                    noSource = !sourceSet.allSource.isEmpty() || !noSource
-                }
-                if (!noSource) {
-                    def files = subproject.tasks.jar.outputs.getFiles().getFiles().stream()
-                    if (subproject.tasks.findByName("shadowJar")) {
-                        files = subproject.tasks.shadowJar.outputs.getFiles().getFiles().stream()
-                    }
-                    files
-                } else {
-                    Arrays.stream(new File[0])
-                }
-            }.toArray { size -> new File[size] }
-}
-
-subprojects.forEach { subproject ->
-    subproject.evaluate()
-    if (subproject.tasks.findByName("shadowJar")) {
-        project.tasks.githubRelease.dependsOn subproject.tasks.shadowJar
-    } else {
-        project.tasks.githubRelease.dependsOn subproject.tasks.jar
     }
 }

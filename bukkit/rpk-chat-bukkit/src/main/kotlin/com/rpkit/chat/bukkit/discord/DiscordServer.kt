@@ -24,18 +24,17 @@ import com.rpkit.chat.bukkit.discord.command.DiscordVersionCommand
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.discord.DiscordUserId
 import com.rpkit.players.bukkit.profile.discord.RPKDiscordProfileService
-import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileService
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
+import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.requests.GatewayIntent.*
+import net.dv8tion.jda.api.utils.cache.CacheFlag
 import org.bukkit.ChatColor
 import java.util.concurrent.ConcurrentHashMap
 
@@ -50,12 +49,12 @@ class DiscordServer(
             GUILD_MEMBERS,
             GUILD_PRESENCES,
             GUILD_VOICE_STATES,
-            GUILD_EMOJIS,
+            GUILD_EMOJIS_AND_STICKERS,
             GUILD_MESSAGES,
             DIRECT_MESSAGES,
             DIRECT_MESSAGE_REACTIONS
         )
-    ).build()
+    ).disableCache(CacheFlag.SCHEDULED_EVENTS).build()
 
     private var ready = false
 
@@ -102,35 +101,6 @@ class DiscordServer(
                 chatChannel.undirectedPipeline.filter { it !is DiscordComponent },
                 true
             )
-        }
-    }
-
-    override fun onMessageReactionAdd(event: MessageReactionAddEvent) {
-        if (event.user == jda.selfUser) return
-        if (event.reaction.reactionEmote.emoji != "\u2705") return
-        val messageId = event.messageIdLong
-        val discordService = Services[RPKDiscordService::class.java] ?: return
-        discordService.getMessageProfileLink(messageId).thenAccept getMessageProfileLink@{ profile ->
-            if (profile == null) return@getMessageProfileLink
-            val discordProfileService = Services[RPKDiscordProfileService::class.java] ?: return@getMessageProfileLink
-            val user = event.user ?: return@getMessageProfileLink
-            discordProfileService.getDiscordProfile(DiscordUserId(user.idLong)).thenAccept getDiscordProfile@{ discordProfile ->
-                discordProfile.profile = profile
-                discordProfileService.updateDiscordProfile(discordProfile)
-                val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@getDiscordProfile
-                user.openPrivateChannel().queue { privateChannel ->
-                    privateChannel.sendMessage("Your Discord profile has been successfully linked to ${profile.name.value}.").queue()
-                    minecraftProfileService.getMinecraftProfiles(profile).thenAccept { minecraftProfiles ->
-                        minecraftProfiles
-                            .filter { minecraftProfile -> minecraftProfile.isOnline }
-                            .forEach { minecraftProfile ->
-                                minecraftProfile.sendMessage(plugin.messages["account-link-discord-successful", mapOf(
-                                    "discord-tag" to user.asTag
-                                )])
-                            }
-                    }
-                }
-            }
         }
     }
 

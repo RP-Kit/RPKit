@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Ren Binden
+ * Copyright 2022 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package com.rpkit.chat.bukkit.discord
 
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.emoji.Emoji
 
 class DiscordMessageImpl(val message: Message) : DiscordMessage {
     override val id: Long = message.idLong
 
     override fun addReaction(reaction: DiscordReaction) {
         when (reaction) {
-            is DiscordUnicodeReaction -> message.addReaction(reaction.unicode).queue()
+            is DiscordUnicodeReaction -> message.addReaction(Emoji.fromUnicode(reaction.unicode)).queue()
         }
     }
 

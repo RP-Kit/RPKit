@@ -21,7 +21,6 @@ import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction.ADD_PLAYER
-import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction.REMOVE_PLAYER
 import com.comphenix.protocol.wrappers.PlayerInfoData
 import com.comphenix.protocol.wrappers.WrappedChatComponent
 import com.comphenix.protocol.wrappers.WrappedGameProfile
@@ -29,6 +28,7 @@ import com.rpkit.characters.bukkit.character.RPKCharacter
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.chat.ComponentSerializer
 import org.bukkit.entity.Player
+import java.util.*
 
 fun reloadPlayer(player: Player, character: RPKCharacter, viewers: List<Player>) {
     reloadPlayerInfo(player, character, viewers)
@@ -53,18 +53,13 @@ private fun sendRemovePlayerPacket(player: Player, recipients: List<Player>) {
 }
 
 private fun createRemovePlayerPacket(player: Player): PacketContainer {
-    val packet = ProtocolLibrary.getProtocolManager().createPacket(PLAYER_INFO)
-    packet.playerInfoAction.write(0, REMOVE_PLAYER)
-    val profile = WrappedGameProfile.fromPlayer(player)
-    val chatComponent = WrappedChatComponent.fromText(profile.name)
-    val playerInfoData =
-        PlayerInfoData(profile, player.ping, EnumWrappers.NativeGameMode.fromBukkit(player.gameMode), chatComponent)
-    packet.playerInfoDataLists.write(0, listOf(playerInfoData))
+    val packet = ProtocolLibrary.getProtocolManager().createPacket(PLAYER_INFO_REMOVE)
+    packet.structures.withType<List<UUID>>(List::class.java).write(0, listOf(player.uniqueId))
     return packet
 }
 
 private fun sendAddPlayerPacket(player: Player, character: RPKCharacter, recipients: List<Player>) {
-    val packet = createAddPlayerPacket(player, character)
+    val packet = createAddPlayerPacket(player, character) ?: return
     recipients.forEach { onlinePlayer ->
         ProtocolLibrary.getProtocolManager().sendServerPacket(onlinePlayer, packet)
     }
@@ -73,19 +68,22 @@ private fun sendAddPlayerPacket(player: Player, character: RPKCharacter, recipie
 private fun createAddPlayerPacket(
     player: Player,
     character: RPKCharacter
-): PacketContainer {
+): PacketContainer? {
     val packet = ProtocolLibrary.getProtocolManager().createPacket(PLAYER_INFO)
-    packet.playerInfoAction.write(0, ADD_PLAYER)
+    packet.playerInfoActions.write(0, setOf(ADD_PLAYER))
     val profile = WrappedGameProfile.fromPlayer(player).withName(character.name.take(16))
     val tabListTextComponent =
         WrappedChatComponent.fromJson(ComponentSerializer.toString(TextComponent.fromLegacyText(player.playerListName)))
     val playerInfoData = PlayerInfoData(
-        profile,
+        player.uniqueId,
         player.ping,
+        true,
         EnumWrappers.NativeGameMode.fromBukkit(player.gameMode),
-        tabListTextComponent
+        profile,
+        tabListTextComponent,
+        null
     )
-    packet.playerInfoDataLists.write(0, listOf(playerInfoData))
+    packet.playerInfoDataLists.write(1, listOf(playerInfoData))
     return packet
 }
 
