@@ -18,4 +18,4 @@ ALTER TABLE `rpkit_character`
     ADD `weight` double NULL;
 
 ALTER TABLE `rpkit_character`
-    ADD `weight_hidden` boolean NOT NULL;
+    ADD `weight_hidden` boolean NOT NULL DEFAULT false;
