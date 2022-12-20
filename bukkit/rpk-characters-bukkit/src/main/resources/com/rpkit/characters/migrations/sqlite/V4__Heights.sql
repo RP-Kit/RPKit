@@ -18,4 +18,4 @@ ALTER TABLE `rpkit_character`
     ADD `height` double NULL;
 
 ALTER TABLE `rpkit_character`
-    ADD `height_hidden` boolean NOT NULL;
+    ADD `height_hidden` boolean NOT NULL DEFAULT false;
