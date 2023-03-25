@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Ren Binden
+ * Copyright 2023 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ class RPKStatsPlaceholderExpansion(private val plugin: RPKStatsBukkit) : Placeho
     override fun getAuthor() = plugin.description.authors.joinToString()
     override fun getVersion() = plugin.description.version
 
-    override fun onPlaceholderRequest(player: Player, params: String): String? {
+    override fun onPlaceholderRequest(player: Player?, params: String): String? {
+        if (player == null) return null
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val statService = Services[RPKStatService::class.java] ?: return null
