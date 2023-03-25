@@ -31,7 +31,8 @@ class RPKCharactersPlaceholderExpansion(private val plugin: RPKCharactersBukkit)
     override fun getAuthor() = plugin.description.authors.joinToString()
     override fun getVersion() = plugin.description.version
 
-    override fun onPlaceholderRequest(player: Player, params: String): String? {
+    override fun onPlaceholderRequest(player: Player?, params: String): String? {
+        if (player == null) return null
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return null
         val characterService = Services[RPKCharacterService::class.java] ?: return null
         val minecraftProfile = player.let { minecraftProfileService.getPreloadedMinecraftProfile(it) }
