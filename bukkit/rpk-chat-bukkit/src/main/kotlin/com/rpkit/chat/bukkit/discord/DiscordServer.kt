@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Ren Binden
+ * Copyright 2023 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.requests.GatewayIntent.*
+import net.dv8tion.jda.api.requests.GatewayIntent.GUILD_VOICE_STATES
+import net.dv8tion.jda.api.requests.GatewayIntent.MESSAGE_CONTENT
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import org.bukkit.ChatColor
 import java.util.concurrent.ConcurrentHashMap
@@ -43,18 +44,16 @@ class DiscordServer(
         val guildName: String
 ) : ListenerAdapter() {
 
-    private val jda = JDABuilder.create(
+    private val jda = JDABuilder.createDefault(
         plugin.config.getString("discord.token"),
-        listOf(
-            GUILD_MEMBERS,
-            GUILD_PRESENCES,
-            GUILD_VOICE_STATES,
-            GUILD_EMOJIS_AND_STICKERS,
-            GUILD_MESSAGES,
-            DIRECT_MESSAGES,
-            DIRECT_MESSAGE_REACTIONS
+    )
+        .enableIntents(MESSAGE_CONTENT)
+        .disableIntents(GUILD_VOICE_STATES)
+        .disableCache(
+            CacheFlag.MEMBER_OVERRIDES,
+            CacheFlag.VOICE_STATE,
         )
-    ).disableCache(CacheFlag.SCHEDULED_EVENTS).build()
+        .build()
 
     private var ready = false
 
