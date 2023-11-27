@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2023 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,7 +177,7 @@ class MoneyPayCommand(private val plugin: RPKEconomyBukkit) : CommandExecutor {
 
         override fun acceptValidatedInput(context: ConversationContext, input: Player): Prompt {
             val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return END_OF_CONVERSATION
-            val minecraftProfile = minecraftProfileService.getMinecraftProfile(input)
+            val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(input)
             context.setSessionData("minecraft_profile", minecraftProfile)
             return PlayerSetPrompt()
         }
