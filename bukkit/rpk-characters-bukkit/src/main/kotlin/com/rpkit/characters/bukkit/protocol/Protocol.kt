@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Ren Binden
+ * Copyright 2023 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,8 @@ package com.rpkit.characters.bukkit.protocol
 import com.comphenix.protocol.PacketType.Play.Server.*
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketContainer
-import com.comphenix.protocol.wrappers.EnumWrappers
+import com.comphenix.protocol.wrappers.*
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction.ADD_PLAYER
-import com.comphenix.protocol.wrappers.PlayerInfoData
-import com.comphenix.protocol.wrappers.WrappedChatComponent
-import com.comphenix.protocol.wrappers.WrappedGameProfile
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.chat.ComponentSerializer
@@ -81,7 +78,7 @@ private fun createAddPlayerPacket(
         EnumWrappers.NativeGameMode.fromBukkit(player.gameMode),
         profile,
         tabListTextComponent,
-        null
+        null as? WrappedRemoteChatSessionData
     )
     packet.playerInfoDataLists.write(1, listOf(playerInfoData))
     return packet

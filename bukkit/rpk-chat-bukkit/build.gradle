@@ -36,7 +36,7 @@ dependencies {
     implementation group: "org.bstats", name: "bstats-bukkit", version: "3.0.0"
     implementation group: "com.github.pircbotx", name: "pircbotx", version: "2.2"
     implementation group: "org.jooq", name: "jooq", version: "3.17.6"
-    implementation(group: "net.dv8tion", name: "JDA", version: "5.0.0-beta.2") {
+    implementation(group: "net.dv8tion", name: "JDA", version: "5.0.0-beta.18") {
         exclude module: "opus-java"
     }
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.6"
@@ -120,6 +120,7 @@ shadowJar {
         include(dependency("com.neovisionaries:nv-websocket-client"))
         include(dependency("com.squareup.okhttp3:okhttp"))
         include(dependency("com.squareup.okio:okio"))
+        include(dependency("com.squareup.okio:okio-jvm"))
         include(dependency("org.apache.commons:commons-collections4"))
         include(dependency("net.sf.trove4j:trove4j"))
         include(dependency("com.fasterxml.jackson.core:jackson-databind"))

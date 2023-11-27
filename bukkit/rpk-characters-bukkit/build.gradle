@@ -41,7 +41,7 @@ dependencies {
     implementation group: "org.http4k", name: "http4k-format-gson"
     implementation group: "org.slf4j", name: "slf4j-jdk14", version: "2.0.6"
     implementation group: "me.clip", name: "placeholderapi", version: "2.11.2"
-    implementation group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0-SNAPSHOT"
+    implementation group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.1.0"
     implementation project(":rpk-core")
     implementation project(":bukkit:rpk-core-bukkit")
     implementation project(":bukkit:rpk-player-lib-bukkit")
