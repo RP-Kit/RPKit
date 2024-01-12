@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Ren Binden
+ * Copyright 2024 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,10 @@ class NotificationListCommand(private val plugin: RPKNotificationsBukkit) : RPKC
         }
         val page = args.lastOrNull()?.toIntOrNull() ?: 1
         return notificationService.getNotifications(profile).thenApply { notifications ->
+            if (notifications.isEmpty()) {
+                sender.sendMessage(plugin.messages.notificationListNoNotifications)
+                return@thenApply CommandSuccess
+            }
             val view = PaginatedView.fromChatComponents(
                 TextComponent.fromLegacyText(plugin.messages.notificationListTitle),
                 notifications

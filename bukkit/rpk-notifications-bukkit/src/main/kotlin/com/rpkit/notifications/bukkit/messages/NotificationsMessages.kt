@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Ren Binden
+ * Copyright 2024 Ren Binden
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,7 @@ class NotificationsMessages(plugin: RPKNotificationsBukkit): BukkitMessages(plug
     val notificationListItem = getParameterized("notification-list-item")
         .let(::NotificationListItemMessage)
     val notificationListItemHover = get("notification-list-item-hover")
+    val notificationListNoNotifications = get("notification-list-no-notifications")
     val notFromConsole = get("not-from-console")
     val noProfileSelf = get("no-profile-self")
     val noNotificationService = get("no-notification-service")
