@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Ren Binden
+ * Copyright 2024 Ren Binden
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +30,8 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
+import java.util.logging.Level.SEVERE
 import java.util.regex.Pattern
 
 /**
@@ -61,8 +64,8 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages["no-chat-channel-service"])
             return true
         }
-        chatChannelService.chatChannels.forEach { chatChannel ->
-            chatChannel.listeners.thenAccept { listeners ->
+        val messageComponentFutures = chatChannelService.chatChannels.map { chatChannel ->
+            val messageComponents = chatChannel.listeners.thenApply { listeners ->
                 val messageComponents = mutableListOf<BaseComponent>()
                 val pattern = Pattern.compile("(\\\$\\{channel\\})|(\\\$\\{mute\\})|(${ChatColor.COLOR_CHAR}x(${ChatColor.COLOR_CHAR}[0-9a-f]){6})|(${ChatColor.COLOR_CHAR}[0-9a-f])")
                 val template = plugin.messages["listchatchannels-item", mapOf(
@@ -169,7 +172,17 @@ class ListChatChannelsCommand(private val plugin: RPKChatBukkit) : CommandExecut
                     textComponent.isItalic = chatFormat == ChatColor.ITALIC
                 }
                 messageComponents.add(textComponent)
-                sender.spigot().sendMessage(*messageComponents.toTypedArray())
+                return@thenApply messageComponents.toTypedArray()
+            }.exceptionally { exception ->
+                plugin.logger.log(SEVERE, "Failed to list chat channels for player ${sender.name}", exception)
+                throw exception
+            }
+            return@map messageComponents
+        }
+        CompletableFuture.allOf(*messageComponentFutures.toTypedArray()).thenRunAsync {
+            messageComponentFutures.forEach { future ->
+                val messageComponents = future.join()
+                sender.spigot().sendMessage(*messageComponents)
             }
         }
         return true
