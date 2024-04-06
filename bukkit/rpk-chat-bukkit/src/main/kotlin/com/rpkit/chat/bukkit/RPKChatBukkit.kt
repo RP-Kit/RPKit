@@ -37,6 +37,7 @@ import com.rpkit.chat.bukkit.command.listchatchannels.ListChatChannelsCommand
 import com.rpkit.chat.bukkit.command.message.MessageCommand
 import com.rpkit.chat.bukkit.command.mute.MuteCommand
 import com.rpkit.chat.bukkit.command.reply.ReplyCommand
+import com.rpkit.chat.bukkit.command.setchatnamecolor.SetChatNameColorCommand
 import com.rpkit.chat.bukkit.command.snoop.SnoopCommand
 import com.rpkit.chat.bukkit.command.unmute.UnmuteCommand
 import com.rpkit.chat.bukkit.database.table.*
@@ -182,6 +183,7 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         database.addTable(RPKChatGroupMemberTable(database, this))
         database.addTable(RPKLastUsedChatGroupTable(database, this))
         database.addTable(RPKSnooperTable(database, this))
+        database.addTable(RPKChatNameColorTable(database, this))
 
         // Class loader needs to be the plugin's class loader in order for ServiceLoader in slf4j to be able to find
         // the SLF4JLoggerProvider implementation, as the remapped slf4j-jdk14 is loaded by the plugin's class loader
@@ -233,6 +235,7 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         getCommand("message")?.setExecutor(MessageCommand(this))
         getCommand("reply")?.setExecutor(ReplyCommand(this))
         getCommand("snoop")?.setExecutor(SnoopCommand(this))
+        getCommand("setchatnamecolor")?.setExecutor(SetChatNameColorCommand(this))
         Services[RPKChatChannelService::class.java]?.chatChannels?.forEach { chatChannel ->
             getDynamicCommand(chatChannel.name.value).setExecutor(QuickChatChannelCommand(this, chatChannel).toBukkit())
         }
