@@ -30,7 +30,7 @@ import java.util.logging.Level
 abstract class GenericTextPart(
     private val plugin: RPKChatBukkit,
     val font: String? = null,
-    val color: String? = null,
+    var color: String? = null,
     val isBold: Boolean? = null,
     val isItalic: Boolean? = null,
     val isUnderlined: Boolean? = null,

@@ -54,6 +54,9 @@ commands:
     description: Reply to the last private message or chat group message sent to you
     aliases: [r]
     usage: /<command> [message]
+  setchatnamecolor:
+    description: Sets the color of your name in chat
+    usage: /<command> [color]
 permissions:
   rpkit.chat.command.listchatchannels:
     description: Allows listing chat channels
@@ -99,4 +102,7 @@ permissions:
     default: true
   rpkit.chat.command.reply:
     description: Allows replying to private messages
+    default: true
+  rpkit.chat.command.setchatnamecolor:
+    description: Allows setting the color of your name in chat
     default: true
