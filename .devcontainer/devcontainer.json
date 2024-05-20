@@ -21,7 +21,8 @@
 		"vscode": {
 			"extensions": [
 				"vscjava.vscode-java-pack",
-				"vscjava.vscode-gradle"
+				"vscjava.vscode-gradle",
+				"fwcd.kotlin"
 			]
 		}
 	},
