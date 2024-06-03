@@ -21,7 +21,10 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
+import com.rpkit.chat.bukkit.database.table.RPKChatNameColorTable
 import com.rpkit.core.service.Services
+import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
@@ -93,5 +96,48 @@ class ReceiverCharacterNamePart(
             serialized["hover"] as? HoverAction,
             serialized["click"] as? ClickAction
         )
+    }
+
+    override fun toChatComponents(context: DirectedPreFormatMessageContext) = supplyAsync {
+        TextComponent.fromLegacyText(getText(context).join()).also {
+            for (component in it) {
+
+                if (font != null) component.font = font
+                component.color = getChatNameColor(context)
+                if (isBold != null) component.isBold = isBold
+                if (isItalic != null) component.isItalic = isItalic
+                if (isUnderlined != null) component.isUnderlined = isUnderlined
+                if (isStrikethrough != null) component.isStrikethrough = isStrikethrough
+                if (isObfuscated != null) component.isObfuscated = isObfuscated
+                if (insertion != null) component.insertion = insertion
+                if (hover != null) component.hoverEvent = hover.toHoverEvent(context).join()
+                if (click != null) component.clickEvent = click.toClickEvent(context).join()
+            }
+        }
+    }.exceptionally { exception ->
+        plugin.logger.log(Level.SEVERE, "Failed to convert text part to chat components", exception)
+        throw exception
+    }
+
+    // method to get chat name color
+    private fun getChatNameColor(context: DirectedPreFormatMessageContext): ChatColor {
+        // try to use chat name color from database
+        val minecraftProfile = context.senderMinecraftProfile
+        if (minecraftProfile != null) {
+            val minecraftProfileId = minecraftProfile.id
+            if (minecraftProfileId != null) {
+                val chatNameColorRecord = plugin.database.getTable(RPKChatNameColorTable::class.java)[minecraftProfileId].join()
+                if (chatNameColorRecord != null) {
+                    return ChatColor.of(chatNameColorRecord.chatNameColor)
+                }
+            }
+        }
+        return if (color == null) {
+            // default color
+            ChatColor.WHITE
+        } else {
+            // color from configuration
+            ChatColor.of(color)
+        }
     }
 }
