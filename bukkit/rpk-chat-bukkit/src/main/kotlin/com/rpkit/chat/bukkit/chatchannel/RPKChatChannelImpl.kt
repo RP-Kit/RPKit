@@ -171,9 +171,6 @@ class RPKChatChannelImpl(
                         format.flatMap { part -> part.toChatComponents(preFormatContext).join().toList() }.toTypedArray(),
                         preFormatContext.isCancelled
                     )
-                    if (senderMinecraftProfile != null) {
-                        setSenderCharacterNamePartColor(senderMinecraftProfile)
-                    };
                     directedPostFormatPipeline.forEach { component ->
                         postFormatContext = component.process(postFormatContext).join()
                     }
@@ -194,26 +191,4 @@ class RPKChatChannelImpl(
             }
         })
     }
-
-    private fun setSenderCharacterNamePartColor(senderMinecraftProfile: RPKMinecraftProfile) {
-        val minecraftProfileId = senderMinecraftProfile.id ?: return
-        val recordExists = plugin.database.getTable(RPKChatNameColorTable::class.java)[minecraftProfileId].join() != null
-        if (recordExists) {
-            val senderCharacterNamePart = getSenderCharacterNamePart() ?: return
-            val chatNameColorRecord = plugin.database.getTable(RPKChatNameColorTable::class.java)[minecraftProfileId].join()
-            if (chatNameColorRecord != null) {
-                senderCharacterNamePart.color = chatNameColorRecord.chatNameColor
-            }
-        }
-    }
-
-    private fun getSenderCharacterNamePart(): SenderCharacterNamePart? {
-        for (part in format) {
-            if (part is SenderCharacterNamePart) {
-                return part
-            }
-        }
-        return null
-    }
-
 }
