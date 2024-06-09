@@ -28,7 +28,6 @@ import com.rpkit.chat.bukkit.chatchannel.pipeline.UndirectedPipelineComponent
 import com.rpkit.chat.bukkit.context.DirectedPostFormatMessageContext
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
 import com.rpkit.chat.bukkit.context.UndirectedMessageContext
-import com.rpkit.chat.bukkit.database.table.RPKChatNameColorTable
 import com.rpkit.chat.bukkit.event.chatchannel.RPKBukkitChatChannelMessageEvent
 import com.rpkit.chat.bukkit.mute.RPKChatChannelMuteService
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
