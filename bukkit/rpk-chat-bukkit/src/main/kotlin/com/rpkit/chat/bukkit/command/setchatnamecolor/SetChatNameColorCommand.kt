@@ -62,11 +62,6 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
 
         // retrieve desired chat name color
         val chatNameColor = args[0]
-        if (isInputTooLong(chatNameColor)) {
-            sender.sendMessage(plugin.messages["setchatnamecolor-too-long"])
-            return true
-        }
-
         if (!isHexColorCodeValid(chatNameColor)) {
             sender.sendMessage(plugin.messages["setchatnamecolor-invalid-color-code"])
             return true
@@ -87,15 +82,6 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
             return@exceptionally null
         }
         return true
-    }
-
-    /**
-     * Checks if the input is too long. The maximum length for a chat name color is 16 characters.
-     * @param name the input to check
-     * @return true if the input is too long, false otherwise
-     */
-    private fun isInputTooLong(name: String): Boolean {
-        return name.length > 16
     }
 
     /**
