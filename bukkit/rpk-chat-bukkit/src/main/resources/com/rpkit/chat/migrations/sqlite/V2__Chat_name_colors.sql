@@ -18,5 +18,6 @@
 CREATE TABLE `rpkit_chat_name_color`
 (
     `minecraft_profile_id` int          NOT NULL,
-    `chat_name_color`      varchar(256) NOT NULL
+    `chat_name_color`      varchar(256) NOT NULL,
+    PRIMARY KEY (`minecraft_profile_id`)
 );
