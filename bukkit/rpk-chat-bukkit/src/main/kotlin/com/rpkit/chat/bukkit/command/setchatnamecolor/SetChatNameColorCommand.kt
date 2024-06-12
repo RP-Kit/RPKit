@@ -27,6 +27,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.runAsync
+import java.util.logging.Level.SEVERE
 
 /**
  * SetChatNameColor command.
@@ -76,8 +77,7 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
         setChatNameColorAsync(minecraftProfileId, chatNameColor).thenRun {
             sender.sendMessage(plugin.messages["setchatnamecolor-chat-name-color-has-been-set"])
         }.exceptionally { exception ->
-            plugin.logger.severe("Failed to set chat name color for ${minecraftProfile.name}")
-            plugin.logger.severe(exception.message)
+            plugin.logger.log(SEVERE, "Failed to set chat name color for ${minecraftProfile.name}", exception)
             sender.sendMessage(plugin.messages["setchatnamecolor-something-went-wrong"])
             return@exceptionally null
         }
