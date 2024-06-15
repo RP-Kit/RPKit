@@ -108,7 +108,7 @@ class SenderCharacterNamePart(
 
                 if (font != null) component.font = font
 
-                if (plugin.config.getBoolean("misc.chatNameColorOverrideEnabled")) {
+                if (plugin.config.getBoolean("misc.characterChatNameColorOverrideEnabled")) {
                     component.color = getChatNameColor(context)
                 }
                 else {

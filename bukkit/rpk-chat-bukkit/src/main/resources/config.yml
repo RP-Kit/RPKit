@@ -393,4 +393,5 @@ caching:
       enabled: true
       size: 20
 misc:
-  chatNameColorOverrideEnabled: true
+  characterChatNameColorOverrideEnabled: true
+  profileChatNameColorOverrideEnabled: true
