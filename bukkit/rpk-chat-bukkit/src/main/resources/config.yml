@@ -392,5 +392,5 @@ caching:
     minecraft_profile_id:
       enabled: true
       size: 20
-chat-names:
+misc:
   chatNameColorOverrideEnabled: true
