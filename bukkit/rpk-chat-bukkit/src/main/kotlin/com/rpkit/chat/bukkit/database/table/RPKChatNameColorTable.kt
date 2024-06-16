@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture
 import com.rpkit.chat.bukkit.database.jooq.tables.records.RpkitChatNameColorRecord
 import com.rpkit.players.bukkit.profile.minecraft.RPKMinecraftProfileId
 import java.util.concurrent.CompletableFuture.runAsync
+import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.logging.Level.SEVERE
 
 /**
@@ -67,7 +68,7 @@ class RPKChatNameColorTable(private val database: Database, private val plugin: 
 
     operator fun get(id: RPKMinecraftProfileId): CompletableFuture<RpkitChatNameColorRecord?> {
         // get chat name color record from database by id
-        return CompletableFuture.supplyAsync {
+        return supplyAsync {
             database.create
                 .selectFrom(RPKIT_CHAT_NAME_COLOR)
                 .where(RPKIT_CHAT_NAME_COLOR.MINECRAFT_PROFILE_ID.eq(id.value))
