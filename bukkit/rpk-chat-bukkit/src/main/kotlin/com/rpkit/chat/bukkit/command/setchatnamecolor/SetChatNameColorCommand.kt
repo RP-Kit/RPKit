@@ -37,48 +37,48 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("rpkit.chat.command.setchatnamecolor")) {
-            sender.sendMessage(plugin.messages["no-permission-setchatnamecolor"])
+            sender.sendMessage(plugin.messages.noPermissionSetchatnamecolor)
             return true
         }
         if (sender !is Player) {
-            sender.sendMessage(plugin.messages["not-from-console"])
+            sender.sendMessage(plugin.messages.notFromConsole)
             return true
         }
         val minecraftProfileService = Services[RPKMinecraftProfileService::class.java]
         if (minecraftProfileService == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile-service"])
+            sender.sendMessage(plugin.messages.noMinecraftProfileService)
             return true
         }
         val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(sender)
         if (minecraftProfile == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
 
         // if no arguments
         if (args.isEmpty()) {
-            sender.sendMessage(plugin.messages["setchatnamecolor-usage"])
+            sender.sendMessage(plugin.messages.setchatnamecolorUsage)
             return true
         }
 
         // retrieve desired chat name color
         val chatNameColor = args[0]
         if (!isHexColorCodeValid(chatNameColor)) {
-            sender.sendMessage(plugin.messages["setchatnamecolor-invalid-color-code"])
+            sender.sendMessage(plugin.messages.setchatnamecolorInvalidColorCode)
             return true
         }
 
         val minecraftProfileId = minecraftProfile.id
         if (minecraftProfileId == null) {
-            sender.sendMessage(plugin.messages["no-minecraft-profile"])
+            sender.sendMessage(plugin.messages.noMinecraftProfile)
             return true
         }
 
         setChatNameColorAsync(minecraftProfileId, chatNameColor).thenRun {
-            sender.sendMessage(plugin.messages["setchatnamecolor-chat-name-color-has-been-set"])
+            sender.sendMessage(plugin.messages.setchatnamecolorChatNameColorHasBeenSet)
         }.exceptionally { exception ->
             plugin.logger.log(SEVERE, "Failed to set chat name color for ${minecraftProfile.name}", exception)
-            sender.sendMessage(plugin.messages["setchatnamecolor-something-went-wrong"])
+            sender.sendMessage(plugin.messages.setchatnamecolorSomethingWentWrong)
             return@exceptionally null
         }
         return true
