@@ -29,6 +29,8 @@ import java.util.concurrent.CompletableFuture.supplyAsync
 import net.md_5.bungee.api.ChatColor
 import java.util.logging.Level
 import com.rpkit.chat.bukkit.database.table.RPKChatNameColorTable
+import com.rpkit.chat.bukkit.chatnamecolor.RPKChatNameColorService
+import com.rpkit.core.service.Services
 
 @SerializableAs("SenderProfileNamePart")
 class SenderProfileNamePart(
@@ -117,25 +119,23 @@ class SenderProfileNamePart(
         throw exception
     }
 
-    // method to get chat name color
     private fun getChatNameColor(context: DirectedPreFormatMessageContext): ChatColor {
-        // try to use chat name color from database
-        val minecraftProfile = context.senderMinecraftProfile
-        if (minecraftProfile != null) {
-            val minecraftProfileId = minecraftProfile.id
-            if (minecraftProfileId != null) {
-                val chatNameColorRecord = plugin.database.getTable(RPKChatNameColorTable::class.java)[minecraftProfileId].join()
-                if (chatNameColorRecord != null) {
-                    return ChatColor.of(chatNameColorRecord.chatNameColor)
-                }
+        val chatNameColorService = Services[RPKChatNameColorService::class.java]
+        val senderMinecraftProfile = context.senderMinecraftProfile
+        if (senderMinecraftProfile != null) {
+            val overriddenChatNameColor = chatNameColorService?.getChatNameColor(senderMinecraftProfile)
+            if (overriddenChatNameColor != null) {
+                return ChatColor.of(overriddenChatNameColor)
             }
         }
-        return if (color == null) {
-            // default color
-            ChatColor.WHITE
-        } else {
-            // color from configuration
+        return getConfiguredChatPartColorOrDefault()
+    }
+
+    private fun getConfiguredChatPartColorOrDefault(): ChatColor {
+        return if (color != null) {
             ChatColor.of(color)
+        } else {
+            ChatColor.WHITE
         }
     }
 }

@@ -21,8 +21,6 @@ import com.rpkit.chat.bukkit.RPKChatBukkit
 import com.rpkit.chat.bukkit.chatchannel.format.click.ClickAction
 import com.rpkit.chat.bukkit.chatchannel.format.hover.HoverAction
 import com.rpkit.chat.bukkit.context.DirectedPreFormatMessageContext
-import com.rpkit.chat.bukkit.database.table.RPKChatNameColorTable
-import com.rpkit.core.service.Services
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
@@ -30,6 +28,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.SerializableAs
 import java.util.concurrent.CompletableFuture.supplyAsync
 import java.util.logging.Level
+import com.rpkit.chat.bukkit.database.table.RPKChatNameColorTable
+import com.rpkit.chat.bukkit.chatnamecolor.RPKChatNameColorService
+import com.rpkit.core.service.Services
 
 @SerializableAs("SenderCharacterNamePart")
 class SenderCharacterNamePart(
@@ -130,25 +131,23 @@ class SenderCharacterNamePart(
         throw exception
     }
 
-    // method to get chat name color
     private fun getChatNameColor(context: DirectedPreFormatMessageContext): ChatColor {
-        // try to use chat name color from database
-        val minecraftProfile = context.senderMinecraftProfile
-        if (minecraftProfile != null) {
-            val minecraftProfileId = minecraftProfile.id
-            if (minecraftProfileId != null) {
-                val chatNameColorRecord = plugin.database.getTable(RPKChatNameColorTable::class.java)[minecraftProfileId].join()
-                if (chatNameColorRecord != null) {
-                    return ChatColor.of(chatNameColorRecord.chatNameColor)
-                }
+        val chatNameColorService = Services[RPKChatNameColorService::class.java]
+        val senderMinecraftProfile = context.senderMinecraftProfile
+        if (senderMinecraftProfile != null) {
+            val overriddenChatNameColor = chatNameColorService?.getChatNameColor(senderMinecraftProfile)
+            if (overriddenChatNameColor != null) {
+                return ChatColor.of(overriddenChatNameColor)
             }
         }
-        return if (color == null) {
-            // default color
-            ChatColor.WHITE
-        } else {
-            // color from configuration
+        return getConfiguredChatPartColorOrDefault()
+    }
+
+    private fun getConfiguredChatPartColorOrDefault(): ChatColor {
+        return if (color != null) {
             ChatColor.of(color)
+        } else {
+            ChatColor.WHITE
         }
     }
 }

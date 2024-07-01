@@ -56,6 +56,8 @@ import com.rpkit.chat.bukkit.prefix.RPKPrefixServiceImpl
 import com.rpkit.chat.bukkit.snooper.RPKSnooperService
 import com.rpkit.chat.bukkit.snooper.RPKSnooperServiceImpl
 import com.rpkit.chat.bukkit.speaker.RPKChatChannelSpeakerService
+import com.rpkit.chat.bukkit.chatnamecolor.RPKChatNameColorService
+import com.rpkit.chat.bukkit.chatnamecolor.RPKChatNameColorServiceImpl
 import com.rpkit.core.bukkit.command.toBukkit
 import com.rpkit.core.bukkit.listener.registerListeners
 import com.rpkit.core.database.Database
@@ -209,6 +211,7 @@ class RPKChatBukkit : JavaPlugin(), RPKPlugin {
         Services[RPKChatChannelSpeakerService::class.java] = RPKChatChannelSpeakerService(this)
         Services[RPKChatGroupService::class.java] = RPKChatGroupServiceImpl(this)
         Services[RPKSnooperService::class.java] = RPKSnooperServiceImpl(this)
+        Services[RPKChatNameColorService::class.java] = RPKChatNameColorServiceImpl(this)
 
         registerChatChannelPermissions(chatChannelService)
         registerPrefixPermissions(prefixService)
