@@ -27,12 +27,12 @@ interface RPKSnooperService : Service {
 
     /**
      * A list of all Minecraft profiles who are currently snooping.
-     * THis list is immutable, so Minecraft profiles should be added or removed with [addSnooper] and [removeSnooper] respectively.
+     * This list is immutable, so Minecraft profiles should be added or removed with [addSnooper] and [removeSnooper] respectively.
      */
     val snoopers: CompletableFuture<List<RPKMinecraftProfile>>
 
     /**
-     * Adds a snooper. This Minecraft profile is then abel to see messages they would not otherwise see.
+     * Adds a snooper. This Minecraft profile is then able to see messages they would not otherwise see.
      *
      * @param minecraftProfile The Minecraft profile to enable snooping for
      */
