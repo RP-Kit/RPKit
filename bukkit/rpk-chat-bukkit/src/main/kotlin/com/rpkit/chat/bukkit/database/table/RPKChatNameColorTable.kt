@@ -66,6 +66,16 @@ class RPKChatNameColorTable(private val database: Database, private val plugin: 
         }
     }
 
+    fun upsert(id: RPKMinecraftProfileId, chatNameColor: String): CompletableFuture<Void> {
+        return get(id).thenAcceptAsync { existingChatNameColor ->
+            if (existingChatNameColor == null) {
+                insert(id, chatNameColor)
+            } else {
+                update(id, chatNameColor)
+            }
+        }
+    }
+
     operator fun get(id: RPKMinecraftProfileId): CompletableFuture<RpkitChatNameColorRecord?> {
         // get chat name color record from database by id
         return supplyAsync {

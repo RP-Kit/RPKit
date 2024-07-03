@@ -101,12 +101,7 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
      */
     private fun setChatNameColorAsync(minecraftProfileId: RPKMinecraftProfileId, chatNameColor: String) : CompletableFuture<Void> {
         return runAsync {
-            val recordExists = plugin.database.getTable(RPKChatNameColorTable::class.java)[minecraftProfileId].join() != null
-            if (recordExists) {
-                plugin.database.getTable(RPKChatNameColorTable::class.java).update(minecraftProfileId, chatNameColor)
-            } else {
-                plugin.database.getTable(RPKChatNameColorTable::class.java).insert(minecraftProfileId, chatNameColor)
-            }
+            plugin.database.getTable(RPKChatNameColorTable::class.java).upsert(minecraftProfileId, chatNameColor)
         }
     }
 }
