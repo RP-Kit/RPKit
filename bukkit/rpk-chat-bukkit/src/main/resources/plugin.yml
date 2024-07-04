@@ -106,3 +106,6 @@ permissions:
   rpkit.chat.command.setchatnamecolor:
     description: Allows setting the color of your name in chat
     default: true
+  rpkit.chat.command.setchatnamecolor.others:
+    description: Allows setting the color of other players' names in chat
+    default: op

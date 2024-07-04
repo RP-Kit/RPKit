@@ -68,6 +68,45 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
             return true
         }
 
+        // if a second argument is provided
+        if (args.size > 1) {
+            // check that sender has permission to set the chat name colors of other players
+            if (!sender.hasPermission("rpkit.chat.command.setchatnamecolor.others")) {
+                sender.sendMessage("You do not have permission to set the chat name color of other players.")
+                return true
+            }
+
+            val targetPlayerName = args[1]
+            val targetPlayer = plugin.server.getPlayer(targetPlayerName)
+            if (targetPlayer == null) {
+                sender.sendMessage("Player not found.")
+                return true
+            }
+
+            val targetMinecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(targetPlayer)
+            if (targetMinecraftProfile == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return true
+            }
+
+            val targetMinecraftProfileId = targetMinecraftProfile.id
+            if (targetMinecraftProfileId == null) {
+                sender.sendMessage(plugin.messages["no-minecraft-profile"])
+                return true
+            }
+
+            setChatNameColorAsync(targetMinecraftProfileId, chatNameColor).thenRun {
+                sender.sendMessage("Chat color name set to $chatNameColor for ${targetPlayer.name}")
+            }.exceptionally { exception ->
+                plugin.logger.severe("Failed to set chat name color for ${targetPlayer.name}")
+                plugin.logger.severe(exception.message)
+                sender.sendMessage("Failed to set chat name color.")
+                return@exceptionally null
+            }
+            return true
+
+        }
+
         val minecraftProfileId = minecraftProfile.id
         if (minecraftProfileId == null) {
             sender.sendMessage(plugin.messages.noMinecraftProfile)
