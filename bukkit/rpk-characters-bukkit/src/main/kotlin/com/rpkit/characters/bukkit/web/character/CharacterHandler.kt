@@ -20,7 +20,6 @@ import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacter
 import com.rpkit.characters.bukkit.character.RPKCharacterId
 import com.rpkit.characters.bukkit.character.RPKCharacterService
-import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.characters.bukkit.race.RPKRaceName
 import com.rpkit.characters.bukkit.species.RPKSpeciesName
 import com.rpkit.characters.bukkit.species.RPKSpeciesService
@@ -92,16 +91,6 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.isHeightHidden = characterPutRequest.isHeightHidden
         character.isWeightHidden = characterPutRequest.isWeightHidden
         characterService.updateCharacter(character).join()
-        if (plugin.config.getBoolean("characters.set-player-nameplate")
-            && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
-            val minecraftProfile = character.minecraftProfile
-            if (minecraftProfile?.isOnline == true) {
-                val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-                if (bukkitPlayer != null) {
-                    reloadPlayer(bukkitPlayer, character, plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
-                }
-            }
-        }
         return Response(NO_CONTENT)
     }
 
@@ -138,16 +127,6 @@ class CharacterHandler(private val plugin: RPKCharactersBukkit) {
         character.isHeightHidden = characterPatchRequest.isHeightHidden ?: character.isHeightHidden
         character.isWeightHidden = characterPatchRequest.isWeightHidden ?: character.isWeightHidden
         characterService.updateCharacter(character).join()
-        if (plugin.config.getBoolean("characters.set-player-nameplate")
-            && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
-            val minecraftProfile = character.minecraftProfile
-            if (minecraftProfile?.isOnline == true) {
-                val bukkitPlayer = plugin.server.getPlayer(minecraftProfile.minecraftUUID)
-                if (bukkitPlayer != null) {
-                    reloadPlayer(bukkitPlayer, character, plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId })
-                }
-            }
-        }
         return Response(NO_CONTENT)
     }
 

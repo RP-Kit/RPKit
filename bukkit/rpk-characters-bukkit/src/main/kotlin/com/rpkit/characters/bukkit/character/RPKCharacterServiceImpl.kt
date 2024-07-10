@@ -22,7 +22,6 @@ import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterCreateEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterDeleteEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterSwitchEvent
 import com.rpkit.characters.bukkit.event.character.RPKBukkitCharacterUpdateEvent
-import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.characters.bukkit.species.RPKSpecies
 import com.rpkit.characters.bukkit.species.RPKSpeciesName
 import com.rpkit.characters.bukkit.species.RPKSpeciesService
@@ -167,14 +166,6 @@ class RPKCharacterServiceImpl(override val plugin: RPKCharactersBukkit) : RPKCha
                         if (newCharacter.isDead) {
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 1000000, 0))
                             bukkitPlayer.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 255))
-                        }
-                        if (plugin.config.getBoolean("characters.set-player-nameplate")
-                            && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
-                            reloadPlayer(
-                                bukkitPlayer,
-                                newCharacter,
-                                plugin.server.onlinePlayers.filter { it.uniqueId != bukkitPlayer.uniqueId }
-                            )
                         }
                     }
                     newCharacter.minecraftProfile = minecraftProfile

@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.listener
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.newcharactercooldown.RPKNewCharacterCooldownService
-import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.core.bukkit.location.toRPKLocation
 import com.rpkit.core.service.Services
 import com.rpkit.players.bukkit.profile.RPKProfile
@@ -42,8 +41,6 @@ class PlayerJoinListener(val plugin: RPKCharactersBukkit) : Listener {
     fun onPlayerJoin(event: PlayerJoinEvent) {
         createCharacterIfNotPresent(event)
         setPlayerDisplayName(event)
-        setPlayerNameplate(event)
-        showOtherPlayerNameplates(event)
     }
 
     private fun createCharacterIfNotPresent(event: PlayerJoinEvent) {
@@ -97,41 +94,6 @@ class PlayerJoinListener(val plugin: RPKCharactersBukkit) : Listener {
             }
         } else {
             event.player.setDisplayName(character.name)
-        }
-    }
-
-    private fun setPlayerNameplate(event: PlayerJoinEvent) {
-        if (!plugin.config.getBoolean("characters.set-player-nameplate") || plugin.server.pluginManager.getPlugin("ProtocolLib") == null) return
-        val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return
-        val characterService = Services[RPKCharacterService::class.java] ?: return
-        val minecraftProfile = minecraftProfileService.getPreloadedMinecraftProfile(event.player) ?: return
-        val character = characterService.getPreloadedActiveCharacter(minecraftProfile)
-        if (character == null) {
-            characterService.loadActiveCharacter(minecraftProfile).thenAccept { loadedCharacter ->
-                plugin.server.scheduler.scheduleSyncDelayedTask(plugin) {
-                    if (loadedCharacter != null) {
-                        reloadPlayer(event.player, loadedCharacter, plugin.server.onlinePlayers.filter { it.uniqueId != event.player.uniqueId })
-                    }
-                }
-            }
-        } else {
-            plugin.server.scheduler.scheduleSyncDelayedTask(plugin) {
-                reloadPlayer(event.player, character, plugin.server.onlinePlayers.filter { it.uniqueId != event.player.uniqueId })
-            }
-        }
-    }
-
-    private fun showOtherPlayerNameplates(event: PlayerJoinEvent) {
-        if (!plugin.config.getBoolean("characters.set-player-nameplate") || plugin.server.pluginManager.getPlugin("ProtocolLib") == null) return
-        plugin.server.scheduler.scheduleSyncDelayedTask(plugin) {
-            val minecraftProfileService = Services[RPKMinecraftProfileService::class.java] ?: return@scheduleSyncDelayedTask
-            val characterService = Services[RPKCharacterService::class.java] ?: return@scheduleSyncDelayedTask
-            plugin.server.onlinePlayers.filter { it.uniqueId != event.player.uniqueId }.forEach { onlinePlayer ->
-                val minecraftProfile =
-                    minecraftProfileService.getPreloadedMinecraftProfile(onlinePlayer) ?: return@forEach
-                val character = characterService.getPreloadedActiveCharacter(minecraftProfile) ?: return@forEach
-                reloadPlayer(onlinePlayer, character, listOf(event.player))
-            }
         }
     }
 

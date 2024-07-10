@@ -19,7 +19,6 @@ package com.rpkit.characters.bukkit.command.character.set
 import com.rpkit.characters.bukkit.RPKCharactersBukkit
 import com.rpkit.characters.bukkit.character.RPKCharacterService
 import com.rpkit.characters.bukkit.command.result.NoCharacterSelfFailure
-import com.rpkit.characters.bukkit.protocol.reloadPlayer
 import com.rpkit.core.command.RPKCommandExecutor
 import com.rpkit.core.command.result.CommandResult
 import com.rpkit.core.command.result.CommandSuccess
@@ -97,11 +96,6 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : RPKComm
         nameBuilder.append(args[args.size - 1])
         character.name = nameBuilder.toString()
         return characterService.updateCharacter(character).thenApply { updatedCharacter ->
-            if (plugin.config.getBoolean("characters.set-player-nameplate")
-                && plugin.server.pluginManager.getPlugin("ProtocolLib") != null
-                && bukkitPlayer != null) {
-                reloadPlayer(bukkitPlayer, character, plugin.server.onlinePlayers.filter { it.uniqueId != sender.minecraftUUID })
-            }
             sender.sendMessage(plugin.messages["character-set-name-valid"])
             updatedCharacter?.showCharacterCard(sender)
             return@thenApply CommandSuccess
@@ -124,10 +118,6 @@ class CharacterSetNameCommand(private val plugin: RPKCharactersBukkit) : RPKComm
             if (input == null) return NameSetPrompt()
             character.name = input
             characterService.updateCharacter(character)
-            if (plugin.config.getBoolean("characters.set-player-nameplate")
-                && plugin.server.pluginManager.getPlugin("ProtocolLib") != null) {
-                reloadPlayer(conversable, character, plugin.server.onlinePlayers.filter { it.uniqueId != conversable.uniqueId })
-            }
             return NameSetPrompt()
         }
 

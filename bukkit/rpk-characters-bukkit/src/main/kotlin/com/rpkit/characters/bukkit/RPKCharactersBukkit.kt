@@ -186,12 +186,6 @@ class RPKCharactersBukkit : JavaPlugin(), RPKPlugin {
                     )
                 }
         }
-
-        if (config.getBoolean("characters.set-player-nameplate")) {
-            if (server.pluginManager.getPlugin("ProtocolLib") != null) {
-                logger.info("Detected ProtocolLib, enabling player nameplates")
-            }
-        }
     }
 
     private fun registerCommands() {
