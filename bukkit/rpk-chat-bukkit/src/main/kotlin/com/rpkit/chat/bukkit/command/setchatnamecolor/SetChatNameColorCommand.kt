@@ -72,14 +72,14 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
         if (args.size > 1) {
             // check that sender has permission to set the chat name colors of other players
             if (!sender.hasPermission("rpkit.chat.command.setchatnamecolor.others")) {
-                sender.sendMessage("You do not have permission to set the chat name color of other players.")
+                sender.sendMessage(plugin.messages.noPermissionSetchatnamecolorOthers)
                 return true
             }
 
             val targetPlayerName = args[1]
             val targetPlayer = plugin.server.getPlayer(targetPlayerName)
             if (targetPlayer == null) {
-                sender.sendMessage("Player not found.")
+                sender.sendMessage(plugin.messages.playerNotFound)
                 return true
             }
 
@@ -96,7 +96,7 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
             }
 
             setChatNameColorAsync(targetMinecraftProfileId, chatNameColor).thenRun {
-                sender.sendMessage("Chat color name set to $chatNameColor for ${targetPlayer.name}")
+                sender.sendMessage(plugin.messages.setchatnamecolorChatNameColorHasBeenSetOthers)
             }.exceptionally { exception ->
                 plugin.logger.severe("Failed to set chat name color for ${targetPlayer.name}")
                 plugin.logger.severe(exception.message)
@@ -120,6 +120,8 @@ class SetChatNameColorCommand(private val plugin: RPKChatBukkit) : CommandExecut
             sender.sendMessage(plugin.messages.setchatnamecolorSomethingWentWrong)
             return@exceptionally null
         }
+        
+        sender.sendMessage(plugin.messages.setchatnamecolorChatNameColorHasBeenSet)
         return true
     }
 

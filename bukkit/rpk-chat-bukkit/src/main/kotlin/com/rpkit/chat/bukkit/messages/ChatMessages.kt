@@ -283,4 +283,7 @@ class ChatMessages(plugin: RPKChatBukkit) : BukkitMessages(plugin) {
     val setchatnamecolorInvalidColorCode = get("setchatnamecolor-invalid-color-code")
     val setchatnamecolorChatNameColorHasBeenSet = get("setchatnamecolor-chat-name-color-has-been-set")
     val setchatnamecolorSomethingWentWrong = get("setchatnamecolor-something-went-wrong")
+    val noPermissionSetchatnamecolorOthers = get("no-permission-setchatnamecolor-others")
+    val playerNotFound = get("player-not-found")
+    val setchatnamecolorChatNameColorHasBeenSetOthers = get("setchatnamecolor-chat-name-color-has-been-set-others")
 }
